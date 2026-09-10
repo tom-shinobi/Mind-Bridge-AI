@@ -476,19 +476,23 @@ export function App() {
   return (
     <div className="min-h-screen bg-[#020409] text-[#F5F5F7] flex flex-col relative selection:bg-white/20 selection:text-white font-body">
       
-      {/* Dynamic Moving Particles & Moody Dark Chromatic Canvas */}
+      {/* Dynamic Moving Particles & Vibrant Glowing Chromatic Aurora Canvas */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Luminous Interactive Particle Constellation */}
-        <ParticleBackground />
+        {/* Dynamic Colorful Flowing Chromatic Mesh */}
+        <div className="dynamic-chromatic-mesh absolute inset-0 opacity-80 pointer-events-none" />
+        
+        {/* Luminous Glowing Aurora Orbs (Cyan, Violet, Magenta, Emerald, Amber) */}
+        <div className="aurora-orb-violet -top-[140px] left-[5%] opacity-75" />
+        <div className="aurora-orb-cyan top-[20%] -right-[120px] opacity-75" />
+        <div className="aurora-orb-magenta -bottom-[120px] left-[15%] opacity-70" />
+        <div className="aurora-orb-emerald top-[48%] left-[28%] opacity-65" />
+        <div className="aurora-orb-amber -top-[80px] right-[18%] opacity-65" />
 
-        {/* Deep, Moody, Subdued Aurora Glows */}
-        <div className="dynamic-chromatic-mesh absolute inset-0 opacity-40 pointer-events-none" />
-        <div className="aurora-orb-violet -top-[160px] left-[5%] opacity-35" />
-        <div className="aurora-orb-cyan top-[22%] -right-[140px] opacity-30" />
-        <div className="aurora-orb-magenta -bottom-[140px] left-[18%] opacity-25" />
-        <div className="aurora-orb-emerald top-[52%] left-[30%] opacity-20" />
-        <div className="aurora-orb-amber -top-[90px] right-[20%] opacity-25" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_15%,rgba(2,4,9,0.55)_55%,rgba(2,4,9,0.92)_100%)] pointer-events-none" />
+        {/* Atmospheric Contrast Vignette (Preserves Deep Contrast for Razor-Sharp Text) */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_25%,rgba(2,4,9,0.38)_65%,rgba(2,4,9,0.82)_100%)] pointer-events-none" />
+
+        {/* Luminous Interactive Dynamic Particles Floating On Top of Gradients */}
+        <ParticleBackground />
       </div>
 
       {/* Real Snell's Law SVG Displacement Map Filter */}
@@ -516,9 +520,9 @@ export function App() {
         onOpenAuth={() => setIsDemoMode(false)}
       />
 
-      {/* Symmetrical Centered Viewport Container */}
-      <div className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <main className="w-full pb-16">
+      {/* Symmetrical Centered Viewport Container (Phone-Friendly Spacing) */}
+      <div className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10 pb-28 md:pb-16">
+        <main className="w-full">
           {activeTab === 'dashboard' && (
             <Dashboard
               profile={profile}
