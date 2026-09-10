@@ -952,6 +952,9 @@
   color: #e2e8f0;
   line-height: 1.65;
   font-size: 0.875rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .markdown-content p {

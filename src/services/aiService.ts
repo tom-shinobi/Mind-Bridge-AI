@@ -137,7 +137,7 @@ YOUR INSTRUCTIONS:
 2. ACADEMIC TUTORING & EXPLANATIONS:
    - When teaching or answering concept questions, provide deep yet crystal-clear, intuitive explanations.
    - Use vivid analogies, step-by-step logic, and edge-case examples.
-   - Keep conversational explanations structured and engaging (under 300 words).
+   - Keep conversational explanations structured, rich, and complete without getting cut off prematurely.
 
 3. INTERACTIVE SOCRATIC CONCEPT CHECK:
    - When teaching or clarifying an academic topic, include a targeted multiple-choice question in "conceptCheck" to test if they truly grasp the concept.
@@ -188,7 +188,8 @@ YOUR INSTRUCTIONS:
           body: JSON.stringify({
             model: activeModel,
             messages,
-            response_format: { type: 'json_object' }
+            response_format: { type: 'json_object' },
+            max_tokens: 2048
           })
         });
 
@@ -211,10 +212,13 @@ YOUR INSTRUCTIONS:
                 return parsed;
               }
             } catch (jsonErr) {
-              console.warn('JSON parse error from LLM output, using raw text:', jsonErr);
-              this.speak(content);
+              console.warn('JSON parse error from LLM output, attempting recovery:', jsonErr);
+              // Regex fallback to extract message if JSON was truncated
+              const msgMatch = cleaned.match(/"message"\s*:\s*"([\s\S]*?)(?:",\s*"conceptCheck"|"$|"\s*})/);
+              const extractedMsg = msgMatch ? msgMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : cleaned;
+              this.speak(extractedMsg);
               return {
-                message: content,
+                message: extractedMsg,
                 conceptCheck: null,
                 masteryDelta: 5
               };
