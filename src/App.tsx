@@ -128,15 +128,28 @@ export function App() {
   const activeGapsCount = gaps.filter((g) => g.status !== 'resolved').length;
 
   return (
-    <div className="min-h-screen bg-[#071628] text-slate-100 flex flex-col relative selection:bg-cyan-500/30 selection:text-cyan-100">
+    <div className="min-h-screen bg-[#030712] text-[#F5F5F7] flex flex-col relative selection:bg-white/20 selection:text-white font-body">
       
-      {/* Dynamic Ambient Oceanic & Anime Mesh Glows */}
+      {/* Real Optical Chromatic Fluid Silk Ribbons Canvas (Matching Reference Image 2) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="glow-azure -top-[120px] left-[15%] opacity-40" />
-        <div className="glow-sakura top-[35%] -right-[120px] opacity-30" />
-        <div className="glow-mint -bottom-[100px] left-[10%] opacity-25" />
-        <div className="glow-cyan top-[60%] left-[45%] opacity-25" />
+        <div className="chromatic-ribbon-purple -top-[140px] left-[10%] opacity-55" />
+        <div className="chromatic-ribbon-magenta top-[30%] -right-[140px] opacity-45" />
+        <div className="chromatic-ribbon-cyan -bottom-[120px] left-[15%] opacity-50" />
+        <div className="chromatic-ribbon-amber top-[55%] left-[40%] opacity-35" />
+        
+        {/* Subtle Apple Ambient Grid / Starfield Vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_0%,rgba(3,7,18,0.7)_70%,rgba(3,7,18,0.95)_100%)] pointer-events-none" />
       </div>
+
+      {/* Real Snell's Law SVG Displacement Map Filter */}
+      <svg className="hidden">
+        <defs>
+          <filter id="liquid-glass-lens-filter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="12" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
 
       {/* Top Navbar */}
       <Navbar

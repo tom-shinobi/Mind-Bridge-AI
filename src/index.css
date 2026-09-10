@@ -2,67 +2,438 @@
 
 @layer base {
   :root {
-    --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --font-heading: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+    --font-mono: "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
   }
 
   body {
     font-family: var(--font-body);
-    background: radial-gradient(circle at 20% 15%, #0e3256 0%, #081d33 45%, #051322 100%);
-    color: #E2E8F0;
+    background: #030712;
+    color: #F5F5F7;
     min-height: 100vh;
     overflow-x: hidden;
+    letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    letter-spacing: -0.025em;
   }
 }
 
 /* ==========================================================================
-   MODERN SKEUOMORPHIC SEA-BLUE & ANIME DESIGN SYSTEM
+   APPLE WEBSITE & REAL OPTICAL LIQUID GLASS SYSTEM (SNELL'S LAW & REFRACTION)
    ========================================================================== */
 
-/* Ambient Anime Mesh Glows */
-.glow-azure {
+/* Flowing Chromatic Fluid Silk Ribbons Canvas (Reference Image 2) */
+.chromatic-ribbon-purple {
   position: absolute;
-  width: 650px;
-  height: 650px;
+  width: 800px;
+  height: 800px;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(14, 165, 233, 0.26) 0%, transparent 70%);
-  filter: blur(80px);
-  pointer-events: none;
-}
-
-.glow-sakura {
-  position: absolute;
-  width: 580px;
-  height: 580px;
-  border-radius: 9999px;
-  background: radial-gradient(circle, rgba(244, 114, 182, 0.22) 0%, transparent 70%);
+  background: radial-gradient(circle at 40% 40%, rgba(168, 85, 247, 0.45) 0%, rgba(217, 70, 239, 0.35) 45%, transparent 70%);
   filter: blur(90px);
   pointer-events: none;
+  animation: floatRibbon1 18s ease-in-out infinite alternate;
 }
 
-.glow-mint {
+.chromatic-ribbon-magenta {
   position: absolute;
-  width: 500px;
-  height: 500px;
+  width: 750px;
+  height: 750px;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.2) 0%, transparent 70%);
-  filter: blur(80px);
+  background: radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.4) 0%, rgba(236, 72, 153, 0.3) 50%, transparent 70%);
+  filter: blur(85px);
   pointer-events: none;
+  animation: floatRibbon2 22s ease-in-out infinite alternate;
 }
 
-.glow-cyan {
+.chromatic-ribbon-cyan {
+  position: absolute;
+  width: 850px;
+  height: 850px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 35%, rgba(6, 182, 212, 0.4) 0%, rgba(2, 132, 199, 0.3) 50%, transparent 70%);
+  filter: blur(90px);
+  pointer-events: none;
+  animation: floatRibbon3 20s ease-in-out infinite alternate;
+}
+
+.chromatic-ribbon-amber {
   position: absolute;
   width: 600px;
   height: 600px;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(6, 182, 212, 0.24) 0%, transparent 70%);
+  background: radial-gradient(circle at 45% 45%, rgba(249, 115, 22, 0.35) 0%, rgba(245, 158, 11, 0.25) 50%, transparent 70%);
   filter: blur(80px);
   pointer-events: none;
+  animation: floatRibbon1 25s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes floatRibbon1 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(40px, -30px) scale(1.06); }
+  100% { transform: translate(-30px, 40px) scale(0.95); }
+}
+
+@keyframes floatRibbon2 {
+  0% { transform: translate(0px, 0px) scale(0.95); }
+  50% { transform: translate(-50px, 35px) scale(1.08); }
+  100% { transform: translate(35px, -45px) scale(1.02); }
+}
+
+@keyframes floatRibbon3 {
+  0% { transform: translate(0px, 0px) scale(1.02); }
+  50% { transform: translate(35px, 40px) scale(0.94); }
+  100% { transform: translate(-45px, -30px) scale(1.06); }
+}
+
+/* Ambient Glow Aliases */
+.glow-azure, .glow-mint {
+  position: absolute;
+  width: 850px;
+  height: 850px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 35%, rgba(6, 182, 212, 0.4) 0%, rgba(2, 132, 199, 0.3) 50%, transparent 70%);
+  filter: blur(90px);
+  pointer-events: none;
+}
+.glow-sakura {
+  position: absolute;
+  width: 750px;
+  height: 750px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.4) 0%, rgba(236, 72, 153, 0.3) 50%, transparent 70%);
+  filter: blur(85px);
+  pointer-events: none;
+}
+.glow-cyan {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 40% 40%, rgba(168, 85, 247, 0.45) 0%, rgba(217, 70, 239, 0.35) 45%, transparent 70%);
+  filter: blur(90px);
+  pointer-events: none;
+}
+
+/* Real Refractive Apple Liquid Glass Card */
+.apple-liquid-glass,
+.sea-glass-card,
+.liquid-glass-card {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  backdrop-filter: blur(40px) saturate(220%) contrast(108%);
+  -webkit-backdrop-filter: blur(40px) saturate(220%) contrast(108%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-top-color: rgba(255, 255, 255, 0.65);
+  border-left-color: rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 30px 60px -15px rgba(0, 0, 0, 0.65),
+    0 10px 24px -8px rgba(0, 0, 0, 0.45),
+    inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -1.5px 2px 0 rgba(0, 0, 0, 0.3),
+    inset 1px 0 2px 0 rgba(255, 255, 255, 0.35);
+  border-radius: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-liquid-glass:hover,
+.sea-glass-card:hover,
+.liquid-glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  border-top-color: rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 35px 70px -15px rgba(0, 0, 0, 0.75),
+    0 14px 28px -8px rgba(0, 0, 0, 0.5),
+    inset 0 2px 3px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1.5px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Chromatic Edge Dispersion (Simulating Snell's Law Rainbow Fringe) */
+.apple-liquid-glass::before,
+.sea-glass-card::before,
+.liquid-glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(244, 114, 182, 0.4) 0%,
+    rgba(56, 189, 248, 0.3) 50%,
+    rgba(251, 191, 36, 0.25) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.75;
+  transition: opacity 0.3s ease;
+}
+
+/* Specular Top Glare Sheen */
+.apple-liquid-glass::after,
+.sea-glass-card::after,
+.liquid-glass-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.95) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Apple Liquid Glass Pill */
+.apple-liquid-pill,
+.sea-glass-pill,
+.liquid-glass-pill {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-top-color: rgba(255, 255, 255, 0.75);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.25),
+    0 8px 20px -5px rgba(0, 0, 0, 0.35);
+  border-radius: 9999px;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-liquid-pill:hover,
+.sea-glass-pill:hover,
+.liquid-glass-pill:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Real 3D Optical Refraction Lens Sphere (Matching uploaded "Liquid" image) */
+.liquid-glass-lens {
+  position: relative;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0.06) 55%,
+    rgba(0, 0, 0, 0.45) 100%
+  );
+  backdrop-filter: blur(14px) saturate(250%) contrast(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(250%) contrast(120%);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 35px 70px -15px rgba(0, 0, 0, 0.85),
+    inset 0 14px 28px rgba(255, 255, 255, 0.75),
+    inset 0 -14px 32px rgba(0, 0, 0, 0.7),
+    0 0 35px rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.liquid-glass-lens:hover {
+  transform: scale(1.04);
+  box-shadow:
+    0 45px 90px -15px rgba(0, 0, 0, 0.9),
+    inset 0 16px 32px rgba(255, 255, 255, 0.85),
+    inset 0 -16px 36px rgba(0, 0, 0, 0.75),
+    0 0 45px rgba(255, 255, 255, 0.35);
+}
+
+.liquid-glass-lens-glare {
+  position: absolute;
+  top: 10%;
+  left: 14%;
+  width: 44%;
+  height: 32%;
+  border-radius: 9999px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.4) 45%,
+    transparent 80%
+  );
+  transform: rotate(-30deg);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.liquid-glass-lens-caustic {
+  position: absolute;
+  bottom: 12%;
+  right: 14%;
+  width: 40%;
+  height: 26%;
+  border-radius: 9999px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 80%
+  );
+  transform: rotate(-15deg);
+  filter: blur(3px);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   APPLE WEBSITE BUTTON SYSTEM (Exact match to uploaded iPhone Duo website)
+   ========================================================================== */
+
+/* 1. Apple Solid Charcoal / Primary Pill Button ("Learn more") */
+.btn-apple-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #1d1d1f;
+  color: #FFFFFF;
+  border-radius: 9999px;
+  padding: 0.625rem 1.625rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  letter-spacing: -0.012em;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-apple-primary:hover {
+  background: #2d2d30;
+  border-color: rgba(255, 255, 255, 0.28);
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.btn-apple-primary:active {
+  transform: scale(0.98);
+}
+
+/* 2. Apple Translucent Glass Pill Button ("View pricing") */
+.btn-apple-glass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  color: #FFFFFF;
+  border-radius: 9999px;
+  padding: 0.625rem 1.625rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  letter-spacing: -0.012em;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-top-color: rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.65),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-apple-glass:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.65);
+  transform: scale(1.02);
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.btn-apple-glass:active {
+  transform: scale(0.98);
+}
+
+/* 3. Apple Crisp White Pill Button */
+.btn-apple-white {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #FFFFFF;
+  color: #000000;
+  border-radius: 9999px;
+  padding: 0.625rem 1.625rem;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: -0.012em;
+  box-shadow:
+    0 4px 20px rgba(255, 255, 255, 0.25),
+    0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-apple-white:hover {
+  background: #F5F5F7;
+  transform: scale(1.02);
+  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.35);
+}
+
+.btn-apple-white:active {
+  transform: scale(0.98);
+}
+
+/* 4. Apple Interactive Blue Pill Button */
+.btn-apple-blue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #0071E3;
+  color: #FFFFFF;
+  border-radius: 9999px;
+  padding: 0.625rem 1.625rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  letter-spacing: -0.012em;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 4px 16px rgba(0, 113, 227, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-apple-blue:hover {
+  background: #0077ED;
+  transform: scale(1.02);
+  box-shadow: 0 6px 24px rgba(0, 113, 227, 0.55);
+}
+
+.btn-apple-blue:active {
+  transform: scale(0.98);
 }
 
 /* Outer Hardware Console Shell (Sea-Blue Console MK-V) */
@@ -347,148 +718,152 @@
   border-radius: 9999px;
 }
 
-/* Modern Skeuomorphic Push Buttons */
+/* Modern Skeuomorphic Push Buttons - Refined with Apple Liquid Pill Physics */
 .btn-skeuo-sea,
 .btn-skeuo-primary {
-  background: linear-gradient(180deg, #38BDF8 0%, #0284C7 60%, #0369A1 100%);
+  background: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%);
   color: #FFFFFF;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-top-color: rgba(255, 255, 255, 0.7);
   box-shadow:
-    inset 0 1.5px 1px rgba(255, 255, 255, 0.65),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.35),
-    0 4px 0 #075985,
-    0 8px 18px rgba(2, 132, 199, 0.45);
-  border-radius: 0.75rem;
-  font-weight: 700;
-  transition: all 0.08s ease-out;
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 14px rgba(2, 132, 199, 0.4);
+  border-radius: 9999px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   user-select: none;
 }
 
 .btn-skeuo-sea:hover,
 .btn-skeuo-primary:hover {
-  background: linear-gradient(180deg, #60A5FA 0%, #0EA5E9 60%, #0284C7 100%);
+  background: linear-gradient(180deg, #60A5FA 0%, #0EA5E9 100%);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.55);
 }
 
 .btn-skeuo-sea:active,
 .btn-skeuo-primary:active {
-  transform: translateY(3px);
+  transform: scale(0.98);
   box-shadow:
     inset 0 1.5px 2px rgba(0, 0, 0, 0.4),
-    0 1px 0 #075985,
-    0 3px 6px rgba(2, 132, 199, 0.3);
+    0 2px 6px rgba(2, 132, 199, 0.3);
 }
 
 .btn-skeuo-sakura {
-  background: linear-gradient(180deg, #F472B6 0%, #DB2777 60%, #BE185D 100%);
+  background: linear-gradient(180deg, #F472B6 0%, #DB2777 100%);
   color: #FFFFFF;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-top-color: rgba(255, 255, 255, 0.7);
   box-shadow:
-    inset 0 1.5px 1px rgba(255, 255, 255, 0.65),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.35),
-    0 4px 0 #9D174D,
-    0 8px 18px rgba(219, 39, 119, 0.45);
-  border-radius: 0.75rem;
-  font-weight: 700;
-  transition: all 0.08s ease-out;
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 14px rgba(219, 39, 119, 0.4);
+  border-radius: 9999px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   user-select: none;
 }
 
 .btn-skeuo-sakura:hover {
-  background: linear-gradient(180deg, #FB7185 0%, #EC4899 60%, #DB2777 100%);
+  background: linear-gradient(180deg, #FB7185 0%, #EC4899 100%);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(219, 39, 119, 0.55);
 }
 
 .btn-skeuo-sakura:active {
-  transform: translateY(3px);
-  box-shadow:
-    inset 0 1.5px 2px rgba(0, 0, 0, 0.4),
-    0 1px 0 #9D174D,
-    0 3px 6px rgba(219, 39, 119, 0.3);
+  transform: scale(0.98);
 }
 
 .btn-skeuo-mint {
-  background: linear-gradient(180deg, #34D399 0%, #059669 60%, #047857 100%);
+  background: linear-gradient(180deg, #34D399 0%, #059669 100%);
   color: #FFFFFF;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-top-color: rgba(255, 255, 255, 0.7);
   box-shadow:
-    inset 0 1.5px 1px rgba(255, 255, 255, 0.65),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.35),
-    0 4px 0 #065F46,
-    0 8px 18px rgba(5, 150, 105, 0.45);
-  border-radius: 0.75rem;
-  font-weight: 700;
-  transition: all 0.08s ease-out;
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 14px rgba(5, 150, 105, 0.4);
+  border-radius: 9999px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   user-select: none;
 }
 
 .btn-skeuo-mint:hover {
-  background: linear-gradient(180deg, #6EE7B7 0%, #10B981 60%, #059669 100%);
+  background: linear-gradient(180deg, #6EE7B7 0%, #10B981 100%);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.55);
 }
 
 .btn-skeuo-mint:active {
-  transform: translateY(3px);
-  box-shadow:
-    inset 0 1.5px 2px rgba(0, 0, 0, 0.4),
-    0 1px 0 #065F46,
-    0 3px 6px rgba(5, 150, 105, 0.3);
+  transform: scale(0.98);
 }
 
 .btn-skeuo-orange {
-  background: linear-gradient(180deg, #FB923C 0%, #EA580C 60%, #C2410C 100%);
+  background: linear-gradient(180deg, #FB923C 0%, #EA580C 100%);
   color: #FFFFFF;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-top-color: rgba(255, 255, 255, 0.7);
   box-shadow:
-    inset 0 1.5px 1px rgba(255, 255, 255, 0.65),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.35),
-    0 4px 0 #9A3412,
-    0 8px 18px rgba(234, 88, 12, 0.45);
-  border-radius: 0.75rem;
-  font-weight: 700;
-  transition: all 0.08s ease-out;
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 14px rgba(234, 88, 12, 0.4);
+  border-radius: 9999px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   user-select: none;
 }
 
 .btn-skeuo-orange:hover {
-  background: linear-gradient(180deg, #FDBA74 0%, #F97316 60%, #EA580C 100%);
+  background: linear-gradient(180deg, #FDBA74 0%, #F97316 100%);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.55);
 }
 
 .btn-skeuo-orange:active {
-  transform: translateY(3px);
-  box-shadow:
-    inset 0 1.5px 2px rgba(0, 0, 0, 0.4),
-    0 1px 0 #9A3412,
-    0 3px 6px rgba(234, 88, 12, 0.3);
+  transform: scale(0.98);
 }
 
 .btn-skeuo-glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  color: #E0F2FE;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-top-color: rgba(255, 255, 255, 0.65);
+  color: #FFFFFF;
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.25),
-    0 3px 0 rgba(7, 25, 45, 0.9),
-    0 6px 14px rgba(2, 12, 24, 0.4);
-  border-radius: 0.75rem;
-  font-weight: 600;
-  transition: all 0.08s ease-out;
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    0 4px 14px rgba(0, 0, 0, 0.3);
+  border-radius: 9999px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   user-select: none;
 }
 
 .btn-skeuo-glass:hover {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.06) 100%);
-  border-color: rgba(56, 189, 248, 0.5);
-  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.45);
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 .btn-skeuo-glass:active {
-  transform: translateY(2px);
-  box-shadow:
-    inset 0 1px 2px rgba(0, 0, 0, 0.4),
-    0 1px 0 rgba(7, 25, 45, 0.9);
+  transform: scale(0.98);
 }
 
 /* Skeuomorphic LCD Display Panel */

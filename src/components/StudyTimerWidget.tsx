@@ -49,54 +49,54 @@ export const StudyTimerWidget: React.FC<StudyTimerWidgetProps> = ({
   };
 
   return (
-    <div className="liquid-glass-card p-4 relative overflow-hidden">
-      <div className="flex items-center justify-between mb-2.5">
+    <div className="apple-liquid-glass p-5 relative overflow-hidden border border-white/20">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-purple-400" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
-            Live Focus Engine
+          <Clock className="w-4 h-4 text-white/90" />
+          <span className="text-xs font-semibold tracking-wider text-[#F5F5F7] font-mono uppercase">
+            Focus Timer
           </span>
         </div>
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono">
-          <span className={`led-indicator ${isActive ? 'led-emerald animate-pulse' : 'led-amber'}`} />
-          <span>{isActive ? 'LOGGING ACTIVE' : 'STANDBY'}</span>
+          <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-400 shadow-[0_0_8px_#34D399] animate-pulse' : 'bg-white/40'}`} />
+          <span className="text-white/80">{isActive ? 'SESSION ACTIVE' : 'STANDBY'}</span>
         </div>
       </div>
 
-      {/* Skeuomorphic LCD Digital Display */}
-      <div className="skeuo-lcd py-3 px-4 text-center my-3 relative overflow-hidden border border-purple-500/20 shadow-[inset_0_2px_8px_rgba(0,0,0,0.8)]">
-        <div className="text-3xl sm:text-4xl font-mono font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-orange-200 drop-shadow-[0_0_12px_rgba(168,85,247,0.4)]">
+      {/* Apple Watch Liquid Glass Digital Display */}
+      <div className="py-4 px-4 text-center my-3 relative overflow-hidden rounded-2xl bg-white/[0.04] border border-white/20 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_24px_rgba(0,0,0,0.3)]">
+        <div className="text-3xl sm:text-4xl font-mono font-bold tracking-widest text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">
           {formatTime(seconds)}
         </div>
-        <div className="text-[10px] text-purple-300/60 font-mono uppercase tracking-widest mt-1">
+        <div className="text-[10px] text-[#A1A1A6] font-mono uppercase tracking-wider mt-1.5">
           Target: 4.5 hrs • {Math.round((seconds / 3600) * 10) / 10} hrs logged today
         </div>
       </div>
 
       {/* Target Focus Subject Tag */}
-      <div className="mb-3">
-        <label className="text-[10px] uppercase font-mono text-slate-400 font-semibold mb-1 block">
+      <div className="mb-3.5">
+        <label className="text-[10px] uppercase font-mono text-[#86868B] font-semibold mb-1 block">
           Current Focus Block
         </label>
         <select
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
-          className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-slate-200 focus:outline-none focus:border-purple-500/40"
+          className="w-full text-xs px-3 py-2 rounded-xl bg-white/[0.06] border border-white/20 text-white focus:outline-none focus:border-white/50 backdrop-blur-xl"
         >
-          <option value="B-Trees & Indexing (DBMS)">B-Trees & Indexing (DBMS Gap #1)</option>
-          <option value="Dynamic Programming (DSA)">Dynamic Programming (DSA Gap #2)</option>
-          <option value="Virtual Memory & Paging (OS)">Virtual Memory & Paging (OS Gap #3)</option>
-          <option value="General Revision">General Revision & Problem Solving</option>
+          <option value="B-Trees & Indexing (DBMS)" className="bg-[#0b0f19] text-white">B-Trees & Indexing (DBMS Gap #1)</option>
+          <option value="Dynamic Programming (DSA)" className="bg-[#0b0f19] text-white">Dynamic Programming (DSA Gap #2)</option>
+          <option value="Virtual Memory & Paging (OS)" className="bg-[#0b0f19] text-white">Virtual Memory & Paging (OS Gap #3)</option>
+          <option value="General Revision" className="bg-[#0b0f19] text-white">General Revision & Problem Solving</option>
         </select>
       </div>
 
-      {/* Tactile Timer Buttons */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* Apple Pill Timer Buttons */}
+      <div className="grid grid-cols-2 gap-2.5">
         <button
           type="button"
           onClick={toggleTimer}
-          className={`py-2 px-3 text-xs flex items-center justify-center gap-1.5 ${
-            isActive ? 'btn-skeuo-orange' : 'btn-skeuo-primary'
+          className={`py-2 px-3 text-xs flex items-center justify-center gap-1.5 font-medium ${
+            isActive ? 'btn-apple-primary text-white border-white/30' : 'btn-apple-white'
           }`}
         >
           {isActive ? (
@@ -115,19 +115,19 @@ export const StudyTimerWidget: React.FC<StudyTimerWidgetProps> = ({
         <button
           type="button"
           onClick={resetTimer}
-          className="btn-skeuo-glass py-2 px-3 text-xs flex items-center justify-center gap-1.5"
+          className="btn-apple-glass py-2 px-3 text-xs flex items-center justify-center gap-1.5 font-medium"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>Reset</span>
         </button>
       </div>
 
-      <div className="mt-2.5 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-        <span className="flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-purple-400" />
+      <div className="mt-3 flex items-center justify-between text-[10px] text-[#86868B] font-mono">
+        <span className="flex items-center gap-1 text-white/70">
+          <Sparkles className="w-3 h-3 text-amber-300" />
           Earns +25 XP / 30m
         </span>
-        <span className="text-purple-300">Space Coders Timer</span>
+        <span className="text-[#A1A1A6]">MindBridge Live</span>
       </div>
     </div>
   );

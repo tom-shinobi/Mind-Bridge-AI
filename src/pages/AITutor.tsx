@@ -196,7 +196,7 @@ export const AITutor: React.FC<AITutorProps> = ({
     <div className="space-y-4 animate-fade-in pb-12">
       
       {/* Top Header Card */}
-      <div className="liquid-glass-card p-5 relative overflow-hidden">
+      <div className="apple-liquid-glass p-5 relative overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
@@ -316,7 +316,7 @@ export const AITutor: React.FC<AITutorProps> = ({
                 sound.playClick();
                 onNavigate('tests', { topic: selectedTopic });
               }}
-              className="btn-skeuo-orange py-2 px-4 text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg"
+              className="btn-apple-primary py-2 px-4 text-xs font-mono font-medium tracking-wider flex items-center gap-2"
             >
               <span>Verify Retention in Test</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -327,7 +327,7 @@ export const AITutor: React.FC<AITutorProps> = ({
       </div>
 
       {/* Chat Conversation Scroll Area */}
-      <div className="liquid-glass p-4 sm:p-6 min-h-[420px] max-h-[540px] overflow-y-auto space-y-4">
+      <div className="apple-liquid-glass p-4 sm:p-6 min-h-[420px] max-h-[540px] overflow-y-auto space-y-4">
         {messages.map((msg) => {
           const isAi = msg.sender === 'ai';
 
@@ -468,7 +468,7 @@ export const AITutor: React.FC<AITutorProps> = ({
       {/* Quick Interactive Prompt Chips */}
       <div className="flex flex-wrap gap-2 items-center px-1">
         <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-1">
-          <Sparkles className="w-3 h-3 text-pink-400" /> Quick Ask:
+          <Sparkles className="w-3 h-3 text-cyan-400" /> Quick Ask:
         </span>
         {quickPrompts.map((qp, idx) => (
           <button
@@ -476,15 +476,15 @@ export const AITutor: React.FC<AITutorProps> = ({
             type="button"
             disabled={isThinking}
             onClick={() => handleSendMessage(qp.prompt)}
-            className="text-[11px] font-mono px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] hover:border-purple-500/40 border border-white/10 text-slate-300 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            className="text-[11px] font-mono px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.1] hover:border-white/20 border border-white/10 text-slate-300 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {qp.label}
           </button>
         ))}
       </div>
 
-      {/* Input Bar */}
-      <div className="liquid-glass-card p-2.5 flex items-center gap-2">
+      {/* Apple Spotlight / Liquid Glass Input Bar */}
+      <div className="apple-liquid-glass p-2 flex items-center gap-2 rounded-full border border-white/25 pl-4 pr-2 shadow-2xl">
         <input
           type="text"
           value={inputVal}
@@ -493,14 +493,14 @@ export const AITutor: React.FC<AITutorProps> = ({
             if (e.key === 'Enter') handleSendMessage(inputVal);
           }}
           placeholder={`Ask or explain your thought process regarding "${selectedTopic}"...`}
-          className="flex-1 bg-transparent px-4 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none"
+          className="flex-1 bg-transparent px-2 py-2 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none"
         />
 
         <button
           type="button"
           disabled={!inputVal.trim() || isThinking}
           onClick={() => handleSendMessage(inputVal)}
-          className="btn-skeuo-primary px-4 py-2.5 text-xs font-semibold flex items-center gap-1.5"
+          className="btn-apple-primary px-5 py-2 text-xs font-medium flex items-center gap-1.5"
         >
           <span>Send</span>
           <Send className="w-3.5 h-3.5" />

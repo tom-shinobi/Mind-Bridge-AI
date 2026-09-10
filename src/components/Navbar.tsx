@@ -39,82 +39,75 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-cyan-500/20 bg-[#07192c]/85 backdrop-blur-2xl shadow-[0_4px_24px_rgba(2,10,24,0.5)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+    <header className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-[#000000]/65 backdrop-blur-3xl shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
-        {/* Brand & Project Identity */}
+        {/* Apple-Style Brand & Project Identity */}
         <div 
           onClick={() => { sound.playClick(); onNavigate('dashboard'); }}
-          className="flex items-center gap-3.5 cursor-pointer group select-none"
+          className="flex items-center gap-3 cursor-pointer group select-none"
         >
-          <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 via-sky-500 to-pink-500 p-[1.5px] shadow-[0_0_20px_rgba(6,182,212,0.35)] transition-transform group-hover:scale-105">
-            <div className="w-full h-full bg-[#06182c] rounded-[10px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-cyan-300 group-hover:rotate-12 transition-transform" />
-            </div>
-            {/* Glowing Anime LED */}
-            <span className="absolute -top-1 -right-1 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-400 shadow-[0_0_8px_#38BDF8]"></span>
-            </span>
+          {/* Frosted Liquid Glass Brand Icon */}
+          <div className="relative w-9 h-9 rounded-2xl bg-white/[0.08] border border-white/30 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_8px_20px_rgba(0,0,0,0.4)] flex items-center justify-center transition-transform group-hover:scale-105">
+            <Sparkles className="w-4 h-4 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34D399]" />
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-1.5 font-heading">
-                Mind<span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-cyan-300 to-pink-400">Bridge</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 font-mono font-bold border border-cyan-400/30 shadow-[0_0_8px_rgba(6,182,212,0.25)]">
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-lg font-semibold tracking-tight text-white flex items-center gap-1.5 font-heading">
+                <span>MindBridge</span>
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/10 text-white/90 font-mono font-medium border border-white/20 backdrop-blur-md">
                   AI
                 </span>
               </h1>
             </div>
-            <p className="text-[10px] tracking-wider text-slate-400 uppercase font-medium flex items-center gap-1 font-mono">
-              <span className="text-cyan-400 font-semibold">Space Coders</span>
-              <span className="text-pink-400">•</span>
-              <span>B.Tech CSE Assistant</span>
+            <p className="text-[10px] tracking-wider text-[#A1A1A6] font-medium hidden sm:block">
+              Personalized Academic Intelligence
             </p>
           </div>
         </div>
 
-        {/* Real-time Status Badges & Anime Telemetry Pills */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Real-time Apple Liquid Glass Telemetry Pills */}
+        <div className="hidden md:flex items-center gap-2.5">
           
-          {/* Streak Badge (Sunset Tangerine Flame) */}
+          {/* Streak Badge (Tangerine Flame) */}
           <div 
             onClick={() => { sound.playClick(); onNavigate('progress'); }}
-            className="sea-glass-pill px-3.5 py-1.5 flex items-center gap-2 cursor-pointer border-orange-500/30 hover:border-orange-400/60 transition-all group"
+            className="apple-liquid-pill px-3.5 py-1.5 flex items-center gap-2 cursor-pointer border-white/20 hover:border-orange-400/50 transition-all group"
             title="Consistent learning streak"
           >
-            <Flame className="w-4 h-4 text-orange-400 animate-pulse group-hover:scale-110 transition-transform drop-shadow-[0_0_6px_rgba(251,146,60,0.6)]" />
-            <span className="text-xs font-semibold text-slate-200">{profile.streakDays} Day Streak</span>
+            <Flame className="w-3.5 h-3.5 text-orange-400 animate-pulse group-hover:scale-110 transition-transform drop-shadow-[0_0_6px_rgba(251,146,60,0.6)]" />
+            <span className="text-xs font-medium text-[#F5F5F7]">{profile.streakDays} Day Streak</span>
           </div>
 
-          {/* Academic XP & Level (Solar Gold & Sakura) */}
+          {/* Academic XP & Level (Solar Gold) */}
           <div 
             onClick={() => { sound.playClick(); onNavigate('progress'); }}
-            className="sea-glass-pill px-3.5 py-1.5 flex items-center gap-2 cursor-pointer border-amber-400/30 hover:border-amber-400/60 transition-all group"
+            className="apple-liquid-pill px-3.5 py-1.5 flex items-center gap-2 cursor-pointer border-white/20 hover:border-amber-400/50 transition-all group"
             title={`Level ${profile.level} Scholar (${profile.totalXp} XP)`}
           >
-            <Zap className="w-4 h-4 text-amber-300 group-hover:scale-110 transition-transform drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]" />
-            <div className="flex items-center gap-1.5 text-xs">
-              <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-pink-300 to-cyan-300">
+            <Zap className="w-3.5 h-3.5 text-amber-300 group-hover:scale-110 transition-transform drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]" />
+            <div className="flex items-center gap-1.5 text-xs font-medium">
+              <span className="text-amber-300 font-semibold">
                 Lvl {profile.level}
               </span>
-              <span className="text-slate-300 font-mono text-[11px]">({profile.totalXp.toLocaleString()} XP)</span>
+              <span className="text-[#A1A1A6] font-mono text-[11px]">({profile.totalXp.toLocaleString()} XP)</span>
             </div>
           </div>
 
-          {/* Active Learning Gaps Indicator (Sakura / Rose) */}
+          {/* Active Learning Gaps Indicator (Rose) */}
           <div 
             onClick={() => { sound.playClick(); onNavigate('gaps'); }}
-            className={`sea-glass-pill px-3.5 py-1.5 flex items-center gap-2 cursor-pointer transition-all ${
+            className={`apple-liquid-pill px-3.5 py-1.5 flex items-center gap-2 cursor-pointer transition-all ${
               activeGapsCount > 0
-                ? 'border-pink-500/40 text-pink-300 hover:border-pink-400/70 shadow-[0_0_12px_rgba(244,114,182,0.15)]'
-                : 'border-emerald-500/40 text-emerald-300'
+                ? 'border-pink-500/30 text-pink-200 hover:border-pink-400/60'
+                : 'border-emerald-500/30 text-emerald-200'
             }`}
             title="Identified learning gaps needing remediation"
           >
-            <ShieldAlert className="w-4 h-4 text-pink-400 drop-shadow-[0_0_6px_rgba(244,114,182,0.6)]" />
-            <span className="text-xs font-semibold">
+            <ShieldAlert className="w-3.5 h-3.5 text-pink-400 drop-shadow-[0_0_6px_rgba(244,114,182,0.6)]" />
+            <span className="text-xs font-medium">
               {activeGapsCount} Active {activeGapsCount === 1 ? 'Gap' : 'Gaps'}
             </span>
           </div>
@@ -122,18 +115,18 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Controls & Student Profile Capsule */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           
           {/* Sound Toggle */}
           <button
             onClick={toggleSound}
-            className="p-2 rounded-xl text-slate-300 hover:text-cyan-200 bg-[#0c2b4c]/70 border border-cyan-500/25 hover:border-cyan-400/50 shadow-sm hover:shadow-[0_0_12px_rgba(6,182,212,0.25)] transition-all"
+            className="p-2 rounded-full text-[#A1A1A6] hover:text-white bg-white/[0.05] border border-white/15 hover:border-white/30 backdrop-blur-xl transition-all"
             title={aiSettings.soundFxEnabled ? "Mute sound effects" : "Enable tactile sound effects"}
           >
             {aiSettings.soundFxEnabled ? (
-              <Volume2 className="w-4 h-4 text-cyan-400" />
+              <Volume2 className="w-3.5 h-3.5 text-white" />
             ) : (
-              <VolumeX className="w-4 h-4 text-slate-400" />
+              <VolumeX className="w-3.5 h-3.5 text-[#86868B]" />
             )}
           </button>
 
@@ -145,24 +138,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onResetDemo();
               }
             }}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-[#0c2b4c]/70 border border-cyan-500/25 hover:border-cyan-400/50 transition-all shadow-sm"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-[#A1A1A6] hover:text-white bg-white/[0.05] border border-white/15 hover:border-white/30 backdrop-blur-xl transition-all"
             title="Reset to fresh demo state"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
+            <RotateCcw className="w-3 h-3 text-white/80" />
             <span>Reset Demo</span>
           </button>
 
           {/* Student Profile Avatar Capsule */}
           <div 
             onClick={() => { sound.playClick(); onNavigate('settings'); }}
-            className="flex items-center gap-2.5 pl-2 py-1 pr-3 rounded-full bg-[#0a2644]/80 border border-cyan-500/30 hover:border-pink-400/50 cursor-pointer transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]"
+            className="flex items-center gap-2 pl-1.5 py-1 pr-3 rounded-full bg-white/[0.06] border border-white/20 hover:border-white/40 backdrop-blur-2xl cursor-pointer transition-all shadow-sm"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 via-sky-400 to-pink-500 flex items-center justify-center font-bold text-xs text-white shadow-inner">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-white/25 via-white/15 to-white/5 border border-white/40 flex items-center justify-center font-semibold text-[11px] text-white shadow-inner">
               JA
             </div>
             <div className="text-left hidden lg:block">
-              <p className="text-xs font-semibold text-slate-100 leading-tight">{profile.name}</p>
-              <p className="text-[10px] text-cyan-300/80 leading-tight font-mono">Sem {profile.semester} • CGPA {profile.cgpa}</p>
+              <p className="text-xs font-medium text-[#F5F5F7] leading-tight">{profile.name}</p>
+              <p className="text-[10px] text-[#A1A1A6] leading-tight font-mono">Sem {profile.semester} • CGPA {profile.cgpa}</p>
             </div>
           </div>
 

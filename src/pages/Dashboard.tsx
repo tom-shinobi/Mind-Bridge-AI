@@ -28,6 +28,7 @@ import { FaderSlider } from '../components/hardware/FaderSlider';
 import { HardwareButton } from '../components/hardware/HardwareButton';
 import { ScrewRivet } from '../components/hardware/ScrewRivet';
 import { StudyTimerWidget } from '../components/StudyTimerWidget';
+import { RefractiveLens } from '../components/RefractiveLens';
 import { sound } from '../services/soundService';
 
 interface DashboardProps {
@@ -74,7 +75,64 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div className="space-y-8 animate-fade-in pb-16 max-w-6xl mx-auto">
+    <div className="space-y-10 animate-fade-in pb-20 max-w-6xl mx-auto">
+      
+      {/* ==========================================================================
+          APPLE WEBSITE KEYNOTE HERO PRESENTATION (Matching iPhone Duo Reference)
+          Clean Apple typography, crisp pill action buttons, and 3D Refractive Liquid Glass
+          ========================================================================== */}
+      <div className="py-8 sm:py-12 flex flex-col items-center text-center space-y-4 max-w-4xl mx-auto">
+        
+        <span className="text-[11px] uppercase font-mono font-medium tracking-widest text-[#A1A1A6] px-3 py-1 rounded-full bg-white/[0.06] border border-white/15 backdrop-blur-md shadow-sm">
+          MindBridge Pro // Generation 6
+        </span>
+
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-white font-heading leading-tight">
+          Personal learning.<br className="hidden sm:inline" /> Mastered.
+        </h1>
+
+        <p className="text-base sm:text-xl text-[#A1A1A6] max-w-2xl mx-auto font-normal leading-relaxed">
+          The most advanced academic intelligence ever built. Autonomous, adaptive, diagnostic.<br className="hidden sm:inline" /> Featuring real-time academic intelligence for ultimate mastery.
+        </p>
+
+        <p className="text-xs text-[#86868B] font-mono tracking-wider">
+          B.Tech Computer Science & Engineering • Target CGPA 9.0 • Semester 6
+        </p>
+
+        {/* Apple Keynote CTA Pill Buttons (Matching iPhone Duo "Learn more" & "View pricing") */}
+        <div className="flex flex-wrap items-center justify-center gap-3.5 pt-3">
+          <button
+            onClick={() => { sound.playClick(); onNavigate('tutor', { topic: criticalGap?.topic }); }}
+            className="btn-apple-primary px-8 py-3.5 text-sm flex items-center gap-2 group shadow-xl"
+          >
+            <Sparkles className="w-4 h-4 text-white group-hover:rotate-12 transition-transform" />
+            <span>Launch AI Tutor</span>
+          </button>
+
+          <button
+            onClick={() => { sound.playClick(); onNavigate('tests', { topic: criticalGap?.topic }); }}
+            className="btn-apple-glass px-8 py-3.5 text-sm flex items-center gap-2 shadow-xl"
+          >
+            <FileCheck className="w-4 h-4 text-white/90" />
+            <span>Take Diagnostic Quiz</span>
+          </button>
+        </div>
+
+        {/* Real 3D Optical Liquid Glass Refraction Sphere (Matching Reference Image 2) */}
+        <div className="pt-8 relative flex flex-col items-center">
+          <RefractiveLens
+            size={200}
+            badge="Top Priority Gap"
+            label={criticalGap?.topic || 'B-Trees & Indexing'}
+            onClick={() => { sound.playClick(); onNavigate('tutor', { topic: criticalGap?.topic }); }}
+          />
+          <div className="mt-4 flex items-center gap-2 text-[11px] font-mono text-[#A1A1A6] uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#38BDF8] animate-pulse" />
+            <span>Real Optical Liquid Glass Lens • Tap to engage Socratic Dialogue</span>
+          </div>
+        </div>
+
+      </div>
       
       {/* ==========================================================================
           SEA-BLUE CONSOLE MK-V HARDWARE SYNTHESIZER
@@ -356,67 +414,66 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* ==========================================================================
-          ACADEMIC MISSION STATUS & REASONING:
-          "What should I study today, and why?"
+          ACADEMIC MISSION STATUS & REASONING (Apple Keynote Feature Presentation)
           ========================================================================== */}
-      <div className="sea-glass-card p-6 sm:p-8 space-y-4">
-        <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-cyan-500/20">
+      <div className="apple-liquid-glass p-6 sm:p-8 space-y-5 border border-white/20">
+        <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-white/[0.08]">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
               <span>Today's Prescribed Study Mission</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 font-semibold">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white font-mono border border-white/20">
                 Autonomous
               </span>
             </h3>
           </div>
-          <span className="text-xs text-cyan-300/80 font-mono">
-            Tailored Prescription for {profile.name}
+          <span className="text-xs text-[#A1A1A6] font-mono">
+            Prescription for {profile.name}
           </span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
           <div className="lg:col-span-2 space-y-3">
-            <h4 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight">
-              Focus Subject: <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-cyan-300 to-pink-400">{criticalGap?.topic}</span>
+            <h4 className="text-xl sm:text-2xl font-semibold text-white tracking-tight leading-tight font-heading">
+              Focus Subject: <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/90 to-white/60">{criticalGap?.topic}</span>
             </h4>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              <strong className="text-cyan-200">Why this was chosen: </strong>
+            <p className="text-sm text-[#A1A1A6] leading-relaxed">
+              <strong className="text-white">Why this was chosen: </strong>
               {criticalGap?.rootCause || 'Detected 38% mastery deficiency in Midterm Exam. Remediating this now unlocks upcoming relational query optimization.'}
             </p>
 
-            <div className="pt-2 flex flex-wrap items-center gap-4 text-xs font-mono text-slate-300">
-              <span className="flex items-center gap-1.5 text-cyan-300 font-semibold">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#38BDF8]" />
+            <div className="pt-2 flex flex-wrap items-center gap-4 text-xs font-mono text-[#A1A1A6]">
+              <span className="flex items-center gap-1.5 text-white font-medium">
+                <span className="w-2 h-2 rounded-full bg-white shadow-[0_0_6px_#ffffff]" />
                 1. Socratic Explanation
               </span>
-              <ArrowRight className="w-3 h-3 text-cyan-600" />
-              <span className="flex items-center gap-1.5 text-pink-400 font-semibold">
+              <ArrowRight className="w-3 h-3 text-[#86868B]" />
+              <span className="flex items-center gap-1.5 text-pink-300 font-medium">
                 <span className="w-2 h-2 rounded-full bg-pink-400 shadow-[0_0_6px_#F472B6]" />
                 2. Concept Checks
               </span>
-              <ArrowRight className="w-3 h-3 text-cyan-600" />
-              <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+              <ArrowRight className="w-3 h-3 text-[#86868B]" />
+              <span className="flex items-center gap-1.5 text-emerald-300 font-medium">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34D399]" />
                 3. Auto-Adapt Schedule
               </span>
             </div>
           </div>
 
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-3">
             <button
               onClick={() => { sound.playClick(); onNavigate('tutor', { topic: criticalGap?.topic }); }}
-              className="btn-skeuo-sea w-full py-3 px-4 text-xs font-bold flex items-center justify-center gap-2"
+              className="btn-apple-primary w-full py-3 px-5 text-xs font-medium flex items-center justify-center gap-2"
             >
-              <Sparkles className="w-4 h-4 text-cyan-200" />
+              <Sparkles className="w-4 h-4 text-white" />
               <span>Launch AI Tutor Session</span>
             </button>
 
             <button
               onClick={() => { sound.playClick(); onNavigate('tests', { topic: criticalGap?.topic }); }}
-              className="btn-skeuo-sakura w-full py-3 px-4 text-xs font-bold flex items-center justify-center gap-2"
+              className="btn-apple-glass w-full py-3 px-5 text-xs font-medium flex items-center justify-center gap-2"
             >
-              <FileCheck className="w-4 h-4 text-pink-200" />
+              <FileCheck className="w-4 h-4 text-white/90" />
               <span>Take Diagnostic Quiz</span>
             </button>
           </div>
@@ -424,22 +481,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* ==========================================================================
-          METRICS & LIVE STOPWATCH HARDWARE DECK (2-Column Organized Workspace)
+          METRICS & LIVE STOPWATCH HARDWARE DECK (2-Column Apple-Clean Workspace)
           ========================================================================== */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Left 2 Cols: Today's Adaptive Schedule */}
-        <div className="lg:col-span-2 sea-glass-card p-6 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
+        <div className="lg:col-span-2 apple-liquid-glass p-6 sm:p-8 space-y-4 border border-white/20">
+          <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-cyan-400" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono">
+              <Clock className="w-4 h-4 text-white/90" />
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-white font-mono">
                 Today's Adaptive Academic Timetable
               </h3>
             </div>
             <button
               onClick={() => { sound.playClick(); onNavigate('timetable'); }}
-              className="text-xs text-cyan-300 hover:text-white font-mono flex items-center gap-1 transition-colors"
+              className="text-xs text-[#A1A1A6] hover:text-white font-mono flex items-center gap-1 transition-colors"
             >
               <span>Full Schedule</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -450,12 +507,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {todayBlocks.map((block) => (
               <div
                 key={block.id}
-                className={`p-4 rounded-xl border transition-all ${
+                className={`p-4 rounded-2xl border transition-all ${
                   block.completed
-                    ? 'bg-[#06182c]/40 border-cyan-500/10 opacity-55'
+                    ? 'bg-white/[0.02] border-white/5 opacity-40'
                     : block.isAdaptive
-                    ? 'bg-[#0a2747]/80 border-cyan-400/40 shadow-[0_4px_16px_rgba(6,182,212,0.15)]'
-                    : 'bg-[#071d34]/60 border-cyan-500/20'
+                    ? 'bg-white/[0.08] border-white/30 backdrop-blur-2xl shadow-[0_4px_20px_rgba(0,0,0,0.3)]'
+                    : 'bg-white/[0.03] border-white/10'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -465,33 +522,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         sound.playClick();
                         onToggleBlockComplete(block.id);
                       }}
-                      className="mt-0.5 text-slate-400 hover:text-cyan-300 transition-colors"
+                      className="mt-0.5 text-[#86868B] hover:text-white transition-colors"
                     >
                       {block.completed ? (
                         <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                       ) : (
-                        <Circle className="w-5 h-5 text-cyan-400/60 hover:text-cyan-300" />
+                        <Circle className="w-5 h-5 text-white/50 hover:text-white" />
                       )}
                     </button>
 
                     <div>
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="font-mono text-xs font-bold text-cyan-200">
+                        <span className="font-mono text-xs font-semibold text-white">
                           {block.startTime} - {block.endTime}
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-[#06182c] text-slate-300 border border-cyan-500/30">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium uppercase bg-white/10 text-white/80 border border-white/15">
                           {block.blockType.replace('_', ' ')}
                         </span>
                         {block.isAdaptive && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-pink-500/20 text-pink-300 border border-pink-400/30">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium uppercase bg-pink-500/20 text-pink-300 border border-pink-400/30">
                             Adaptive Block
                           </span>
                         )}
                       </div>
-                      <p className={`text-sm font-semibold ${block.completed ? 'line-through text-slate-400' : 'text-white'}`}>
+                      <p className={`text-sm font-semibold ${block.completed ? 'line-through text-[#86868B]' : 'text-white'}`}>
                         {block.topic}
                       </p>
-                      <p className="text-xs text-cyan-300/80 font-mono">{block.subject}</p>
+                      <p className="text-xs text-[#A1A1A6] font-mono mt-0.5">{block.subject}</p>
                     </div>
                   </div>
 
@@ -501,7 +558,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         sound.playClick();
                         onNavigate('tutor', { topic: block.topic });
                       }}
-                      className="btn-skeuo-glass py-1.5 px-3 text-[11px] whitespace-nowrap text-cyan-200 border-cyan-500/30 hover:border-cyan-400"
+                      className="btn-apple-glass py-1.5 px-3.5 text-xs whitespace-nowrap"
                     >
                       Start
                     </button>
@@ -516,17 +573,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="space-y-6">
           <StudyTimerWidget />
 
-          <div className="sea-glass-card p-5 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-cyan-500/20">
+          <div className="apple-liquid-glass p-5 space-y-3.5 border border-white/20">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-pink-400" />
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-[#F5F5F7] font-mono">
                   Identified Gaps ({gaps.length})
                 </h4>
               </div>
               <button
                 onClick={() => { sound.playClick(); onNavigate('gaps'); }}
-                className="text-[10px] font-mono text-cyan-300 hover:text-white"
+                className="text-[10px] font-mono text-[#A1A1A6] hover:text-white"
               >
                 View Diagnostics
               </button>
@@ -534,12 +591,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <div className="space-y-2.5">
               {gaps.slice(0, 3).map((gap) => (
-                <div key={gap.id} className="p-2.5 rounded-xl bg-[#06182c]/80 border border-cyan-500/20 space-y-1">
+                <div key={gap.id} className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-200 truncate pr-2">{gap.topic}</span>
+                    <span className="font-medium text-[#F5F5F7] truncate pr-2">{gap.topic}</span>
                     <span className="font-mono text-[10px] font-bold text-pink-400">{gap.masteryScore}%</span>
                   </div>
-                  <div className="w-full bg-[#030e1a] rounded-full h-1.5 overflow-hidden border border-cyan-500/10">
+                  <div className="w-full bg-black/40 rounded-full h-1.5 overflow-hidden border border-white/10">
                     <div
                       className={`h-full rounded-full ${
                         gap.masteryScore < 45
@@ -560,71 +617,71 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* ==========================================================================
-          DECLUTTERED TELEMETRY INSIGHT PODS (Bottom 3-Pod Dock)
+          APPLE BENTO GRID PODS (3-Pod Feature Dock)
           ========================================================================== */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         
-        {/* Pod 1: Curriculum Mastery */}
-        <div className="sea-glass-card p-5 space-y-2.5 border border-cyan-500/20 hover:border-cyan-400/40 transition-all">
+        {/* Bento 1: Curriculum Mastery */}
+        <div className="apple-liquid-glass p-6 space-y-3 border border-white/20 hover:border-white/40 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-[10px] font-mono font-semibold text-[#A1A1A6] uppercase tracking-wider flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5" />
               Syllabus Intel
             </span>
-            <span className="text-[10px] font-mono text-cyan-300 font-bold">71% Verified</span>
+            <span className="text-[10px] font-mono text-white font-semibold">71% Verified</span>
           </div>
-          <h4 className="text-sm font-bold text-white">Semester Core Syllabus</h4>
-          <p className="text-[11px] text-slate-300 leading-relaxed">
+          <h4 className="text-base font-semibold text-white font-heading">Semester Core Syllabus</h4>
+          <p className="text-xs text-[#A1A1A6] leading-relaxed">
             10 of 14 core modules master-verified. Next target: DBMS Relational Query Optimization.
           </p>
-          <div className="w-full bg-[#06182c] rounded-full h-2 overflow-hidden border border-cyan-500/20 mt-2">
-            <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400" style={{ width: '71%' }} />
+          <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden mt-3">
+            <div className="h-full rounded-full bg-white" style={{ width: '71%' }} />
           </div>
         </div>
 
-        {/* Pod 2: Cognitive Load Shield */}
-        <div className="sea-glass-card p-5 space-y-2.5 border border-emerald-500/20 hover:border-emerald-400/40 transition-all">
+        {/* Bento 2: Cognitive Load Shield */}
+        <div className="apple-liquid-glass p-6 space-y-3 border border-white/20 hover:border-white/40 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-mono font-semibold text-[#A1A1A6] uppercase tracking-wider flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               Adaptive Bio-Guard
             </span>
-            <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-300 font-bold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-300 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Optimal
             </span>
           </div>
-          <h4 className="text-sm font-bold text-white">Cognitive Load Balance</h4>
-          <p className="text-[11px] text-slate-300 leading-relaxed">
+          <h4 className="text-base font-semibold text-white font-heading">Cognitive Load Balance</h4>
+          <p className="text-xs text-[#A1A1A6] leading-relaxed">
             Fatigue shield active. 4.5h scheduled today with 3 Pomodoro recovery intervals.
           </p>
           <button
             onClick={() => { sound.playClick(); onOpenWorkloadModal(); }}
-            className="text-[10px] font-mono text-emerald-300 hover:text-white flex items-center gap-1 pt-1"
+            className="text-[11px] font-mono text-white/80 hover:text-white flex items-center gap-1 pt-1"
           >
-            <span>Adjust Workload Parameters →</span>
+            <span>Adjust Parameters →</span>
           </button>
         </div>
 
-        {/* Pod 3: Active Anime Quest */}
-        <div className="sea-glass-card p-5 space-y-2.5 border border-pink-500/20 hover:border-pink-400/40 transition-all">
+        {/* Bento 3: Active Quest */}
+        <div className="apple-liquid-glass p-6 space-y-3 border border-white/20 hover:border-white/40 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-bold text-pink-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Trophy className="w-3.5 h-3.5" />
-              Anime Scholar Quest
+            <span className="text-[10px] font-mono font-semibold text-[#A1A1A6] uppercase tracking-wider flex items-center gap-1.5">
+              <Trophy className="w-3.5 h-3.5 text-amber-300" />
+              Scholar Quest
             </span>
-            <span className="text-[10px] font-mono text-amber-300 font-bold flex items-center gap-1">
+            <span className="text-[10px] font-mono text-amber-300 font-semibold flex items-center gap-1">
               <Zap className="w-3 h-3 text-amber-300" />
               +150 XP
             </span>
           </div>
-          <h4 className="text-sm font-bold text-white">B-Tree Conqueror</h4>
-          <p className="text-[11px] text-slate-300 leading-relaxed">
+          <h4 className="text-base font-semibold text-white font-heading">B-Tree Conqueror</h4>
+          <p className="text-xs text-[#A1A1A6] leading-relaxed">
             Complete 1 Socratic tutor dialogue and score &gt;75% on B-Tree quiz to earn Silver Scholar badge.
           </p>
           <button
             onClick={() => { sound.playClick(); onNavigate('progress'); }}
-            className="text-[10px] font-mono text-pink-300 hover:text-white flex items-center gap-1 pt-1"
+            className="text-[11px] font-mono text-white/80 hover:text-white flex items-center gap-1 pt-1"
           >
             <span>View All Quests & XP Tree →</span>
           </button>
