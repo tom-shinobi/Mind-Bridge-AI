@@ -386,7 +386,12 @@ export const AITutor: React.FC<AITutorProps> = ({
 
             {!isAi && (
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-xs font-bold text-white flex-shrink-0 mt-1 shadow-md">
-                JA
+                {(() => {
+                  const parts = (profile.name || 'Scholar').trim().split(/\s+/);
+                  return parts.length === 1
+                    ? parts[0].slice(0, 2).toUpperCase()
+                    : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                })()}
               </div>
             )}
           </div>
@@ -409,9 +414,9 @@ export const AITutor: React.FC<AITutorProps> = ({
   // Shared Bottom Controls Component
   const renderBottomControls = () => (
     <div className="space-y-2.5">
-      {/* Quick Interactive Prompt Chips */}
-      <div className="flex flex-wrap gap-2 items-center px-1">
-        <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-1">
+      {/* Quick Interactive Prompt Chips — Swipeable Tray on Mobile */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1 -mx-1 sm:mx-0 sm:flex-wrap">
+        <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1 flex-shrink-0 mr-1 select-none">
           <Sparkles className="w-3 h-3 text-cyan-400" /> Quick Ask:
         </span>
         {quickPrompts.map((qp, idx) => (
@@ -420,7 +425,7 @@ export const AITutor: React.FC<AITutorProps> = ({
             type="button"
             disabled={isThinking}
             onClick={() => handleSendMessage(qp.prompt)}
-            className="text-[11px] font-mono px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.1] hover:border-white/20 border border-white/10 text-slate-300 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="text-[11px] font-mono px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.1] active:scale-95 border border-white/10 text-slate-300 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap flex-shrink-0 touch-press"
           >
             {qp.label}
           </button>
@@ -437,14 +442,14 @@ export const AITutor: React.FC<AITutorProps> = ({
             if (e.key === 'Enter') handleSendMessage(inputVal);
           }}
           placeholder={`Ask or explain your thought process regarding "${selectedTopic}"...`}
-          className="flex-1 bg-transparent px-2 py-2 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none"
+          className="flex-1 bg-transparent px-2 py-2 text-base sm:text-sm text-white placeholder-slate-400 focus:outline-none"
         />
 
         <button
           type="button"
           disabled={!inputVal.trim() || isThinking}
           onClick={() => handleSendMessage(inputVal)}
-          className="btn-apple-primary px-5 py-2 text-xs font-medium flex items-center gap-1.5"
+          className="btn-apple-primary px-5 py-2 text-xs font-medium flex items-center gap-1.5 touch-press active:scale-95"
         >
           <span>Send</span>
           <Send className="w-3.5 h-3.5" />

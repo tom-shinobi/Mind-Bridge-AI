@@ -213,7 +213,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#020409] text-[#F5F5F7] flex flex-col relative selection:bg-white/20 selection:text-white font-body p-4 sm:p-6 justify-center items-center">
+    <div className="min-h-[100dvh] bg-[#020409] text-[#F5F5F7] flex flex-col relative selection:bg-white/20 selection:text-white font-body p-4 sm:p-6 pt-[max(1.5rem,env(safe-area-inset-top,0px))] pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] justify-center items-center">
       
       {/* Background Dynamic Particles & Ambient Fluid Ribbons */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -352,7 +352,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Sanjay Aron"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl liquid-glass-input text-white placeholder-slate-500 text-xs focus:outline-none focus:border-purple-400"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl liquid-glass-input text-white placeholder-slate-500 text-base sm:text-xs focus:outline-none focus:border-purple-400"
                   />
                 </div>
               </div>
@@ -368,7 +368,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="student@university.edu"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl liquid-glass-input text-white placeholder-slate-500 text-xs focus:outline-none focus:border-purple-400"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl liquid-glass-input text-white placeholder-slate-500 text-base sm:text-xs focus:outline-none focus:border-purple-400"
                 />
               </div>
             </div>
@@ -380,7 +380,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   <button
                     type="button"
                     onClick={() => { setIsResetModalOpen(true); setResetSuccess(false); }}
-                    className="text-[10px] text-purple-400 hover:text-purple-300 font-mono"
+                    className="text-[10px] text-purple-400 hover:text-purple-300 font-mono touch-press"
                   >
                     Forgot?
                   </button>
@@ -394,12 +394,12 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl liquid-glass-input text-white placeholder-slate-500 text-xs focus:outline-none focus:border-purple-400"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl liquid-glass-input text-white placeholder-slate-500 text-base sm:text-xs focus:outline-none focus:border-purple-400"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3 text-slate-400 hover:text-white"
+                  className="absolute right-3.5 top-3 text-slate-400 hover:text-white touch-press"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -419,7 +419,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl liquid-glass-input text-white placeholder-slate-500 text-xs focus:outline-none focus:border-purple-400"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl liquid-glass-input text-white placeholder-slate-500 text-base sm:text-xs focus:outline-none focus:border-purple-400"
                   />
                 </div>
               </div>
@@ -442,7 +442,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
             <button
               type="submit"
               disabled={isLoading || !supabaseReady}
-              className="w-full btn-apple-primary py-2.5 px-4 text-xs font-semibold flex items-center justify-center gap-2 shadow-xl mt-2 disabled:opacity-50"
+              className="w-full btn-apple-primary py-2.5 px-4 text-xs font-semibold flex items-center justify-center gap-2 shadow-xl mt-2 disabled:opacity-50 touch-press active:scale-95"
             >
               {isLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : null}
               <span>{tab === 'signin' ? 'Sign In' : 'Create Student Account'}</span>
@@ -489,12 +489,12 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                   placeholder="student@university.edu"
-                  className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400"
+                  className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/15 text-white text-base sm:text-xs focus:outline-none focus:border-purple-400"
                 />
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full btn-apple-primary py-2 text-xs font-semibold"
+                  className="w-full btn-apple-primary py-2 text-xs font-semibold touch-press active:scale-95"
                 >
                   Send Recovery Link
                 </button>
@@ -504,7 +504,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
             <button
               type="button"
               onClick={() => setIsResetModalOpen(false)}
-              className="w-full btn-apple-glass py-1.5 text-xs text-slate-400 hover:text-white"
+              className="w-full btn-apple-glass py-1.5 text-xs text-slate-400 hover:text-white touch-press"
             >
               Close
             </button>
@@ -515,7 +515,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       {/* Supabase Config Modal */}
       {isConfigModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="apple-liquid-glass max-w-md w-full p-6 space-y-4 rounded-3xl border border-white/20 shadow-2xl text-xs">
+          <div className="apple-liquid-glass max-w-md w-full p-6 space-y-4 rounded-3xl border border-white/20 shadow-2xl text-xs max-h-[90dvh] overflow-y-auto">
             <div className="flex items-center gap-2">
               <Database className="w-5 h-5 text-purple-400" />
               <h3 className="text-base font-bold text-white">Supabase Connection Settings</h3>
@@ -533,7 +533,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   value={configUrl}
                   onChange={(e) => setConfigUrl(e.target.value)}
                   placeholder="https://xyzcompany.supabase.co"
-                  className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-purple-400"
+                  className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-base sm:text-xs focus:outline-none focus:border-purple-400"
                 />
               </div>
 
@@ -544,7 +544,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   value={configKey}
                   onChange={(e) => setConfigKey(e.target.value)}
                   placeholder="eyJh..."
-                  className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-purple-400"
+                  className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-base sm:text-xs focus:outline-none focus:border-purple-400"
                 />
               </div>
             </div>
@@ -553,14 +553,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
               <button
                 type="button"
                 onClick={() => setIsConfigModalOpen(false)}
-                className="btn-apple-glass py-2 px-4 text-xs text-slate-400 hover:text-white"
+                className="btn-apple-glass py-2 px-4 text-xs text-slate-400 hover:text-white touch-press"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSaveConfig}
-                className="btn-apple-primary py-2 px-5 text-xs font-semibold"
+                className="btn-apple-primary py-2 px-5 text-xs font-semibold touch-press active:scale-95"
               >
                 Save & Connect
               </button>
@@ -572,7 +572,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       {/* Windows Hello / Passkey Enrollment Modal */}
       {isPasskeyEnrollModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="apple-liquid-glass p-6 sm:p-7 rounded-3xl border border-white/20 shadow-2xl max-w-md w-full space-y-4">
+          <div className="apple-liquid-glass p-6 sm:p-7 rounded-3xl border border-white/20 shadow-2xl max-w-md w-full space-y-4 max-h-[90dvh] overflow-y-auto">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]">
                 <Fingerprint className="w-5 h-5" />
@@ -596,7 +596,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   value={enrollEmail}
                   onChange={(e) => setEnrollEmail(e.target.value)}
                   placeholder="student@university.edu"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white text-base sm:text-xs focus:outline-none focus:border-purple-400"
                 />
               </div>
 
@@ -611,14 +611,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsPasskeyEnrollModalOpen(false)}
-                  className="btn-apple-glass py-2 px-4 text-xs text-slate-400 hover:text-white cursor-pointer"
+                  className="btn-apple-glass py-2 px-4 text-xs text-slate-400 hover:text-white cursor-pointer touch-press"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isEnrollingPasskey}
-                  className="btn-apple-primary py-2 px-5 text-xs font-semibold flex items-center gap-2 cursor-pointer"
+                  className="btn-apple-primary py-2 px-5 text-xs font-semibold flex items-center gap-2 cursor-pointer touch-press active:scale-95"
                 >
                   {isEnrollingPasskey ? (
                     <>

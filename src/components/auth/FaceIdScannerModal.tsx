@@ -208,8 +208,8 @@ export const FaceIdScannerModal: React.FC<FaceIdScannerModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-2xl flex items-center justify-center p-4 selection:bg-purple-500/30">
-      <div className="apple-liquid-glass max-w-sm w-full p-6 sm:p-7 rounded-[32px] border border-white/20 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] relative overflow-hidden flex flex-col items-center">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-2xl flex items-center justify-center p-3 sm:p-4 selection:bg-purple-500/30 overscroll-contain">
+      <div className="apple-liquid-glass max-w-sm w-full p-6 sm:p-7 rounded-[32px] border border-white/20 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] relative overflow-hidden flex flex-col items-center max-h-[92dvh] overflow-y-auto custom-scrollbar">
         
         {/* Ambient Chromatic Glow */}
         <div className="absolute -top-20 -left-20 w-48 h-48 bg-purple-500/25 rounded-full blur-3xl pointer-events-none" />

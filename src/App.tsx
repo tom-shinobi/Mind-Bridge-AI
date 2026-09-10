@@ -562,7 +562,7 @@ export function App() {
       />
 
       {/* Symmetrical Centered Viewport Container (Phone-Friendly Spacing) */}
-      <div className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10 pb-28 md:pb-16">
+      <div className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10 pb-[calc(env(safe-area-inset-bottom,0px)+6.5rem)] md:pb-16">
         <main className="w-full">
           {activeTab === 'dashboard' && (
             <Dashboard

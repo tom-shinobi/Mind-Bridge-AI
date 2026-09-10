@@ -23,11 +23,11 @@ export const RefractiveLens: React.FC<RefractiveLensProps> = ({
   const [glarePos, setGlarePos] = useState({ x: 25, y: 25 });
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const updateInteraction = (clientX: number, clientY: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
     
     // Calculate normalized -1 to +1
     const normX = (x / rect.width - 0.5) * 2;
@@ -37,11 +37,32 @@ export const RefractiveLens: React.FC<RefractiveLensProps> = ({
     setRotateY(normX * 14);
     setRotateX(-normY * 14);
 
-    // Shift glare point towards mouse position
+    // Shift glare point towards pointer position
     setGlarePos({
       x: 20 + (x / rect.width) * 25,
       y: 18 + (y / rect.height) * 25
     });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    updateInteraction(e.clientX, e.clientY);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    setIsHovered(true);
+    if (e.touches.length > 0) {
+      updateInteraction(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length > 0) {
+      updateInteraction(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    handleMouseLeave();
   };
 
   const handleMouseLeave = () => {
@@ -57,8 +78,12 @@ export const RefractiveLens: React.FC<RefractiveLensProps> = ({
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
       onClick={onClick}
-      className={`relative inline-flex flex-col items-center justify-center cursor-pointer select-none group ${className}`}
+      className={`relative inline-flex flex-col items-center justify-center cursor-pointer select-none group touch-press ${className}`}
       style={{ perspective: 1000 }}
     >
       {/* 3D Tilting Liquid Glass Lens Sphere */}

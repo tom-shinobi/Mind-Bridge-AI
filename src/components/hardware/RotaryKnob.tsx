@@ -163,11 +163,13 @@ export const RotaryKnob: React.FC<RotaryKnobProps> = ({
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          className="knob-body flex items-center justify-center cursor-grab active:cursor-grabbing"
+          onPointerCancel={handlePointerUp}
+          className="knob-body flex items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none"
           style={{
             width: sizePx,
             height: sizePx,
-            transform: `rotate(${angle}deg)`
+            transform: `rotate(${angle}deg)`,
+            touchAction: 'none'
           }}
           title={`Click or drag to calibrate ${label}: ${value}`}
         >
@@ -200,6 +202,49 @@ export const RotaryKnob: React.FC<RotaryKnobProps> = ({
           </p>
         )}
       </div>
+
+      {/* Mobile-Friendly Stepper Buttons */}
+      {onChange && (
+        <div className="flex items-center justify-center gap-1.5 mt-2 select-none">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const next = Math.max(min, value - step);
+              if (next !== value) {
+                sound.playClick();
+                onChange(next);
+              }
+            }}
+            disabled={value <= min}
+            className="w-7 h-7 rounded-lg bg-white/[0.08] hover:bg-white/[0.18] active:scale-90 border border-white/20 text-white flex items-center justify-center font-bold text-sm transition-all disabled:opacity-30 disabled:pointer-events-none touch-press cursor-pointer"
+            title="Decrease"
+          >
+            -
+          </button>
+
+          <span className="px-2 py-0.5 min-w-[2.25rem] text-center font-mono text-[11px] font-semibold text-white bg-white/[0.06] border border-white/15 rounded-md">
+            {value}
+          </span>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const next = Math.min(max, value + step);
+              if (next !== value) {
+                sound.playClick();
+                onChange(next);
+              }
+            }}
+            disabled={value >= max}
+            className="w-7 h-7 rounded-lg bg-white/[0.08] hover:bg-white/[0.18] active:scale-90 border border-white/20 text-white flex items-center justify-center font-bold text-sm transition-all disabled:opacity-30 disabled:pointer-events-none touch-press cursor-pointer"
+            title="Increase"
+          >
+            +
+          </button>
+        </div>
+      )}
 
     </div>
   );

@@ -47,9 +47,9 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl animate-fade-in overscroll-contain">
       <div 
-        className="apple-liquid-glass max-w-lg w-full relative p-6 sm:p-7 rounded-3xl border border-white/20 shadow-2xl"
+        className="apple-liquid-glass max-w-lg w-full relative p-5 sm:p-7 rounded-3xl border border-white/20 shadow-2xl max-h-[90dvh] overflow-y-auto custom-scrollbar"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -208,7 +208,7 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Lab report due, exams approaching..."
-              className="w-full px-3.5 py-2.5 rounded-xl liquid-glass-input text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-purple-500/50"
+              className="w-full px-3.5 py-2.5 rounded-xl liquid-glass-input text-base sm:text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-purple-500/50"
             />
           </div>
 

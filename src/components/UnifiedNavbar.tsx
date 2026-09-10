@@ -211,13 +211,13 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       {/* =========================================================================
           1. TOP NAVIGATION BAR (Liquid Glass Island)
           ========================================================================= */}
-      <header className="sticky top-2 z-40 w-full px-2.5 sm:px-4 md:px-6 pointer-events-none mb-3">
+      <header className="sticky top-2 z-40 w-full px-2.5 sm:px-4 md:px-6 pointer-events-none mb-3 pt-[max(0.25rem,env(safe-area-inset-top,0px))]">
         <div className="pointer-events-auto apple-liquid-glass max-w-7xl mx-auto rounded-full px-3 sm:px-4 py-2 shadow-[0_16px_50px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.7)] border border-white/20 backdrop-blur-3xl flex items-center justify-between gap-2 sm:gap-3 select-none transition-all">
           
           {/* Brand Logo & Name */}
           <div
             onClick={() => handleSelectTab('dashboard')}
-            className="flex items-center gap-2 cursor-pointer group select-none flex-shrink-0"
+            className="flex items-center gap-2 cursor-pointer group select-none flex-shrink-0 touch-press"
           >
             <div className="relative w-8 h-8 rounded-xl bg-white/[0.08] border border-white/30 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_4px_16px_rgba(0,0,0,0.4)] flex items-center justify-center transition-transform group-hover:scale-105">
               <Sparkles className="w-4 h-4 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
@@ -303,27 +303,27 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
           {/* Right Controls: Desktop Telemetry & Mobile Action Capsule */}
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             
-            {/* Streak Indicator */}
+            {/* Streak Indicator (Always visible on mobile & desktop) */}
             <div
               onClick={() => handleSelectTab('progress')}
-              className="px-2 sm:px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/15 hover:border-orange-400/40 text-[10px] sm:text-[11px] font-medium flex items-center gap-1 text-slate-200 cursor-pointer transition-all"
+              className="px-2 sm:px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/15 hover:border-orange-400/40 text-[10px] sm:text-[11px] font-medium flex items-center gap-1 text-slate-200 cursor-pointer transition-all touch-press"
               title="Consistent learning streak"
             >
               <Flame className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-400 animate-pulse drop-shadow-[0_0_6px_rgba(251,146,60,0.6)]" />
               <span>{profile.streakDays}d</span>
             </div>
 
-            {/* Level / XP Indicator */}
+            {/* Level / XP Indicator (Desktop & Tablet) */}
             <div
               onClick={() => handleSelectTab('progress')}
-              className="px-2 sm:px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/15 hover:border-amber-400/40 text-[10px] sm:text-[11px] font-medium flex items-center gap-1 text-amber-300 cursor-pointer transition-all"
+              className="hidden sm:flex px-2 sm:px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/15 hover:border-amber-400/40 text-[10px] sm:text-[11px] font-medium items-center gap-1 text-amber-300 cursor-pointer transition-all touch-press"
               title={`Level ${profile.level} Scholar (${profile.totalXp.toLocaleString()} XP)`}
             >
               <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" />
               <span>Lvl {profile.level}</span>
             </div>
 
-            {/* Rebalance Workload Button (Desktop) */}
+            {/* Rebalance Workload Button (Desktop Large) */}
             <button
               type="button"
               onClick={() => {
@@ -337,7 +337,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               <span>Rebalance</span>
             </button>
 
-            {/* Atmosphere Theme Switcher (Dusk vs Nebula) */}
+            {/* Atmosphere Theme Switcher (Dusk vs Nebula) - Touch Friendly on Phone */}
             <button
               type="button"
               onClick={() => {
@@ -345,18 +345,18 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
                 sound.playClick();
                 onUpdateSettings({ ...aiSettings, theme: nextTheme });
               }}
-              className="px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 hover:border-white/30 transition-all cursor-pointer flex items-center gap-1.5 text-slate-200"
+              className="px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 hover:border-white/30 transition-all cursor-pointer flex items-center gap-1.5 text-slate-200 touch-press"
               title={aiSettings.theme === 'nebula' ? "Switch to Sunlight Dusk Galaxy (🌅)" : "Switch to Cosmic Nebula (🌌)"}
             >
-              <span>{aiSettings.theme === 'nebula' ? '🌌' : '🌅'}</span>
+              <span className="text-xs sm:text-sm leading-none">{aiSettings.theme === 'nebula' ? '🌌' : '🌅'}</span>
               <span className="hidden sm:inline">{aiSettings.theme === 'nebula' ? 'Nebula' : 'Dusk'}</span>
             </button>
 
-            {/* Sound FX Toggle */}
+            {/* Sound FX Toggle (Desktop & Tablet) */}
             <button
               type="button"
               onClick={toggleSound}
-              className="p-1.5 rounded-full text-[#A1A1A6] hover:text-white bg-white/[0.05] border border-white/15 hover:border-white/30 transition-all cursor-pointer"
+              className="hidden sm:flex p-1.5 rounded-full text-[#A1A1A6] hover:text-white bg-white/[0.05] border border-white/15 hover:border-white/30 transition-all cursor-pointer"
               title={aiSettings.soundFxEnabled ? "Mute sound effects" : "Enable sound effects"}
             >
               {aiSettings.soundFxEnabled ? (
@@ -366,7 +366,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               )}
             </button>
 
-            {/* Demo Reset / Real Auth Button (Desktop) */}
+            {/* Demo Reset / Real Auth Button (Desktop Wide) */}
             <div className="hidden xl:flex items-center gap-1.5">
               {isDemoMode ? (
                 <div className="flex items-center gap-1">
@@ -419,18 +419,18 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               )}
             </div>
 
-            {/* All Apps / Menu Grid Button (Available on both desktop & mobile) */}
+            {/* All Apps / Menu Grid Button (Desktop Only — on mobile, bottom dock handles this) */}
             <button
               type="button"
               onClick={() => {
                 sound.playClick();
                 setIsDrawerOpen(true);
               }}
-              className="relative p-1.5 sm:px-2.5 sm:py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/25 text-white flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+              className="hidden md:flex p-1.5 sm:px-2.5 sm:py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/25 text-white items-center gap-1.5 shadow-sm transition-all cursor-pointer"
               title="Open Academic Command Center (All Destinations)"
             >
               <LayoutGrid className="w-3.5 h-3.5 text-cyan-300" />
-              <span className="hidden sm:inline text-[11px] font-medium">All Apps</span>
+              <span className="text-[11px] font-medium">All Apps</span>
               {activeGapsCount > 0 && (
                 <span className="w-2 h-2 rounded-full bg-pink-400 animate-ping absolute -top-0.5 -right-0.5" />
               )}
@@ -439,7 +439,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
             {/* Profile Avatar Capsule */}
             <div
               onClick={() => handleSelectTab('settings')}
-              className="flex items-center gap-1.5 pl-0.5 py-0.5 pr-2 rounded-full bg-white/[0.06] border border-white/20 hover:border-white/40 cursor-pointer transition-all"
+              className="flex items-center gap-1.5 pl-0.5 py-0.5 pr-2 rounded-full bg-white/[0.06] border border-white/20 hover:border-white/40 cursor-pointer transition-all touch-press"
               title={`${profile.name} • Sem ${profile.semester}`}
             >
               <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-purple-500/50 via-cyan-500/40 to-pink-500/50 border border-white/40 flex items-center justify-center font-bold text-[10px] text-white shadow-inner">
@@ -459,63 +459,63 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       {/* =========================================================================
           2. MOBILE FLOATING BOTTOM DOCK (iOS Dynamic Style — Adapts Like Butter)
           ========================================================================= */}
-      <div className="fixed bottom-3 inset-x-3 z-40 max-w-md mx-auto md:hidden pointer-events-auto">
-        <nav className="apple-liquid-glass rounded-full px-2 py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.5)] border border-white/20 backdrop-blur-3xl flex items-center justify-around">
+      <div className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom,0px))] inset-x-3 z-40 max-w-md mx-auto md:hidden pointer-events-auto">
+        <nav className="apple-liquid-glass rounded-full px-2 py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.5)] border border-white/20 backdrop-blur-3xl flex items-center justify-around select-none">
           
           {/* 1. Dashboard */}
           <button
             type="button"
             onClick={() => handleSelectTab('dashboard')}
-            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all ${
+            className={`flex flex-col items-center justify-center min-h-[46px] min-w-[46px] py-1 px-3 rounded-2xl transition-all touch-press active:scale-95 ${
               activeTab === 'dashboard'
-                ? 'text-white bg-white/[0.16] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)] font-bold scale-105'
+                ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(56,189,248,0.25)] font-bold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <LayoutDashboard className={`w-4 h-4 ${activeTab === 'dashboard' ? 'text-cyan-300' : ''}`} />
-            <span className="text-[9px] mt-0.5">Home</span>
+            <LayoutDashboard className={`w-4 h-4 ${activeTab === 'dashboard' ? 'text-cyan-300 drop-shadow-[0_0_8px_#38BDF8]' : ''}`} />
+            <span className="text-[9px] mt-0.5 tracking-tight font-medium">Home</span>
           </button>
 
           {/* 2. AI Tutor */}
           <button
             type="button"
             onClick={() => handleSelectTab('tutor')}
-            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all ${
+            className={`flex flex-col items-center justify-center min-h-[46px] min-w-[46px] py-1 px-3 rounded-2xl transition-all touch-press active:scale-95 ${
               activeTab === 'tutor'
-                ? 'text-white bg-white/[0.16] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)] font-bold scale-105'
+                ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(168,85,247,0.25)] font-bold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Bot className={`w-4 h-4 ${activeTab === 'tutor' ? 'text-purple-300' : ''}`} />
-            <span className="text-[9px] mt-0.5">Tutor</span>
+            <Bot className={`w-4 h-4 ${activeTab === 'tutor' ? 'text-purple-300 drop-shadow-[0_0_8px_#C084FC]' : ''}`} />
+            <span className="text-[9px] mt-0.5 tracking-tight font-medium">Tutor</span>
           </button>
 
           {/* 3. Tests */}
           <button
             type="button"
             onClick={() => handleSelectTab('tests')}
-            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all ${
+            className={`flex flex-col items-center justify-center min-h-[46px] min-w-[46px] py-1 px-3 rounded-2xl transition-all touch-press active:scale-95 ${
               activeTab === 'tests'
-                ? 'text-white bg-white/[0.16] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)] font-bold scale-105'
+                ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(96,165,250,0.25)] font-bold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <FileCheck2 className={`w-4 h-4 ${activeTab === 'tests' ? 'text-blue-300' : ''}`} />
-            <span className="text-[9px] mt-0.5">Tests</span>
+            <FileCheck2 className={`w-4 h-4 ${activeTab === 'tests' ? 'text-blue-300 drop-shadow-[0_0_8px_#60A5FA]' : ''}`} />
+            <span className="text-[9px] mt-0.5 tracking-tight font-medium">Tests</span>
           </button>
 
           {/* 4. Syllabus */}
           <button
             type="button"
             onClick={() => handleSelectTab('syllabus')}
-            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all ${
+            className={`flex flex-col items-center justify-center min-h-[46px] min-w-[46px] py-1 px-3 rounded-2xl transition-all touch-press active:scale-95 ${
               activeTab === 'syllabus'
-                ? 'text-white bg-white/[0.16] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)] font-bold scale-105'
+                ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(52,211,153,0.25)] font-bold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <BookOpen className={`w-4 h-4 ${activeTab === 'syllabus' ? 'text-emerald-300' : ''}`} />
-            <span className="text-[9px] mt-0.5">Syllabus</span>
+            <BookOpen className={`w-4 h-4 ${activeTab === 'syllabus' ? 'text-emerald-300 drop-shadow-[0_0_8px_#34D399]' : ''}`} />
+            <span className="text-[9px] mt-0.5 tracking-tight font-medium">Syllabus</span>
           </button>
 
           {/* 5. All Apps / More Drawer */}
@@ -525,15 +525,15 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               sound.playClick();
               setIsDrawerOpen(true);
             }}
-            className="relative flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl text-slate-400 hover:text-white transition-all cursor-pointer"
+            className="relative flex flex-col items-center justify-center min-h-[46px] min-w-[46px] py-1 px-3 rounded-2xl text-slate-400 hover:text-white transition-all cursor-pointer touch-press active:scale-95"
           >
             <div className="relative">
-              <LayoutGrid className="w-4 h-4 text-pink-300" />
+              <LayoutGrid className="w-4 h-4 text-pink-300 drop-shadow-[0_0_8px_#F472B6]" />
               {activeGapsCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_6px_#EC4899]" />
               )}
             </div>
-            <span className="text-[9px] mt-0.5 text-pink-300 font-medium">More ✦</span>
+            <span className="text-[9px] mt-0.5 text-pink-300 font-semibold tracking-tight">More ✦</span>
           </button>
 
         </nav>
@@ -547,11 +547,11 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
           {/* Dimmed Blur Backdrop */}
           <div
             onClick={() => setIsDrawerOpen(false)}
-            className="absolute inset-0 bg-black/70 backdrop-blur-md transition-opacity"
+            className="absolute inset-0 bg-black/75 backdrop-blur-md transition-opacity"
           />
 
           {/* Liquid Glass Bottom Sheet */}
-          <div className="relative z-10 w-full max-w-2xl mx-auto apple-liquid-glass rounded-t-[32px] sm:rounded-3xl border-t sm:border border-white/25 p-5 sm:p-6 pb-10 shadow-[0_-20px_60px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.7)] backdrop-blur-3xl max-h-[90vh] overflow-y-auto">
+          <div className="relative z-10 w-full max-w-2xl mx-auto apple-liquid-glass rounded-t-[32px] sm:rounded-3xl border-t sm:border border-white/25 p-5 sm:p-6 pb-[max(2.5rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))] shadow-[0_-20px_60px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.7)] backdrop-blur-3xl max-h-[85dvh] overscroll-contain overflow-y-auto">
             
             {/* Top Drag Pill */}
             <div className="w-12 h-1.5 rounded-full bg-white/20 mx-auto mb-4" />
@@ -573,7 +573,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(false)}
-                className="w-8 h-8 rounded-full bg-white/[0.08] hover:bg-white/[0.16] border border-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                className="w-9 h-9 rounded-full bg-white/[0.08] hover:bg-white/[0.16] border border-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer touch-press"
               >
                 <X className="w-4 h-4" />
               </button>
