@@ -13,6 +13,15 @@ export interface TutorResponse {
 }
 
 class AIService {
+  private apiStatus = {
+    isRateLimited: false,
+    statusMessage: 'Ready'
+  };
+
+  public getApiStatus() {
+    return this.apiStatus;
+  }
+
   /**
    * Speak text using Web Speech API if enabled
    */
@@ -194,6 +203,7 @@ YOUR INSTRUCTIONS:
         });
 
         if (response.ok) {
+          this.apiStatus = { isRateLimited: false, statusMessage: `Live Connected: ${activeModel}` };
           const data = await response.json();
           const content = data.choices?.[0]?.message?.content;
           if (content) {
@@ -226,6 +236,12 @@ YOUR INSTRUCTIONS:
           }
         } else {
           const errBody = await response.text();
+          if (response.status === 429) {
+            this.apiStatus = {
+              isRateLimited: true,
+              statusMessage: 'OpenRouter Free Tier Limit (50/day) Reached — Socratic Engine Active'
+            };
+          }
           console.warn('OpenRouter API returned error status:', response.status, errBody);
         }
       } catch (err) {
