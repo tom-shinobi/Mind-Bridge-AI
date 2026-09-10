@@ -119,6 +119,66 @@ class SoundService {
     osc.start();
     osc.stop(ctx.currentTime + 0.3);
   }
+
+  // Apple Face ID biometric scanning tick / pulse
+  public playFaceIdScan() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(950, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.03);
+    gain.gain.setValueAtTime(0.06, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.035);
+  }
+
+  // Apple Face ID verification success chime (warm resonant dual bell)
+  public playFaceIdSuccess() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    // Dual ascending major fifth chime (F#5: 740Hz, C#6: 1109Hz)
+    const tones = [
+      { freq: 739.99, start: 0, dur: 0.28, vol: 0.16 },
+      { freq: 1108.73, start: 0.09, dur: 0.38, vol: 0.20 }
+    ];
+
+    tones.forEach(({ freq, start, dur, vol }) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+      gain.gain.setValueAtTime(vol, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + dur + 0.05);
+    });
+  }
+
+  // Face ID biometric mismatch / rejection buzz
+  public playFaceIdReject() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const tones = [220, 175];
+    tones.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.09);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime + idx * 0.09);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.09 + 0.14);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + idx * 0.09);
+      osc.stop(ctx.currentTime + idx * 0.09 + 0.15);
+    });
+  }
 }
 
 export const sound = new SoundService();

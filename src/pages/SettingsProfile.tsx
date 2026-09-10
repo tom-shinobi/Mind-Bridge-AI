@@ -17,12 +17,15 @@ import {
   Shield,
   Mail,
   Loader2,
-  Lock
+  Lock,
+  ScanFace,
+  Trash2
 } from 'lucide-react';
 import type { StudentProfile, AISettings, MemorySummary, AtmosphereTheme } from '../types';
 import { sound } from '../services/soundService';
 import { authService } from '../services/authService';
 import { supabaseDataService } from '../services/supabaseDataService';
+import { FaceIdScannerModal } from '../components/auth/FaceIdScannerModal';
 
 interface SettingsProfileProps {
   profile: StudentProfile;
@@ -80,6 +83,12 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [passkeyStatus, setPasskeyStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Face ID Biometric State
+  const [isFaceScannerOpen, setIsFaceScannerOpen] = useState(false);
+  const [faceIdInfo, setFaceIdInfo] = useState(() => authService.getEnrolledFaceInfo(profile.email || profile.id));
+  const [requireFaceOnLogin, setRequireFaceOnLogin] = useState(() => authService.isFaceVerificationRequiredOnLogin());
+  const [faceIdStatus, setFaceIdStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
   // Account / Reset Password State
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
@@ -91,7 +100,38 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
         setIsPasskeyEnrolled(true);
       }
     });
-  }, [profile.biometricEnabled]);
+
+    setFaceIdInfo(authService.getEnrolledFaceInfo(profile.email || profile.id));
+  }, [profile.biometricEnabled, profile.email, profile.id]);
+
+  const handleFaceEnrollSuccess = () => {
+    setIsFaceScannerOpen(false);
+    const updated = authService.getEnrolledFaceInfo(profile.email || profile.id);
+    setFaceIdInfo(updated);
+    setFaceIdStatus({
+      type: 'success',
+      message: 'Apple Face ID biometric profile successfully enrolled on the server!'
+    });
+    setTimeout(() => setFaceIdStatus(null), 4000);
+  };
+
+  const handleDeleteFaceId = async () => {
+    sound.playClick();
+    const res = await authService.deleteFaceBiometrics(profile.id);
+    if (res.success) {
+      setFaceIdInfo({ isEnrolled: false });
+      setFaceIdStatus({
+        type: 'success',
+        message: 'Face ID biometric template removed from server.'
+      });
+    } else {
+      setFaceIdStatus({
+        type: 'error',
+        message: res.error || 'Failed to remove Face ID.'
+      });
+    }
+    setTimeout(() => setFaceIdStatus(null), 4000);
+  };
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -653,6 +693,118 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
 
       {/* Passkey Biometrics & Account Management */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Apple Face ID (Server-Verified) Card */}
+        <div className="apple-liquid-glass p-6 space-y-4">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-white/[0.08]">
+            <ScanFace className="w-5 h-5 text-cyan-400" />
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono">
+                  Apple Face ID
+                </h3>
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                  Server-Verified
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Unlock MindBridge AI with real-time camera face verification authenticated by server.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3.5 text-xs">
+            {/* Status Pill */}
+            <div className="p-3.5 rounded-2xl liquid-glass-block flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${faceIdInfo.isEnrolled ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-slate-400'}`}>
+                  <ScanFace className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white">
+                    {faceIdInfo.isEnrolled ? 'Face ID Enrolled on Server' : 'No Face ID Enrolled'}
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    {faceIdInfo.isEnrolled
+                      ? `Active • Verified ${faceIdInfo.verificationCount || 0} times • ${faceIdInfo.deviceName || 'Camera Sensor'}`
+                      : 'Enroll your face to enable 1-tap optical Face ID login.'}
+                  </p>
+                </div>
+              </div>
+              <span className={`text-[10px] px-2.5 py-1 rounded-full font-mono border ${faceIdInfo.isEnrolled ? 'liquid-glass-emerald text-emerald-300 border-emerald-500/40' : 'bg-slate-800/60 text-slate-400 border-slate-700'}`}>
+                {faceIdInfo.isEnrolled ? 'ENROLLED' : 'NOT SET'}
+              </span>
+            </div>
+
+            {/* Optional 2-Step Requirement Toggle */}
+            <div className="p-3.5 rounded-2xl liquid-glass-block flex items-center justify-between">
+              <div className="space-y-0.5 pr-2">
+                <p className="font-semibold text-white">Require Face ID on Login</p>
+                <p className="text-[11px] text-slate-400">
+                  Mandate secondary server Face ID verification after password check (2-Step).
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={requireFaceOnLogin}
+                  onChange={(e) => {
+                    sound.playClick();
+                    setRequireFaceOnLogin(e.target.checked);
+                    authService.setFaceVerificationRequiredOnLogin(e.target.checked);
+                  }}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              </label>
+            </div>
+
+            {faceIdStatus && (
+              <div className={`p-3 rounded-xl text-xs flex items-center gap-2 border ${faceIdStatus.type === 'success' ? 'liquid-glass-emerald border-emerald-500/40 text-emerald-200' : 'liquid-glass-danger border-rose-500/40 text-rose-200'}`}>
+                {faceIdStatus.type === 'success' ? <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />}
+                <span>{faceIdStatus.message}</span>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setIsFaceScannerOpen(true);
+                }}
+                className="flex-1 py-2.5 px-4 rounded-xl btn-apple-primary text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+              >
+                <ScanFace className="w-4 h-4 text-cyan-300" />
+                <span>{faceIdInfo.isEnrolled ? 'Re-calibrate Face ID' : 'Enroll Face ID (5s)'}</span>
+              </button>
+
+              {faceIdInfo.isEnrolled && (
+                <button
+                  type="button"
+                  onClick={handleDeleteFaceId}
+                  className="py-2.5 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  title="Remove Face ID Data from Server"
+                >
+                  <Trash2 className="w-4 h-4 text-rose-400" />
+                  <span>Remove</span>
+                </button>
+              )}
+            </div>
+
+            {/* Server Cryptographic Vector Explainer */}
+            <div className="p-3.5 rounded-2xl liquid-glass-block space-y-1 text-[11px] text-slate-400">
+              <div className="flex items-center gap-1.5 font-semibold text-slate-300">
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Server-Verified Biometrics</span>
+              </div>
+              <p className="leading-relaxed">
+                Live camera frames are analyzed in temporary memory. Only a normalized mathematical geometry vector (SHA-256 signed) is verified against the server table <code>user_face_credentials</code>.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Biometric & Device Passkeys Card */}
         <div className="apple-liquid-glass p-6 space-y-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-white/[0.08]">
@@ -993,6 +1145,16 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
         </div>
 
       </div>
+
+      {/* Face ID Biometric Scanner Modal */}
+      <FaceIdScannerModal
+        isOpen={isFaceScannerOpen}
+        mode="enroll"
+        userEmail={profile.email || email}
+        userId={profile.id}
+        onClose={() => setIsFaceScannerOpen(false)}
+        onSuccess={handleFaceEnrollSuccess}
+      />
 
     </div>
   );

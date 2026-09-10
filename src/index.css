@@ -111,6 +111,14 @@
   100% { transform: translate(65px, 40px) scale(0.93); }
 }
 
+@keyframes scanLaser {
+  0% { top: 15%; opacity: 0.3; }
+  20% { opacity: 0.95; }
+  50% { top: 85%; opacity: 1; }
+  80% { opacity: 0.95; }
+  100% { top: 15%; opacity: 0.3; }
+}
+
 .dynamic-chromatic-mesh {
   background: 
     radial-gradient(at 15% 15%, rgba(139, 92, 246, 0.32) 0px, transparent 55%),

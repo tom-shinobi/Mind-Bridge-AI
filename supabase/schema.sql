@@ -154,6 +154,21 @@ CREATE TABLE IF NOT EXISTS public.webauthn_credentials (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- 9. USER FACE BIOMETRIC CREDENTIALS TABLE (Apple-style Face ID Server Verification)
+CREATE TABLE IF NOT EXISTS public.user_face_credentials (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  face_descriptor_hash TEXT NOT NULL,
+  biometric_data JSONB NOT NULL,
+  similarity_threshold NUMERIC(4,2) DEFAULT 0.80,
+  device_name TEXT DEFAULT 'Face ID Sensor',
+  enrolled_at TIMESTAMPTZ DEFAULT now(),
+  last_verified_at TIMESTAMPTZ,
+  verification_count INT DEFAULT 0,
+  CONSTRAINT unique_user_face UNIQUE (user_id)
+);
+
 -- ==============================================================================
 -- ENABLE ROW LEVEL SECURITY (RLS) ON ALL TABLES
 -- ==============================================================================
@@ -165,6 +180,7 @@ ALTER TABLE public.timetable_blocks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.test_attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_log ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.webauthn_credentials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_face_credentials ENABLE ROW LEVEL SECURITY;
 
 -- ==============================================================================
 -- DEFINE ROW LEVEL SECURITY POLICIES (Users can only access their own data)
@@ -207,6 +223,10 @@ CREATE POLICY "Users can CRUD own audit logs" ON public.audit_log FOR ALL USING 
 -- WebAuthn Credentials
 DROP POLICY IF EXISTS "Users can CRUD own passkey credentials" ON public.webauthn_credentials;
 CREATE POLICY "Users can CRUD own passkey credentials" ON public.webauthn_credentials FOR ALL USING (auth.uid() = user_id);
+
+-- User Face Biometric Credentials
+DROP POLICY IF EXISTS "Users can CRUD own face credentials" ON public.user_face_credentials;
+CREATE POLICY "Users can CRUD own face credentials" ON public.user_face_credentials FOR ALL USING (auth.uid() = user_id);
 
 -- ==============================================================================
 -- PROFILE MANAGEMENT: Managed client-side via Supabase JS SDK upon signup

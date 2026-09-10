@@ -11,13 +11,15 @@ import {
   Database,
   RefreshCw,
   Eye,
-  EyeOff
+  EyeOff,
+  ScanFace
 } from 'lucide-react';
 import { sound } from '../../services/soundService';
 import { authService } from '../../services/authService';
 import { isSupabaseConfigured, getSupabaseConfig, saveSupabaseConfig } from '../../services/supabaseClient';
 import type { AuthUser } from '../../types';
 import { ParticleBackground } from '../ParticleBackground';
+import { FaceIdScannerModal } from './FaceIdScannerModal';
 
 interface AuthPortalProps {
   onSuccess: (user: AuthUser) => void;
@@ -40,6 +42,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
   const [infoMsg, setInfoMsg] = useState<string | null>(null);
 
   const [hasPasskey, setHasPasskey] = useState(false);
+  const [hasFaceId, setHasFaceId] = useState(false);
+  const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
+  const [faceModalMode, setFaceModalMode] = useState<'verify' | 'enroll'>('verify');
+  const [verifyWithFaceIdOnLogin, setVerifyWithFaceIdOnLogin] = useState<boolean>(() =>
+    authService.isFaceVerificationRequiredOnLogin()
+  );
+  const [pendingUser, setPendingUser] = useState<AuthUser | null>(null);
+
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetSuccess, setResetSuccess] = useState(false);
@@ -59,10 +69,47 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       }
     });
 
+    setHasFaceId(authService.hasFaceIdEnrolled());
+
     const cfg = getSupabaseConfig();
     setConfigUrl(cfg.url);
     setConfigKey(cfg.anonKey);
   }, []);
+
+  const handleFaceIdClick = () => {
+    sound.playClick();
+    setErrorMsg(null);
+    setInfoMsg(null);
+
+    const isEnrolled = authService.hasFaceIdEnrolled(email);
+    if (isEnrolled) {
+      setFaceModalMode('verify');
+    } else {
+      setFaceModalMode('enroll');
+    }
+    setIsFaceModalOpen(true);
+  };
+
+  const handleFaceSuccess = (result: { user?: AuthUser; confidence?: number }) => {
+    setIsFaceModalOpen(false);
+
+    if (pendingUser) {
+      const u = pendingUser;
+      setPendingUser(null);
+      sound.playSuccess();
+      onSuccess(u);
+    } else if (result.user) {
+      sound.playSuccess();
+      onSuccess(result.user);
+    } else if (faceModalMode === 'enroll') {
+      setHasFaceId(true);
+      setInfoMsg('Face ID profile successfully enrolled on server! You can now unlock with your face.');
+      sound.playSuccess();
+      if (pendingUser) {
+        onSuccess(pendingUser);
+      }
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,6 +129,18 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       sound.playError();
       setErrorMsg(res.error);
     } else if (res.user) {
+      // Optional 2-Step Face Verification if toggled
+      if (verifyWithFaceIdOnLogin) {
+        setPendingUser(res.user);
+        if (authService.hasFaceIdEnrolled(res.user.email)) {
+          setFaceModalMode('verify');
+        } else {
+          setFaceModalMode('enroll');
+        }
+        setIsFaceModalOpen(true);
+        return;
+      }
+
       sound.playSuccess();
       onSuccess(res.user);
     }
@@ -270,6 +329,20 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
             <span>Continue with Google</span>
           </button>
 
+          {/* Apple Face ID Biometric Unlock Button */}
+          <button
+            type="button"
+            disabled={isLoading}
+            onClick={handleFaceIdClick}
+            className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-purple-600/25 via-indigo-600/25 to-cyan-600/25 hover:from-purple-600/35 hover:via-indigo-600/35 hover:to-cyan-600/35 border border-purple-400/30 text-xs font-semibold text-white flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(168,85,247,0.18)] cursor-pointer"
+          >
+            <ScanFace className="w-4 h-4 text-cyan-300" />
+            <span>{hasFaceId ? 'Unlock with Face ID' : 'Set up Apple Face ID Unlock'}</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200 border border-cyan-400/30 font-mono">
+              Server Verified
+            </span>
+          </button>
+
           {/* Biometric Passkey Unlock Button (If Enrolled) */}
           {hasPasskey && (
             <button
@@ -355,6 +428,30 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Optional 2-Step Face ID Verification Checkbox */}
+            {tab === 'signin' && (
+              <div className="pt-1">
+                <label className="flex items-center gap-2 cursor-pointer group select-none">
+                  <input
+                    type="checkbox"
+                    checked={verifyWithFaceIdOnLogin}
+                    onChange={(e) => {
+                      setVerifyWithFaceIdOnLogin(e.target.checked);
+                      authService.setFaceVerificationRequiredOnLogin(e.target.checked);
+                    }}
+                    className="rounded border-white/20 bg-black/50 text-purple-500 focus:ring-purple-500/50 w-3.5 h-3.5 cursor-pointer accent-purple-500"
+                  />
+                  <span className="text-[11px] text-slate-300 group-hover:text-white flex items-center gap-1.5 transition-colors">
+                    <ScanFace className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Optional Face ID on login</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                      2-Step Server Biometrics
+                    </span>
+                  </span>
+                </label>
+              </div>
+            )}
 
             {tab === 'signup' && (
               <div className="space-y-1">
@@ -516,6 +613,27 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           </div>
         </div>
       )}
+
+      {/* Face ID Biometric Scanner Modal */}
+      <FaceIdScannerModal
+        isOpen={isFaceModalOpen}
+        mode={faceModalMode}
+        userEmail={email || pendingUser?.email || ''}
+        userId={pendingUser?.id || ''}
+        onClose={() => {
+          setIsFaceModalOpen(false);
+          setPendingUser(null);
+        }}
+        onSuccess={handleFaceSuccess}
+        onFallbackToPassword={() => {
+          setIsFaceModalOpen(false);
+          if (pendingUser) {
+            // Password was already validated in 2-step verification, proceed to login
+            onSuccess(pendingUser);
+            setPendingUser(null);
+          }
+        }}
+      />
 
     </div>
   );
