@@ -12,14 +12,13 @@ import {
   RefreshCw,
   Eye,
   EyeOff,
-  ScanFace
+  Loader2
 } from 'lucide-react';
 import { sound } from '../../services/soundService';
 import { authService } from '../../services/authService';
 import { isSupabaseConfigured, getSupabaseConfig, saveSupabaseConfig } from '../../services/supabaseClient';
 import type { AuthUser } from '../../types';
 import { ParticleBackground } from '../ParticleBackground';
-import { FaceIdScannerModal } from './FaceIdScannerModal';
 
 interface AuthPortalProps {
   onSuccess: (user: AuthUser) => void;
@@ -42,13 +41,9 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
   const [infoMsg, setInfoMsg] = useState<string | null>(null);
 
   const [hasPasskey, setHasPasskey] = useState(false);
-  const [hasFaceId, setHasFaceId] = useState(false);
-  const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
-  const [faceModalMode, setFaceModalMode] = useState<'verify' | 'enroll'>('verify');
-  const [verifyWithFaceIdOnLogin, setVerifyWithFaceIdOnLogin] = useState<boolean>(() =>
-    authService.isFaceVerificationRequiredOnLogin()
-  );
-  const [pendingUser, setPendingUser] = useState<AuthUser | null>(null);
+  const [isPasskeyEnrollModalOpen, setIsPasskeyEnrollModalOpen] = useState(false);
+  const [enrollEmail, setEnrollEmail] = useState('');
+  const [isEnrollingPasskey, setIsEnrollingPasskey] = useState(false);
 
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
@@ -69,45 +64,37 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       }
     });
 
-    setHasFaceId(authService.hasFaceIdEnrolled());
-
     const cfg = getSupabaseConfig();
     setConfigUrl(cfg.url);
     setConfigKey(cfg.anonKey);
   }, []);
 
-  const handleFaceIdClick = () => {
-    sound.playClick();
-    setErrorMsg(null);
-    setInfoMsg(null);
-
-    const isEnrolled = authService.hasFaceIdEnrolled(email);
-    if (isEnrolled) {
-      setFaceModalMode('verify');
-    } else {
-      setFaceModalMode('enroll');
+  const handleEnrollPasskey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!enrollEmail) {
+      setErrorMsg('Please enter your email to register Windows Hello passkey.');
+      return;
     }
-    setIsFaceModalOpen(true);
-  };
+    sound.playClick();
+    setIsEnrollingPasskey(true);
+    setErrorMsg(null);
 
-  const handleFaceSuccess = (result: { user?: AuthUser; confidence?: number }) => {
-    setIsFaceModalOpen(false);
+    const userId = crypto.randomUUID();
+    const res = await authService.registerPasskey(userId, enrollEmail.trim(), 'Scholar');
+    setIsEnrollingPasskey(false);
 
-    if (pendingUser) {
-      const u = pendingUser;
-      setPendingUser(null);
+    if (res.error) {
+      sound.playError();
+      setErrorMsg(res.error);
+    } else {
       sound.playSuccess();
-      onSuccess(u);
-    } else if (result.user) {
-      sound.playSuccess();
-      onSuccess(result.user);
-    } else if (faceModalMode === 'enroll') {
-      setHasFaceId(true);
-      setInfoMsg('Face ID profile successfully enrolled on server! You can now unlock with your face.');
-      sound.playSuccess();
-      if (pendingUser) {
-        onSuccess(pendingUser);
-      }
+      setHasPasskey(true);
+      setIsPasskeyEnrollModalOpen(false);
+      onSuccess({
+        id: userId,
+        email: enrollEmail.trim(),
+        name: 'Scholar'
+      });
     }
   };
 
@@ -129,18 +116,6 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       sound.playError();
       setErrorMsg(res.error);
     } else if (res.user) {
-      // Optional 2-Step Face Verification if toggled
-      if (verifyWithFaceIdOnLogin) {
-        setPendingUser(res.user);
-        if (authService.hasFaceIdEnrolled(res.user.email)) {
-          setFaceModalMode('verify');
-        } else {
-          setFaceModalMode('enroll');
-        }
-        setIsFaceModalOpen(true);
-        return;
-      }
-
       sound.playSuccess();
       onSuccess(res.user);
     }
@@ -194,8 +169,16 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
     sound.playClick();
     setIsLoading(true);
     setErrorMsg(null);
+    setInfoMsg(null);
+
     const res = await authService.authenticateWithPasskey();
     setIsLoading(false);
+
+    if (res.isFirstTime || (!res.success && (res.error?.toLowerCase().includes('no passkey') || res.error?.toLowerCase().includes('no windows hello')))) {
+      setEnrollEmail(email.trim());
+      setIsPasskeyEnrollModalOpen(true);
+      return;
+    }
 
     if (res.error) {
       sound.playError();
@@ -329,32 +312,26 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
             <span>Continue with Google</span>
           </button>
 
-          {/* Apple Face ID Biometric Unlock Button */}
+          {/* Sign In with Windows Hello / Passkey Button */}
           <button
             type="button"
             disabled={isLoading}
-            onClick={handleFaceIdClick}
-            className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-purple-600/25 via-indigo-600/25 to-cyan-600/25 hover:from-purple-600/35 hover:via-indigo-600/35 hover:to-cyan-600/35 border border-purple-400/30 text-xs font-semibold text-white flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(168,85,247,0.18)] cursor-pointer"
+            onClick={handleBiometricUnlock}
+            className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-purple-600/30 via-indigo-600/30 to-pink-600/30 hover:from-purple-600/40 hover:via-indigo-600/40 hover:to-pink-600/40 border border-purple-400/40 text-xs font-semibold text-white flex items-center justify-between transition-all shadow-[0_0_18px_rgba(168,85,247,0.22)] group cursor-pointer"
           >
-            <ScanFace className="w-4 h-4 text-cyan-300" />
-            <span>{hasFaceId ? 'Unlock with Face ID' : 'Set up Apple Face ID Unlock'}</span>
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200 border border-cyan-400/30 font-mono">
-              Server Verified
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-purple-300 group-hover:scale-105 transition-transform">
+                <Fingerprint className="w-4 h-4" />
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-semibold text-white">Sign In with Windows Hello / Passkey</p>
+                <p className="text-[10px] text-purple-200/80 font-mono">Face, Fingerprint, or PIN</p>
+              </div>
+            </div>
+            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-purple-400/20 text-purple-200 border border-purple-400/30">
+              {hasPasskey ? '1-Tap Unlock' : 'Biometrics'}
             </span>
           </button>
-
-          {/* Biometric Passkey Unlock Button (If Enrolled) */}
-          {hasPasskey && (
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={handleBiometricUnlock}
-              className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-purple-600/30 to-pink-600/30 hover:from-purple-600/40 hover:to-pink-600/40 border border-purple-400/40 text-xs font-semibold text-white flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(168,85,247,0.2)]"
-            >
-              <Fingerprint className="w-4 h-4 text-purple-300" />
-              <span>Unlock with Face / Passkey</span>
-            </button>
-          )}
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-white/10" />
@@ -429,29 +406,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
               </div>
             </div>
 
-            {/* Optional 2-Step Face ID Verification Checkbox */}
-            {tab === 'signin' && (
-              <div className="pt-1">
-                <label className="flex items-center gap-2 cursor-pointer group select-none">
-                  <input
-                    type="checkbox"
-                    checked={verifyWithFaceIdOnLogin}
-                    onChange={(e) => {
-                      setVerifyWithFaceIdOnLogin(e.target.checked);
-                      authService.setFaceVerificationRequiredOnLogin(e.target.checked);
-                    }}
-                    className="rounded border-white/20 bg-black/50 text-purple-500 focus:ring-purple-500/50 w-3.5 h-3.5 cursor-pointer accent-purple-500"
-                  />
-                  <span className="text-[11px] text-slate-300 group-hover:text-white flex items-center gap-1.5 transition-colors">
-                    <ScanFace className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Optional Face ID on login</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                      2-Step Server Biometrics
-                    </span>
-                  </span>
-                </label>
-              </div>
-            )}
+
 
             {tab === 'signup' && (
               <div className="space-y-1">
@@ -614,26 +569,74 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
       )}
 
-      {/* Face ID Biometric Scanner Modal */}
-      <FaceIdScannerModal
-        isOpen={isFaceModalOpen}
-        mode={faceModalMode}
-        userEmail={email || pendingUser?.email || ''}
-        userId={pendingUser?.id || ''}
-        onClose={() => {
-          setIsFaceModalOpen(false);
-          setPendingUser(null);
-        }}
-        onSuccess={handleFaceSuccess}
-        onFallbackToPassword={() => {
-          setIsFaceModalOpen(false);
-          if (pendingUser) {
-            // Password was already validated in 2-step verification, proceed to login
-            onSuccess(pendingUser);
-            setPendingUser(null);
-          }
-        }}
-      />
+      {/* Windows Hello / Passkey Enrollment Modal */}
+      {isPasskeyEnrollModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="apple-liquid-glass p-6 sm:p-7 rounded-3xl border border-white/20 shadow-2xl max-w-md w-full space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                <Fingerprint className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Setup Windows Hello / Passkey</h3>
+                <p className="text-xs text-slate-400">Unlock MindBridge with Face, Fingerprint, or PIN</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              No passkey was found for this device yet. Enter your email to create a secure, hardware-backed Windows Hello credential.
+            </p>
+
+            <form onSubmit={handleEnrollPasskey} className="space-y-3">
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1">Account Email</label>
+                <input
+                  type="email"
+                  required
+                  value={enrollEmail}
+                  onChange={(e) => setEnrollEmail(e.target.value)}
+                  placeholder="student@university.edu"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400"
+                />
+              </div>
+
+              {errorMsg && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              <div className="pt-2 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsPasskeyEnrollModalOpen(false)}
+                  className="btn-apple-glass py-2 px-4 text-xs text-slate-400 hover:text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isEnrollingPasskey}
+                  className="btn-apple-primary py-2 px-5 text-xs font-semibold flex items-center gap-2 cursor-pointer"
+                >
+                  {isEnrollingPasskey ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Verifying with Windows Hello...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Fingerprint className="w-3.5 h-3.5 text-purple-300" />
+                      <span>Register Windows Hello</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

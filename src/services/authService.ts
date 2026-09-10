@@ -239,12 +239,12 @@ class AuthService {
   }
 
   /**
-   * Register biometric passkey on current device
+   * Register biometric passkey on current device (Windows Hello / Face ID / Touch ID)
    */
   public async registerPasskey(userId: string, email: string, name: string): Promise<{ success: boolean; error: string | null }> {
     const isSupported = await this.isPasskeySupported();
     if (!isSupported) {
-      return { success: false, error: 'Biometric passkeys (Face ID / Windows Hello) are not supported on this device or browser.' };
+      return { success: false, error: 'Biometric passkeys (Windows Hello / Face ID) are not supported on this device or browser.' };
     }
 
     try {
@@ -272,6 +272,7 @@ class AuthService {
           authenticatorSelection: {
             authenticatorAttachment: 'platform',
             userVerification: 'preferred',
+            residentKey: 'preferred',
             requireResidentKey: false
           },
           timeout: 60000,
@@ -280,7 +281,7 @@ class AuthService {
       })) as PublicKeyCredential | null;
 
       if (!credential) {
-        return { success: false, error: 'Passkey registration was canceled or timed out.' };
+        return { success: false, error: 'Windows Hello / Passkey registration was canceled or timed out.' };
       }
 
       // Convert credential ID to Base64
@@ -288,45 +289,47 @@ class AuthService {
 
       // Save locally for quick device verification
       const existing = this.getLocalCredentials();
-      existing.push({
+      const filtered = existing.filter((c) => c.userId !== userId && c.email !== email);
+      filtered.push({
         userId,
         email,
         credentialId: rawId,
         registeredAt: new Date().toISOString()
       });
-      localStorage.setItem(WEBAUTHN_LOCAL_CREDENTIALS, JSON.stringify(existing));
+      localStorage.setItem(WEBAUTHN_LOCAL_CREDENTIALS, JSON.stringify(filtered));
 
       // Also persist to Supabase if configured
       const client = getSupabaseClient();
       if (client) {
-        await client.from('webauthn_credentials').insert({
-          user_id: userId,
-          credential_id: rawId,
-          public_key: rawId,
-          device_name: navigator.userAgent.includes('Windows') ? 'Windows Hello' : navigator.userAgent.includes('Mac') ? 'Touch ID / Face ID' : 'Platform Authenticator'
-        });
+        try {
+          await client.from('webauthn_credentials').insert({
+            user_id: userId,
+            credential_id: rawId,
+            public_key: rawId,
+            device_name: navigator.userAgent.includes('Windows') ? 'Windows Hello' : navigator.userAgent.includes('Mac') ? 'Touch ID / Face ID' : 'Platform Authenticator'
+          });
+        } catch (e) {
+          console.warn('Could not persist passkey to Supabase table:', e);
+        }
       }
 
       return { success: true, error: null };
     } catch (err: unknown) {
       const e = err as Error;
-      return { success: false, error: e.message || 'Failed to register biometric passkey.' };
+      return { success: false, error: e.message || 'Failed to register Windows Hello passkey.' };
     }
   }
 
   /**
-   * Unlock with Face / Biometric Passkey
+   * Unlock with Windows Hello / Face / Fingerprint / Passkey
    */
-  public async authenticateWithPasskey(): Promise<{ success: boolean; user?: AuthUser; error: string | null }> {
+  public async authenticateWithPasskey(): Promise<{ success: boolean; user?: AuthUser; isFirstTime?: boolean; error: string | null }> {
     const isSupported = await this.isPasskeySupported();
     if (!isSupported) {
-      return { success: false, error: 'Biometric unlock is not supported on this browser.' };
+      return { success: false, error: 'Biometric passkey unlock is not supported on this browser.' };
     }
 
     const localCreds = this.getLocalCredentials();
-    if (localCreds.length === 0) {
-      return { success: false, error: 'No biometric passkey registered on this device yet. Please log in with password first to enable biometric unlock.' };
-    }
 
     try {
       const challenge = new Uint8Array(32);
@@ -340,34 +343,62 @@ class AuthService {
         };
       });
 
-      const assertion = (await navigator.credentials.get({
+      // If local credentials exist, provide them. Otherwise attempt resident key discovery.
+      const getOptions: CredentialRequestOptions = {
         publicKey: {
           challenge,
-          allowCredentials,
+          ...(allowCredentials.length > 0 ? { allowCredentials } : {}),
           userVerification: 'preferred',
           timeout: 60000,
           rpId: window.location.hostname
         }
-      })) as PublicKeyCredential | null;
+      };
+
+      const assertion = (await navigator.credentials.get(getOptions)) as PublicKeyCredential | null;
 
       if (!assertion) {
-        return { success: false, error: 'Biometric authentication was canceled.' };
+        return { success: false, error: 'Windows Hello verification was canceled.' };
       }
 
       const verifiedId = btoa(String.fromCharCode(...new Uint8Array(assertion.rawId)));
       const matched = localCreds.find((c) => c.credentialId === verifiedId) || localCreds[0];
 
+      if (matched) {
+        return {
+          success: true,
+          user: {
+            id: matched.userId,
+            email: matched.email
+          },
+          error: null
+        };
+      }
+
+      // If resident key provided a user handle
+      const res = assertion.response as AuthenticatorAssertionResponse;
+      let userId = '';
+      if (res.userHandle && res.userHandle.byteLength > 0) {
+        userId = new TextDecoder().decode(res.userHandle);
+      }
+
       return {
         success: true,
         user: {
-          id: matched.userId,
-          email: matched.email
+          id: userId || 'hello-user',
+          email: 'scholar@mindbridge.edu'
         },
         error: null
       };
     } catch (err: unknown) {
       const e = err as Error;
-      return { success: false, error: e.message || 'Biometric verification failed.' };
+      if (localCreds.length === 0) {
+        return {
+          success: false,
+          isFirstTime: true,
+          error: 'No Windows Hello passkey found on this device yet. Click to register your Windows Hello credential.'
+        };
+      }
+      return { success: false, error: e.message || 'Windows Hello verification failed.' };
     }
   }
 

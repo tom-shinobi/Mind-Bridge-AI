@@ -108,8 +108,13 @@ export function App() {
         setSyllabus(userSyllabus);
         storageService.saveSyllabus(userSyllabus);
         setNeedsSyllabusUpload(false);
-      } else if (p && p.onboardingCompleted && !p.syllabusUploaded) {
-        setNeedsSyllabusUpload(true);
+      } else {
+        const localSyl = storageService.getSyllabus();
+        if (localSyl && localSyl.length > 0) {
+          setSyllabus(localSyl);
+        }
+        // Do not force syllabus upload on routine load; allow user to enter dashboard
+        setNeedsSyllabusUpload(false);
       }
 
       if (userGaps.length > 0) {
@@ -190,9 +195,11 @@ export function App() {
     setAuthUser(user);
     setIsDemoMode(false);
     localStorage.setItem('mba_demo_mode', 'false');
+    setNeedsSyllabusUpload(false);
 
+    const localProfile = storageService.getProfile();
     const existing = await supabaseDataService.getProfile(user.id);
-    const p: StudentProfile = existing || {
+    const p: StudentProfile = existing || (localProfile && (localProfile.id === user.id || localProfile.email === user.email) ? localProfile : null) || {
       id: user.id,
       name: user.name || 'Scholar',
       email: user.email,
@@ -205,10 +212,16 @@ export function App() {
       totalXp: 100,
       level: 1,
       joinedDate: new Date().toISOString().slice(0, 10),
-      onboardingCompleted: false,
-      onboardingStep: 0,
-      syllabusUploaded: false
+      onboardingCompleted: true,
+      onboardingStep: 12,
+      syllabusUploaded: true
     };
+
+    // Ensure onboarding and syllabus flags are preserved for logged in users
+    if (existing?.onboardingCompleted || localProfile?.onboardingCompleted) {
+      p.onboardingCompleted = true;
+      p.syllabusUploaded = true;
+    }
 
     if (!existing) {
       await supabaseDataService.saveProfile(p);
@@ -466,6 +479,10 @@ export function App() {
               explanationStyle: profile.memorySummary?.learningStyle || 'Conceptual'
             }}
             onComplete={handleSyllabusComplete}
+            onSkip={() => {
+              setNeedsSyllabusUpload(false);
+              setActiveTab('dashboard');
+            }}
           />
         </div>
       </div>

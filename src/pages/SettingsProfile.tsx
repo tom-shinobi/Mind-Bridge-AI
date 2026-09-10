@@ -86,7 +86,6 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
   // Face ID Biometric State
   const [isFaceScannerOpen, setIsFaceScannerOpen] = useState(false);
   const [faceIdInfo, setFaceIdInfo] = useState(() => authService.getEnrolledFaceInfo(profile.email || profile.id));
-  const [requireFaceOnLogin, setRequireFaceOnLogin] = useState(() => authService.isFaceVerificationRequiredOnLogin());
   const [faceIdStatus, setFaceIdStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Account / Reset Password State
@@ -693,21 +692,97 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
 
       {/* Passkey Biometrics & Account Management */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Apple Face ID (Server-Verified) Card */}
+        {/* Biometric & Device Passkeys Card (Windows Hello / Platform Biometrics) */}
+        <div className="apple-liquid-glass p-6 space-y-4">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-white/[0.08]">
+            <Fingerprint className="w-5 h-5 text-purple-400" />
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono">
+                  Windows Hello & Passkeys
+                </h3>
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  Native Platform
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Unlock MindBridge instantly using Windows Hello (IR Face, Fingerprint, or PIN) or Apple Touch ID.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3.5 text-xs">
+            {/* Status */}
+            <div className="p-3.5 rounded-2xl liquid-glass-block flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isPasskeyEnrolled ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-slate-400'}`}>
+                  <Fingerprint className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white">
+                    {isPasskeyEnrolled ? 'Windows Hello Passkey Active' : 'No Passkey Enrolled'}
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    {isPasskeyEnrolled
+                      ? 'This device is enrolled for 1-click Windows Hello login.'
+                      : 'Enroll this device for instant biometric sign-in without passwords.'}
+                  </p>
+                </div>
+              </div>
+              <span className={`text-[10px] px-2.5 py-1 rounded-full font-mono border ${isPasskeyEnrolled ? 'liquid-glass-emerald text-emerald-300 border-emerald-500/40' : 'bg-slate-800/60 text-slate-400 border-slate-700'}`}>
+                {isPasskeyEnrolled ? 'ENROLLED' : 'NOT SET'}
+              </span>
+            </div>
+
+            {passkeyStatus && (
+              <div className={`p-3 rounded-xl text-xs flex items-center gap-2 border ${passkeyStatus.type === 'success' ? 'liquid-glass-emerald border-emerald-500/40 text-emerald-200' : 'liquid-glass-danger border-rose-500/40 text-rose-200'}`}>
+                {passkeyStatus.type === 'success' ? <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />}
+                <span>{passkeyStatus.message}</span>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleRegisterPasskey}
+              disabled={passkeyLoading || !isPasskeySupported}
+              className="w-full py-2.5 px-4 rounded-xl btn-apple-primary text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+            >
+              {passkeyLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-purple-300" />
+              ) : (
+                <Fingerprint className="w-4 h-4 text-purple-300" />
+              )}
+              <span>{isPasskeyEnrolled ? 'Re-enroll Windows Hello / Passkey' : 'Register Windows Hello on this PC'}</span>
+            </button>
+
+            {/* Zero Biometric Storage Explainer */}
+            <div className="p-3.5 rounded-2xl liquid-glass-block space-y-1 text-[11px] text-slate-400">
+              <div className="flex items-center gap-1.5 font-semibold text-slate-300">
+                <Shield className="w-3.5 h-3.5 text-purple-400" />
+                <span>Zero Biometric Storage Guarantee</span>
+              </div>
+              <p className="leading-relaxed">
+                MindBridge AI never touches, records, or stores your face images, embeddings, or fingerprints. Biometric authentication is handled securely by your Windows Hello TPM hardware chip (W3C WebAuthn standard).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Optical Face ID Card (Secondary / Experimental) */}
         <div className="apple-liquid-glass p-6 space-y-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-white/[0.08]">
             <ScanFace className="w-5 h-5 text-cyan-400" />
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono">
-                  Apple Face ID
+                  Optical Face ID (Experimental)
                 </h3>
                 <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                  Server-Verified
+                  Webcam Optical
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">
-                Unlock MindBridge AI with real-time camera face verification authenticated by server.
+                Webcam face contour recognition analyzed in browser memory.
               </p>
             </div>
           </div>
@@ -721,41 +796,18 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
                 </div>
                 <div>
                   <p className="font-semibold text-white">
-                    {faceIdInfo.isEnrolled ? 'Face ID Enrolled on Server' : 'No Face ID Enrolled'}
+                    {faceIdInfo.isEnrolled ? 'Optical Face ID Enrolled' : 'No Face ID Enrolled'}
                   </p>
                   <p className="text-[11px] text-slate-400">
                     {faceIdInfo.isEnrolled
                       ? `Active • Verified ${faceIdInfo.verificationCount || 0} times • ${faceIdInfo.deviceName || 'Camera Sensor'}`
-                      : 'Enroll your face to enable 1-tap optical Face ID login.'}
+                      : 'Enroll webcam face geometry if your device lacks Windows Hello.'}
                   </p>
                 </div>
               </div>
               <span className={`text-[10px] px-2.5 py-1 rounded-full font-mono border ${faceIdInfo.isEnrolled ? 'liquid-glass-emerald text-emerald-300 border-emerald-500/40' : 'bg-slate-800/60 text-slate-400 border-slate-700'}`}>
                 {faceIdInfo.isEnrolled ? 'ENROLLED' : 'NOT SET'}
               </span>
-            </div>
-
-            {/* Optional 2-Step Requirement Toggle */}
-            <div className="p-3.5 rounded-2xl liquid-glass-block flex items-center justify-between">
-              <div className="space-y-0.5 pr-2">
-                <p className="font-semibold text-white">Require Face ID on Login</p>
-                <p className="text-[11px] text-slate-400">
-                  Mandate secondary server Face ID verification after password check (2-Step).
-                </p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={requireFaceOnLogin}
-                  onChange={(e) => {
-                    sound.playClick();
-                    setRequireFaceOnLogin(e.target.checked);
-                    authService.setFaceVerificationRequiredOnLogin(e.target.checked);
-                  }}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-              </label>
             </div>
 
             {faceIdStatus && (
@@ -773,10 +825,10 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
                   sound.playClick();
                   setIsFaceScannerOpen(true);
                 }}
-                className="flex-1 py-2.5 px-4 rounded-xl btn-apple-primary text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+                className="flex-1 py-2.5 px-4 rounded-xl btn-apple-glass text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <ScanFace className="w-4 h-4 text-cyan-300" />
-                <span>{faceIdInfo.isEnrolled ? 'Re-calibrate Face ID' : 'Enroll Face ID (5s)'}</span>
+                <span>{faceIdInfo.isEnrolled ? 'Re-calibrate Face ID' : 'Calibrate Webcam Face ID'}</span>
               </button>
 
               {faceIdInfo.isEnrolled && (
@@ -796,81 +848,10 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
             <div className="p-3.5 rounded-2xl liquid-glass-block space-y-1 text-[11px] text-slate-400">
               <div className="flex items-center gap-1.5 font-semibold text-slate-300">
                 <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Server-Verified Biometrics</span>
+                <span>Camera Privacy Assurance</span>
               </div>
               <p className="leading-relaxed">
-                Live camera frames are analyzed in temporary memory. Only a normalized mathematical geometry vector (SHA-256 signed) is verified against the server table <code>user_face_credentials</code>.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Biometric & Device Passkeys Card */}
-        <div className="apple-liquid-glass p-6 space-y-4">
-          <div className="flex items-center gap-2.5 pb-3 border-b border-white/[0.08]">
-            <Fingerprint className="w-5 h-5 text-purple-400" />
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono">
-                Biometric & Passkey Authentication
-              </h3>
-              <p className="text-[11px] text-slate-400">
-                Unlock MindBridge instantly using device biometric sensors.
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-3.5 text-xs">
-            {/* Status */}
-            <div className="p-3.5 rounded-2xl liquid-glass-block flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isPasskeyEnrolled ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-slate-400'}`}>
-                  <Fingerprint className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="font-semibold text-white">
-                    {isPasskeyEnrolled ? 'Biometric Passkey Active' : 'No Passkey Enrolled'}
-                  </p>
-                  <p className="text-[11px] text-slate-400">
-                    {isPasskeyEnrolled
-                      ? 'This device is verified for Face ID / Windows Hello login.'
-                      : 'Enroll this device for 1-click biometric sign-in.'}
-                  </p>
-                </div>
-              </div>
-              <span className={`text-[10px] px-2.5 py-1 rounded-full font-mono border ${isPasskeyEnrolled ? 'liquid-glass-emerald text-emerald-300 border-emerald-500/40' : 'bg-slate-800/60 text-slate-400 border-slate-700'}`}>
-                {isPasskeyEnrolled ? 'ENROLLED' : 'DISABLED'}
-              </span>
-            </div>
-
-            {passkeyStatus && (
-              <div className={`p-3 rounded-xl text-xs flex items-center gap-2 border ${passkeyStatus.type === 'success' ? 'liquid-glass-emerald border-emerald-500/40 text-emerald-200' : 'liquid-glass-danger border-rose-500/40 text-rose-200'}`}>
-                {passkeyStatus.type === 'success' ? <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />}
-                <span>{passkeyStatus.message}</span>
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={handleRegisterPasskey}
-              disabled={passkeyLoading || !isPasskeySupported}
-              className="w-full py-2.5 px-4 rounded-xl btn-apple-primary text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
-            >
-              {passkeyLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-purple-300" />
-              ) : (
-                <Fingerprint className="w-4 h-4 text-purple-300" />
-              )}
-              <span>{isPasskeyEnrolled ? 'Re-enroll This Device (Passkey)' : 'Register This Device (Face ID / Windows Hello)'}</span>
-            </button>
-
-            {/* Zero Biometric Storage Explainer */}
-            <div className="p-3.5 rounded-2xl liquid-glass-block space-y-1 text-[11px] text-slate-400">
-              <div className="flex items-center gap-1.5 font-semibold text-slate-300">
-                <Shield className="w-3.5 h-3.5 text-purple-400" />
-                <span>Zero Biometric Storage Guarantee</span>
-              </div>
-              <p className="leading-relaxed">
-                MindBridge AI never touches, records, or stores your face images, embeddings, or fingerprints. Biometric authentication is handled exclusively by your hardware device (W3C WebAuthn standard).
+                Optical camera frames are processed in temporary browser memory. Only normalized geometry points (SHA-256 signed) are saved.
               </p>
             </div>
           </div>
