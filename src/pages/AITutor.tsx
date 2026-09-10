@@ -53,11 +53,19 @@ export const AITutor: React.FC<AITutorProps> = ({
     { label: '🧪 Socratic Challenge', prompt: 'Give me a challenging conceptual problem on this topic to test my edge-case understanding.' }
   ];
 
+  const chatScrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom of messages
+  // Auto-scroll directly inside the chat window container
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTo({
+        top: chatScrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
@@ -400,7 +408,7 @@ export const AITutor: React.FC<AITutorProps> = ({
   // 1. Fullscreen Overlay Mode
   if (isFullscreen) {
     return (
-      <div className="fixed inset-0 z-50 bg-[#030712]/95 backdrop-blur-3xl flex flex-col p-3 sm:p-5 lg:p-6 overflow-hidden animate-fade-in font-body">
+      <div className="fixed inset-0 z-50 bg-[#030712]/95 backdrop-blur-3xl flex flex-col p-3 sm:p-5 overflow-hidden animate-fade-in font-body">
         {/* Optical Chromatic Fluid Silk Ribbons Canvas */}
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-40">
           <div className="chromatic-ribbon-purple -top-[120px] left-[15%]" />
@@ -511,14 +519,20 @@ export const AITutor: React.FC<AITutorProps> = ({
           </div>
         </div>
 
-        {/* Fullscreen Chat Messages Scroll Area */}
-        <div className="flex-1 w-full overflow-y-auto relative z-10 p-4 sm:p-6 space-y-4 max-w-5xl mx-auto min-h-0 apple-liquid-glass rounded-2xl shadow-inner">
-          {renderMessagesList()}
-        </div>
+        {/* Fullscreen Chat Console Frame with Dedicated Scrollable Messages Area */}
+        <div className="apple-liquid-glass flex-1 min-h-0 flex flex-col max-w-5xl w-full mx-auto relative overflow-hidden shadow-2xl">
+          {/* Scrollable Messages Container */}
+          <div
+            ref={chatScrollRef}
+            className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-4 custom-scrollbar"
+          >
+            {renderMessagesList()}
+          </div>
 
-        {/* Fullscreen Bottom Input Dock */}
-        <div className="relative z-10 pt-3 max-w-5xl w-full mx-auto flex-shrink-0">
-          {renderBottomControls()}
+          {/* Fullscreen Bottom Input Dock Pinned Inside Console Card */}
+          <div className="p-3 sm:p-4 border-t border-white/[0.08] bg-black/40 backdrop-blur-xl flex-shrink-0">
+            {renderBottomControls()}
+          </div>
         </div>
       </div>
     );
@@ -672,27 +686,42 @@ export const AITutor: React.FC<AITutorProps> = ({
 
       </div>
 
-      {/* Chat Conversation Scroll Area - Tall & Spacious */}
-      <div className="apple-liquid-glass p-4 sm:p-6 h-[calc(100vh-16rem)] min-h-[600px] max-h-[850px] overflow-y-auto space-y-4 shadow-xl">
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] text-xs font-mono text-slate-400">
-          <span>Topic Scope: <strong className="text-white">{selectedTopic}</strong></span>
+      {/* Embedded Chat Console Card with Fixed Viewport Height & Independent Internal Scrolling */}
+      <div className="apple-liquid-glass h-[680px] lg:h-[750px] flex flex-col relative overflow-hidden shadow-2xl">
+        {/* Console Header Bar */}
+        <div className="px-4 py-3 border-b border-white/[0.08] flex items-center justify-between flex-shrink-0 bg-black/25 backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            <Bot className="w-4 h-4 text-purple-400" />
+            <span className="text-xs font-mono text-slate-300">
+              Topic Scope: <strong className="text-white font-bold">{selectedTopic}</strong>
+            </span>
+          </div>
           <button
             onClick={() => {
               sound.playClick();
               setIsFullscreen(true);
             }}
             className="btn-apple-glass py-1 px-3 text-[11px] flex items-center gap-1.5 text-cyan-300 hover:text-white"
+            title="Open Fullscreen (Esc to exit)"
           >
             <Maximize2 className="w-3 h-3" />
             <span>Fullscreen Mode</span>
           </button>
         </div>
 
-        {renderMessagesList()}
-      </div>
+        {/* Scrollable Messages Container */}
+        <div
+          ref={chatScrollRef}
+          className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-4 custom-scrollbar"
+        >
+          {renderMessagesList()}
+        </div>
 
-      {/* Bottom Controls */}
-      {renderBottomControls()}
+        {/* Pinned Bottom Controls inside the Console Card */}
+        <div className="p-3 sm:p-4 border-t border-white/[0.08] bg-black/40 backdrop-blur-xl flex-shrink-0 space-y-2.5">
+          {renderBottomControls()}
+        </div>
+      </div>
 
     </div>
   );

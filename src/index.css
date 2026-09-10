@@ -146,6 +146,11 @@
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.apple-liquid-glass.scrollable,
+.apple-liquid-glass.allow-scroll {
+  overflow: auto !important;
+}
+
 .apple-liquid-glass:hover,
 .sea-glass-card:hover,
 .liquid-glass-card:hover {
@@ -1113,5 +1118,34 @@
 
 .markdown-content .katex-html {
   white-space: normal;
+}
+
+/* Custom Apple Liquid Glass Scrollbar */
+.custom-scrollbar {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.28) rgba(0, 0, 0, 0.25);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 9999px;
+  margin: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45);
 }
 
