@@ -148,7 +148,14 @@ YOUR INSTRUCTIONS:
      * "correctAnswer": The exact text of the correct choice from the options array.
      * "explanation": Why that choice is correct.
 
-4. OUTPUT FORMAT:
+4. MATHEMATICAL & MARKDOWN FORMATTING:
+   - ALWAYS format mathematical expressions, time complexities, asymptotic notations, and formulas in standard LaTeX math notation:
+     * Inline math with single dollar signs: $O(\log n)$, $O(\log_2 N)$, $\lceil t/2 \rceil$, $t - 1$, $O(N)$, $O(1)$.
+     * Display math with double dollar signs: $$...$$ for standalone formulas.
+   - Use bold markdown asterisks (**term**) for core definitions and vital takeaways.
+   - Use markdown headings (## and ###), structured bullet points (- ), and fenced code blocks for tree/code visualizations.
+
+5. OUTPUT FORMAT:
    You MUST return a valid JSON object matching this schema:
    {
      "message": "Your markdown-formatted answer, feedback, or explanation to the student.",

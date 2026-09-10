@@ -20,6 +20,7 @@ import type {
 import { adaptiveEngine } from '../services/adaptiveEngine';
 import { aiService } from '../services/aiService';
 import { sound } from '../services/soundService';
+import { FormattedContent } from '../components/FormattedContent';
 
 interface PersonalizedTestsProps {
   tests: Test[];
@@ -313,7 +314,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
                             <span className="font-mono text-[10px] font-bold">
                               {String.fromCharCode(65 + optIdx)}.
                             </span>
-                            <span>{opt}</span>
+                            <FormattedContent content={opt} className="inline text-xs" />
                           </div>
                           {isCorrectChoice && (
                             <span className="text-[10px] font-mono text-emerald-400 uppercase font-bold">
@@ -327,7 +328,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
 
                   <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-xs text-slate-300 leading-relaxed">
                     <strong className="text-purple-300 font-mono">Pedagogical Rationale: </strong>
-                    {q.explanation}
+                    <FormattedContent content={q.explanation} className="inline text-xs" />
                   </div>
                 </div>
               );
@@ -378,10 +379,11 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
             </span>
           </div>
 
-          {/* Question Text */}
-          <h4 className="text-base sm:text-lg font-bold text-white leading-relaxed">
-            {q.questionText}
-          </h4>
+          {/* Question Text (LaTeX & Markdown Formatted) */}
+          <FormattedContent
+            content={q.questionText}
+            className="text-base sm:text-lg font-bold text-white leading-relaxed"
+          />
 
           {/* Code Snippet if any */}
           {q.codeSnippet && (
@@ -415,7 +417,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
                   >
                     {String.fromCharCode(65 + optIdx)}
                   </span>
-                  <span className="leading-snug">{opt}</span>
+                  <FormattedContent content={opt} className="leading-snug inline text-xs sm:text-sm" />
                 </button>
               );
             })}

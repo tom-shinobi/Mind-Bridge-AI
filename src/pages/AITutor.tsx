@@ -17,6 +17,7 @@ import { aiService } from '../services/aiService';
 import { storageService } from '../services/storageService';
 import { sound } from '../services/soundService';
 import { RotaryKnob } from '../components/hardware/RotaryKnob';
+import { FormattedContent } from '../components/FormattedContent';
 
 interface AITutorProps {
   initialTopic?: string;
@@ -356,10 +357,8 @@ export const AITutor: React.FC<AITutorProps> = ({
                   <span>{msg.timestamp}</span>
                 </div>
 
-                {/* Body Text */}
-                <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-line">
-                  {msg.text}
-                </div>
+                {/* Body Text (Markdown & LaTeX Math Formatted) */}
+                <FormattedContent content={msg.text} />
 
                 {/* Embedded Socratic Concept Check Question */}
                 {isAi && msg.conceptCheck && (
@@ -390,9 +389,10 @@ export const AITutor: React.FC<AITutorProps> = ({
                       )}
                     </div>
 
-                    <p className="text-xs font-semibold text-white">
-                      {msg.conceptCheck.question}
-                    </p>
+                    <FormattedContent
+                      content={msg.conceptCheck.question}
+                      className="text-xs font-semibold text-white"
+                    />
 
                     {/* Options */}
                     {msg.conceptCheck.options && (
@@ -426,7 +426,7 @@ export const AITutor: React.FC<AITutorProps> = ({
                               <span className="w-5 h-5 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center font-mono font-bold text-[10px] flex-shrink-0 mt-0.5">
                                 {String.fromCharCode(65 + optIdx)}
                               </span>
-                              <span>{opt}</span>
+                              <FormattedContent content={opt} className="inline text-xs" />
                             </button>
                           );
                         })}
@@ -437,7 +437,7 @@ export const AITutor: React.FC<AITutorProps> = ({
                     {msg.conceptCheck.studentAnswer && msg.conceptCheck.explanation && (
                       <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 text-[11px] text-slate-300 leading-relaxed">
                         <strong className="text-purple-300 font-mono">Why: </strong>
-                        {msg.conceptCheck.explanation}
+                        <FormattedContent content={msg.conceptCheck.explanation} className="inline text-[11px]" />
                       </div>
                     )}
                   </div>
