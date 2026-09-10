@@ -544,7 +544,7 @@ export const initialAuditLog: AdaptiveAuditEntry[] = [
 export const initialAISettings: AISettings = {
   provider: 'openrouter',
   openRouterApiKey: (import.meta as unknown as { env?: { VITE_OPENROUTER_API_KEY?: string } }).env?.VITE_OPENROUTER_API_KEY || '',
-  model: 'google/gemini-2.0-flash-001',
+  model: 'liquid/lfm-2.5-2.6b:free',
   speechEnabled: true,
   soundFxEnabled: true
 };

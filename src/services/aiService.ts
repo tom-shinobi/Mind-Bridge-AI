@@ -8,7 +8,7 @@ export interface TutorResponse {
     options?: string[];
     correctAnswer?: string;
     explanation?: string;
-  };
+  } | null;
   masteryDelta?: number; // e.g. +5% or +10%
 }
 
@@ -22,8 +22,11 @@ class AIService {
 
     try {
       window.speechSynthesis.cancel();
-      // Clean markdown stars and backticks for smoother speech
-      const cleanText = text.replace(/[*_`#]/g, '').slice(0, 280);
+      // Clean markdown stars, backticks, and math symbols for smoother speech
+      const cleanText = text
+        .replace(/[*_`#]/g, '')
+        .replace(/\$[^$]*\$/g, 'the mathematical expression')
+        .slice(0, 260);
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.rate = 1.05;
       utterance.pitch = 1.0;
@@ -34,7 +37,78 @@ class AIService {
   }
 
   /**
-   * Generates a Socratic tutoring turn for a given subject and topic.
+   * Compiles the student's full profile, marks, learning gaps, timetable,
+   * and syllabus into an authoritative context block for the LLM.
+   */
+  public getStudentContext(): string {
+    try {
+      const profile = storageService.getProfile();
+      const records = storageService.getAcademicRecords();
+      const gaps = storageService.getLearningGaps();
+      const syllabus = storageService.getSyllabus();
+      const timetable = storageService.getTimetable();
+      const studySeconds = storageService.getTodayStudySeconds();
+      const checkIns = storageService.getDailyCheckIns();
+      const latestCheckIn = checkIns[checkIns.length - 1];
+      const workloadState = latestCheckIn ? `${latestCheckIn.workloadLevel} (stress rating ${latestCheckIn.stressRating}/5)` : 'balanced';
+
+      const activeGaps = gaps
+        .filter((g) => g.status !== 'resolved')
+        .map(
+          (g) =>
+            `- [${g.severity.toUpperCase()} GAP] Topic: "${g.topic}" (${g.subject}) | Current Mastery: ${g.masteryScore}% | Recommended Remediation: ${g.recommendedHours} hrs | Root Cause: ${g.rootCause}`
+        )
+        .join('\n');
+
+      const recentMarks = records
+        .slice(0, 6)
+        .map(
+          (r) =>
+            `- ${r.subjectName} (${r.subjectCode}): ${r.examType} = ${r.score}/${r.totalMarks} (${r.percentage}%, Grade: ${r.grade})`
+        )
+        .join('\n');
+
+      const todaySchedule = timetable
+        .map(
+          (t) =>
+            `- ${t.dayOfWeek} [${t.startTime} - ${t.endTime}] | ${t.subject}: ${t.topic} | Type: ${t.blockType} | Status: ${t.completed ? 'COMPLETED' : 'PENDING'}`
+        )
+        .join('\n');
+
+      const weakTopics = syllabus
+        .filter((s) => s.status === 'pending' || s.masteryPercentage < 50)
+        .map((s) => `- ${s.subject} (${s.moduleName}): ${s.topic} (${s.masteryPercentage}% mastery, status: ${s.status})`)
+        .join('\n');
+
+      return `=== AUTHENTICATED STUDENT USER DATA ===
+STUDENT NAME: ${profile.name}
+DEGREE & PROGRAM: ${profile.degree} (Semester ${profile.semester})
+DEPARTMENT: ${profile.department}
+ACADEMIC STANDING: Current CGPA ${profile.cgpa}/10.0 | Target CGPA: ${profile.targetCgpa}/10.0
+ENGAGEMENT: Level ${profile.level}, ${profile.totalXp} XP, ${profile.streakDays}-Day Consistent Streak
+COGNITIVE WORKLOAD STATE: ${workloadState}
+TOTAL TIME STUDIED TODAY: ${Math.round(studySeconds / 60)} minutes
+
+OFFICIAL ACADEMIC EXAM MARKS:
+${recentMarks || 'No exam records logged'}
+
+CURRENT ACTIVE LEARNING GAPS (DIAGNOSED BY EVALUATION ENGINE):
+${activeGaps || 'No active learning gaps recorded'}
+
+TODAY'S ADAPTIVE TIMETABLE:
+${todaySchedule || 'No study blocks scheduled today'}
+
+FLAGGED SYLLABUS TOPICS REQUIRING ATTENTION:
+${weakTopics || 'All syllabus topics above 50%'}
+----------------------------------------`;
+    } catch (e) {
+      console.warn('Error reading student context for AI:', e);
+      return '';
+    }
+  }
+
+  /**
+   * Generates a personalized Socratic tutoring response with access to user data.
    */
   public async getTutorResponse(
     topic: string,
@@ -42,32 +116,54 @@ class AIService {
     userMessage: string
   ): Promise<TutorResponse> {
     const settings = storageService.getAISettings();
+    const studentContext = this.getStudentContext();
+    const activeModel = settings.model || 'liquid/lfm-2.5-2.6b:free';
 
     // Try OpenRouter if API key is provided
     if (settings.provider === 'openrouter' && settings.openRouterApiKey) {
       try {
-        const systemPrompt = `You are Mind Bridge AI, a personalized Socratic academic tutor.
-Your mission is to teach "${topic}" concisely, clearly, and interactively.
-Guidelines:
-1. Keep explanations under 3-4 sentences.
-2. After explaining a core intuition, ALWAYS ask ONE targeted conceptual check question to test if the student truly understands.
-3. If evaluating a student's answer, provide clear feedback (validate what is right, gently clarify misconceptions).
-4. Tone: Encouraging, razor-sharp, educational, respectful.
-Format your output as JSON:
-{
-  "message": "Your conversational explanation or feedback",
-  "conceptCheck": {
-    "question": "The question for the student",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "correctAnswer": "Option B",
-    "explanation": "Why Option B is correct"
-  },
-  "masteryDelta": 5
-}`;
+        const systemPrompt = `You are Mind Bridge AI, the personal AI academic tutor and learning assistant for the student described below.
+You have direct, authenticated access to the student's real academic record, exam marks, diagnosed learning gaps, personalized syllabus, and daily timetable.
+
+${studentContext}
+
+CURRENT SUBJECT / CONVERSATION SCOPE: "${topic}"
+
+YOUR INSTRUCTIONS:
+1. USER DATA AWARENESS:
+   - If the student asks about their grades, learning gaps, schedule, weak topics, or how to improve, cite their actual numbers (e.g. 8.42 CGPA, 38% mastery in B-Trees, 62% DBMS Midterm, today's schedule).
+   - Tailor all learning explanations and advice to their level (B.Tech CSE Semester 6) and visual/hands-on learning style.
+
+2. ACADEMIC TUTORING & EXPLANATIONS:
+   - When teaching or answering concept questions, provide deep yet crystal-clear, intuitive explanations.
+   - Use vivid analogies, step-by-step logic, and edge-case examples.
+   - Keep conversational explanations structured and engaging (under 300 words).
+
+3. INTERACTIVE SOCRATIC CONCEPT CHECK:
+   - When teaching or clarifying an academic topic, include a targeted multiple-choice question in "conceptCheck" to test if they truly grasp the concept.
+   - If the student is asking a general inquiry about their grades, gaps, timetable, or study strategy, set "conceptCheck" to null.
+   - For "conceptCheck", provide:
+     * "question": The targeted question.
+     * "options": Exactly 4 clear choices.
+     * "correctAnswer": The exact text of the correct choice from the options array.
+     * "explanation": Why that choice is correct.
+
+4. OUTPUT FORMAT:
+   You MUST return a valid JSON object matching this schema:
+   {
+     "message": "Your markdown-formatted answer, feedback, or explanation to the student.",
+     "conceptCheck": {
+       "question": "Question text",
+       "options": ["Option A", "Option B", "Option C", "Option D"],
+       "correctAnswer": "Option A",
+       "explanation": "Why Option A is correct"
+     } or null,
+     "masteryDelta": 5
+   }`;
 
         const messages = [
           { role: 'system', content: systemPrompt },
-          ...history.map((m) => ({
+          ...history.slice(-8).map((m) => ({
             role: m.sender === 'ai' ? 'assistant' : 'user',
             content: m.text
           })),
@@ -83,7 +179,7 @@ Format your output as JSON:
             'X-Title': 'Mind Bridge AI'
           },
           body: JSON.stringify({
-            model: settings.model || 'google/gemini-2.0-flash-001',
+            model: activeModel,
             messages,
             response_format: { type: 'json_object' }
           })
@@ -93,32 +189,105 @@ Format your output as JSON:
           const data = await response.json();
           const content = data.choices?.[0]?.message?.content;
           if (content) {
-            const parsed = JSON.parse(content);
-            if (parsed.message) {
-              this.speak(parsed.message);
-              return parsed;
+            // Strip markdown code fences if model enclosed JSON in ```json
+            let cleaned = content.trim();
+            if (cleaned.startsWith('```json')) {
+              cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+            } else if (cleaned.startsWith('```')) {
+              cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
+            }
+
+            try {
+              const parsed: TutorResponse = JSON.parse(cleaned);
+              if (parsed.message) {
+                this.speak(parsed.message);
+                return parsed;
+              }
+            } catch (jsonErr) {
+              console.warn('JSON parse error from LLM output, using raw text:', jsonErr);
+              this.speak(content);
+              return {
+                message: content,
+                conceptCheck: null,
+                masteryDelta: 5
+              };
             }
           }
+        } else {
+          const errBody = await response.text();
+          console.warn('OpenRouter API returned error status:', response.status, errBody);
         }
       } catch (err) {
-        console.warn('OpenRouter API call failed or timed out, using intelligent local engine:', err);
+        console.warn('OpenRouter API call error, falling back to local reasoning engine:', err);
       }
     }
 
-    // High-fidelity Local Socratic Reasoning Engine
+    // High-fidelity Local Socratic Reasoning Engine (with student context awareness)
     return this.getLocalTutorResponse(topic, userMessage, history.length);
   }
 
   private getLocalTutorResponse(topic: string, userMessage: string, turnCount: number): TutorResponse {
     const lowerTopic = topic.toLowerCase();
     const lowerUser = userMessage.toLowerCase();
+    const profile = storageService.getProfile();
+    const gaps = storageService.getLearningGaps();
+    const timetable = storageService.getTimetable();
+
+    // Student asks about gaps or performance
+    if (lowerUser.includes('gap') || lowerUser.includes('weak') || lowerUser.includes('mark') || lowerUser.includes('score') || lowerUser.includes('grade')) {
+      const activeGapsList = gaps.map((g) => `• **${g.topic}** (${g.subject}): ${g.masteryScore}% mastery [${g.severity.toUpperCase()} gap]`).join('\n');
+      const msg = `Hey ${profile.name}! Based on your authenticated academic records:
+
+**Current Standing:**
+• CGPA: **${profile.cgpa}/10.0** (Target: **${profile.targetCgpa}**)
+• Consistent **${profile.streakDays}-Day Study Streak** with **${profile.totalXp} XP** (Level ${profile.level})
+
+**Your Active Learning Gaps:**
+${activeGapsList}
+
+Your highest priority is **B-Trees & B+ Tree Indexing** in DBMS (38% mastery, 35% end-sem weight). Would you like to practice B-Tree node splitting or schedule a deep-focus block?`;
+      this.speak(msg);
+      return {
+        message: msg,
+        conceptCheck: {
+          question: "Which of your active learning gaps has the highest exam impact weighting?",
+          options: [
+            "B-Trees & B+ Tree Indexing (35% impact)",
+            "Dynamic Programming State Transitions (30% impact)",
+            "Virtual Memory Page Replacement (20% impact)",
+            "Computer Networks Framing"
+          ],
+          correctAnswer: "B-Trees & B+ Tree Indexing (35% impact)",
+          explanation: "B-Trees in DBMS represent a Critical severity gap with 35% weightage on your upcoming end-semester examinations."
+        },
+        masteryDelta: 5
+      };
+    }
+
+    // Student asks about timetable or schedule
+    if (lowerUser.includes('schedule') || lowerUser.includes('timetable') || lowerUser.includes('today') || lowerUser.includes('plan')) {
+      const scheduleList = timetable.map((t) => `• **${t.startTime} - ${t.endTime}**: ${t.subject} — *${t.topic}* (${t.completed ? '✅ Done' : '⏳ Pending'})`).join('\n');
+      const msg = `Here is your current adaptive schedule for **${profile.name}**:
+
+${scheduleList}
+
+Your study plan is dynamically balanced based on your cognitive workload state. Focus on the upcoming pending blocks to keep your **${profile.streakDays}-day streak** alive!`;
+      this.speak(msg);
+      return {
+        message: msg,
+        conceptCheck: null,
+        masteryDelta: 5
+      };
+    }
 
     // 1. DBMS: B-Trees & Indexing
     if (lowerTopic.includes('b-tree') || lowerTopic.includes('indexing') || lowerTopic.includes('dbms')) {
       if (turnCount <= 1) {
-        const msg = `Welcome! Let's conquer **B-Trees & B+ Trees**. In databases, disks read data in fixed-size blocks (pages). If we used binary search on disk, we would do $O(\\log_2 N)$ disk seeks—which is way too slow! 
-        
-A **B-Tree** solves this by having high fan-out: each node holds multiple keys and points to multiple children, reducing tree height to typically 3 or 4.`;
+        const msg = `Welcome ${profile.name}! Let's conquer **B-Trees & B+ Trees** (currently at ${gaps[0]?.masteryScore || 38}% mastery in your profile).
+
+In database storage engines, disks read blocks in 4KB/8KB pages. If we used binary search on disk, we would do $O(\\log_2 N)$ disk seeks—which takes tens of milliseconds! 
+
+A **B-Tree** solves this by having high fan-out: each node holds hundreds of keys and points to multiple child pages, reducing tree height to typically 3 or 4 levels.`;
         this.speak(msg);
         return {
           message: msg,
@@ -159,7 +328,7 @@ Now let's examine the **Node Splitting rule**: When a node reaches its capacity 
         };
       }
 
-      const msg = `Great effort. The key point to remember is that B-Trees are designed around disk block boundaries. Even with a million records, a B-Tree has a height of only 3 to 4 levels! Let's test your understanding of leaf node structure.`;
+      const msg = `Great effort, ${profile.name}. The key point to remember is that B-Trees are designed around disk block boundaries. Even with a million records, a B-Tree has a height of only 3 to 4 levels! Let's test your understanding of leaf node structure.`;
       this.speak(msg);
       return {
         message: msg,
@@ -179,7 +348,7 @@ Now let's examine the **Node Splitting rule**: When a node reaches its capacity 
     }
 
     // 2. DSA: Dynamic Programming
-    if (lowerTopic.includes('dynamic') || lowerTopic.includes('knapsack') || lowerTopic.includes('recurrence')) {
+    if (lowerTopic.includes('dynamic') || lowerTopic.includes('knapsack') || lowerTopic.includes('recurrence') || lowerTopic.includes('dp')) {
       const msg = `Let's break down **Dynamic Programming (DP)**! DP is all about two properties: **Overlapping Subproblems** and **Optimal Substructure**. Instead of re-solving identical subproblems exponentially, we store intermediate results in a table (memoization or tabulation).`;
       this.speak(msg);
       return {
@@ -221,19 +390,19 @@ Now let's examine the **Node Splitting rule**: When a node reaches its capacity 
     }
 
     // Default General Tutor
-    const msg = `Let's explore **${topic}**. What part of this topic feels most challenging to you right now? Is it the core definitions, the mathematical recurrence, or how it is implemented?`;
+    const msg = `Hello ${profile.name}! I'm ready to explore **${topic}** with you. With your visual & hands-on learning style, what part of this topic feels most challenging to you right now? Is it the core intuition, the mathematical formalisms, or implementing the code?`;
     this.speak(msg);
     return {
       message: msg,
       conceptCheck: {
-        question: `When analyzing ${topic}, what is the primary objective or invariant you must preserve?`,
+        question: `When analyzing "${topic}", what is the primary invariant or objective to optimize for?`,
         options: [
-          "Preserve correctness while minimizing time and space complexity.",
+          "Preserve correctness while minimizing asymptotic time and space complexity.",
           "Execute exclusively in kernel mode.",
           "Avoid using cache memory.",
-          "Hardcode all constants."
+          "Hardcode all runtime constants."
         ],
-        correctAnswer: "Preserve correctness while minimizing time and space complexity.",
+        correctAnswer: "Preserve correctness while minimizing asymptotic time and space complexity.",
         explanation: "Academic mastery focuses on maintaining system correctness and optimizing algorithmic resource constraints."
       },
       masteryDelta: 5

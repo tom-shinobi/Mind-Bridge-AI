@@ -137,7 +137,16 @@ class StorageService {
   }
 
   public getAISettings(): AISettings {
-    return this.load<AISettings>(STORAGE_KEYS.AI_SETTINGS, initialAISettings);
+    const loaded = this.load<AISettings>(STORAGE_KEYS.AI_SETTINGS, initialAISettings);
+    // Ensure model defaults to liquid/lfm-2.5-2.6b:free if set to older default
+    if (!loaded.model || loaded.model.includes('gemini') || loaded.model === 'default') {
+      loaded.model = 'liquid/lfm-2.5-2.6b:free';
+    }
+    const envKey = (import.meta as unknown as { env?: { VITE_OPENROUTER_API_KEY?: string } }).env?.VITE_OPENROUTER_API_KEY;
+    if (!loaded.openRouterApiKey && envKey) {
+      loaded.openRouterApiKey = envKey;
+    }
+    return loaded;
   }
 
   public saveAISettings(settings: AISettings): void {

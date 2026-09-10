@@ -8,10 +8,13 @@ import {
   XCircle,
   ArrowRight,
   Brain,
-  Layers
+  Layers,
+  Cpu,
+  Database
 } from 'lucide-react';
 import type { TutorMessage, LearningGap, SyllabusTopic } from '../types';
 import { aiService } from '../services/aiService';
+import { storageService } from '../services/storageService';
 import { sound } from '../services/soundService';
 import { RotaryKnob } from '../components/hardware/RotaryKnob';
 
@@ -34,6 +37,17 @@ export const AITutor: React.FC<AITutorProps> = ({
   const [inputVal, setInputVal] = useState<string>('');
   const [isThinking, setIsThinking] = useState<boolean>(false);
   const [masteryScore, setMasteryScore] = useState<number>(38); // Starts from initial gap score
+
+  const profile = storageService.getProfile();
+  const aiSettings = storageService.getAISettings();
+
+  const quickPrompts = [
+    { label: '🎯 Analyze My Gaps', prompt: 'Analyze my current learning gaps and tell me what my top priority is right now.' },
+    { label: '📅 Today\'s Timetable', prompt: 'What is on my study schedule today and how should I prioritize my study blocks?' },
+    { label: '💡 Explain B-Trees', prompt: 'Explain B-Trees and B+ Trees with an intuitive visual analogy.' },
+    { label: '📈 Roadmap to 9.0 CGPA', prompt: 'Given my current 8.42 CGPA and exam marks, what is my optimal roadmap to reach 9.0 CGPA?' },
+    { label: '🧪 Socratic Challenge', prompt: 'Give me a challenging conceptual problem on this topic to test my edge-case understanding.' }
+  ];
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -215,6 +229,9 @@ export const AITutor: React.FC<AITutorProps> = ({
                 }}
                 className="text-xs px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-slate-200 focus:outline-none focus:border-purple-500/50"
               >
+                <option value="General Academic Advisor & Learning Gaps">
+                  🎓 General Academic Advisor (All Gaps & Records)
+                </option>
                 <optgroup label="Active Learning Gaps">
                   {gaps.map((g) => (
                     <option key={g.id} value={g.topic}>
@@ -243,6 +260,27 @@ export const AITutor: React.FC<AITutorProps> = ({
             </button>
           </div>
 
+        </div>
+
+        {/* Hardware Status Banner: Live Model & Student Data Link */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mt-3.5 pt-3 border-t border-white/[0.08] text-[11px] font-mono">
+          <div className="flex items-center gap-2 bg-black/50 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-emerald-400 shadow-inner">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <Cpu className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="font-semibold uppercase tracking-wider">
+              AI Engine: {aiSettings.model || 'liquid/lfm-2.5-2.6b:free'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 bg-black/50 border border-purple-500/30 px-3 py-1.5 rounded-lg text-purple-300 shadow-inner">
+            <Database className="w-3.5 h-3.5 text-purple-400" />
+            <span className="font-medium">
+              Student Context Synced: <strong className="text-white">{profile.name}</strong> • CGPA <strong className="text-pink-400">{profile.cgpa}</strong> • <strong className="text-amber-400">{gaps.length} Active Gaps</strong>
+            </span>
+          </div>
         </div>
 
         {/* Live Mastery Gauge & Hardware Deck */}
@@ -425,6 +463,24 @@ export const AITutor: React.FC<AITutorProps> = ({
         )}
 
         <div ref={messagesEndRef} />
+      </div>
+
+      {/* Quick Interactive Prompt Chips */}
+      <div className="flex flex-wrap gap-2 items-center px-1">
+        <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-1">
+          <Sparkles className="w-3 h-3 text-pink-400" /> Quick Ask:
+        </span>
+        {quickPrompts.map((qp, idx) => (
+          <button
+            key={idx}
+            type="button"
+            disabled={isThinking}
+            onClick={() => handleSendMessage(qp.prompt)}
+            className="text-[11px] font-mono px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] hover:border-purple-500/40 border border-white/10 text-slate-300 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+          >
+            {qp.label}
+          </button>
+        ))}
       </div>
 
       {/* Input Bar */}

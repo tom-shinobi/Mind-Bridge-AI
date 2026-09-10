@@ -254,7 +254,8 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
                 onChange={(e) => setModel(e.target.value)}
                 className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs"
               >
-                <option value="google/gemini-2.0-flash-001">Google Gemini 2.0 Flash (Fast & Sharp)</option>
+                <option value="liquid/lfm-2.5-2.6b:free">LiquidAI: LFM 2.5 2.6B (Free - Recommended)</option>
+                <option value="google/gemini-2.0-flash-001">Google Gemini 2.0 Flash</option>
                 <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku</option>
                 <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B Instruct</option>
               </select>
