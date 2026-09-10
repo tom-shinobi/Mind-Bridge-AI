@@ -13,6 +13,7 @@ import {
 import type { TutorMessage, LearningGap, SyllabusTopic } from '../types';
 import { aiService } from '../services/aiService';
 import { sound } from '../services/soundService';
+import { RotaryKnob } from '../components/hardware/RotaryKnob';
 
 interface AITutorProps {
   initialTopic?: string;
@@ -244,25 +245,30 @@ export const AITutor: React.FC<AITutorProps> = ({
 
         </div>
 
-        {/* Live Mastery Gauge */}
-        <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs font-mono">
-            <Brain className="w-4 h-4 text-pink-400" />
-            <span className="text-slate-300">Live Understanding Gauge:</span>
-            <span className="font-bold text-white">{masteryScore}%</span>
-          </div>
-
-          <div className="w-1/2 max-w-xs bg-slate-800 rounded-full h-2 overflow-hidden relative">
-            <div
-              className={`h-full rounded-full transition-all duration-700 ${
-                masteryScore >= 75
-                  ? 'bg-emerald-500 shadow-[0_0_10px_#10B981]'
-                  : masteryScore >= 55
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500'
-                  : 'bg-orange-500'
-              }`}
-              style={{ width: `${masteryScore}%` }}
+        {/* Live Mastery Gauge & Hardware Deck */}
+        <div className="mt-4 pt-4 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-6">
+          
+          <div className="flex items-center gap-6">
+            <RotaryKnob
+              value={masteryScore}
+              min={0}
+              max={100}
+              size="md"
+              variant="dark"
+              label="UNDERSTANDING"
+              subLabel={`${masteryScore}% Calibrated`}
+              onChange={(val) => setMasteryScore(val)}
             />
+
+            <div className="space-y-1 max-w-xs">
+              <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
+                <Brain className="w-4 h-4 text-purple-400" />
+                <span className="font-bold uppercase tracking-wider">Concept Comprehension Gauge</span>
+              </div>
+              <p className="text-[11px] text-slate-400 font-mono leading-relaxed">
+                Rises autonomously as you answer Socratic comprehension checks correctly.
+              </p>
+            </div>
           </div>
 
           {masteryScore >= 65 && (
@@ -271,10 +277,10 @@ export const AITutor: React.FC<AITutorProps> = ({
                 sound.playClick();
                 onNavigate('tests', { topic: selectedTopic });
               }}
-              className="btn-skeuo-orange py-1 px-3 text-[11px] font-semibold flex items-center gap-1.5"
+              className="btn-skeuo-orange py-2 px-4 text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg"
             >
-              <span>Ready for Test</span>
-              <ArrowRight className="w-3 h-3" />
+              <span>Verify Retention in Test</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           )}
         </div>

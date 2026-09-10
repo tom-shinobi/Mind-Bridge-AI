@@ -13,6 +13,9 @@ import {
 import type { WorkloadLevel, TimetableBlock, AdaptiveAuditEntry } from '../types';
 import { adaptiveEngine } from '../services/adaptiveEngine';
 import { sound } from '../services/soundService';
+import { FaderSlider } from './hardware/FaderSlider';
+import { HardwareButton } from './hardware/HardwareButton';
+import { ScrewRivet } from './hardware/ScrewRivet';
 
 interface DailyWorkloadModalProps {
   isOpen: boolean;
@@ -46,23 +49,29 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
       <div 
-        className="liquid-glass-card max-w-lg w-full p-6 sm:p-7 relative border border-white/15 shadow-[0_25px_60px_rgba(0,0,0,0.8)]"
+        className="hardware-chassis max-w-lg w-full relative p-6 sm:p-7 shadow-[0_30px_70px_rgba(0,0,0,0.95)]"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Hardware Corner Screws */}
+        <ScrewRivet className="absolute top-3.5 left-3.5" angle={45} />
+        <ScrewRivet className="absolute top-3.5 right-3.5" angle={135} />
+        <ScrewRivet className="absolute bottom-3.5 left-3.5" angle={90} />
+        <ScrewRivet className="absolute bottom-3.5 right-3.5" angle={180} />
+
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between pb-4 border-b border-white/[0.08] relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-400">
+            <div className="w-9 h-9 rounded-xl bg-[#F0451E]/20 border border-[#F0451E]/40 flex items-center justify-center text-[#F0451E]">
               <HeartPulse className="w-5 h-5 animate-pulse" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white leading-tight">
-                Daily Workload & Cognitive Pacing
+              <h3 className="text-base font-bold text-white leading-tight font-mono uppercase tracking-wider">
+                Workload Attenuator // MK-II
               </h3>
-              <p className="text-xs text-slate-400 leading-tight">
-                Smart study reallocation based on your daily capacity
+              <p className="text-[11px] text-slate-400 font-mono leading-tight">
+                Cognitive Pacing & Study Redistribution
               </p>
             </div>
           </div>
@@ -71,21 +80,21 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
               sound.playClick();
               onClose();
             }}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition-colors"
+            className="w-7 h-7 rounded-full bg-[#1C1D22] border border-white/10 text-slate-400 hover:text-white flex items-center justify-center"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="mt-5 space-y-5">
+        <div className="mt-5 space-y-5 relative z-10">
           
-          {/* Workload Level Selector */}
+          {/* Workload Level Rocker Matrix */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2.5 font-mono">
-              Current Academic Load
+            <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-2 font-mono">
+              Academic Capacity State
             </label>
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 gap-2">
               
               {/* Light */}
               <button
@@ -93,18 +102,18 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
                 onClick={() => { sound.playClick(); setSelectedLevel('light'); }}
                 className={`p-3 rounded-xl border text-left transition-all ${
                   selectedLevel === 'light'
-                    ? 'border-emerald-500/50 bg-emerald-500/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
-                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05]'
+                    ? 'border-emerald-500/50 bg-emerald-950/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
+                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-400">
-                    <Smile className="w-4 h-4" /> Light Capacity
+                  <div className="flex items-center gap-1.5 font-mono font-bold text-xs text-emerald-400 uppercase">
+                    <Smile className="w-3.5 h-3.5" /> Light Load
                   </div>
                   <span className="led-indicator led-emerald" />
                 </div>
-                <p className="text-[11px] text-slate-400 leading-tight">
-                  Plenty of free time. Ready for intense focus sessions.
+                <p className="text-[10px] text-slate-400 leading-tight">
+                  High mental capacity. Peak energy for deep work.
                 </p>
               </button>
 
@@ -114,18 +123,18 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
                 onClick={() => { sound.playClick(); setSelectedLevel('balanced'); }}
                 className={`p-3 rounded-xl border text-left transition-all ${
                   selectedLevel === 'balanced'
-                    ? 'border-purple-500/50 bg-purple-500/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
-                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05]'
+                    ? 'border-purple-500/50 bg-purple-950/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
+                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1.5 font-bold text-xs text-purple-300">
-                    <Meh className="w-4 h-4" /> Balanced Load
+                  <div className="flex items-center gap-1.5 font-mono font-bold text-xs text-purple-300 uppercase">
+                    <Meh className="w-3.5 h-3.5" /> Balanced
                   </div>
                   <span className="led-indicator led-violet" />
                 </div>
-                <p className="text-[11px] text-slate-400 leading-tight">
-                  Standard college day. Maintain regular study pacing.
+                <p className="text-[10px] text-slate-400 leading-tight">
+                  Standard college day. Maintain regular pacing.
                 </p>
               </button>
 
@@ -135,17 +144,17 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
                 onClick={() => { sound.playClick(); setSelectedLevel('heavy'); }}
                 className={`p-3 rounded-xl border text-left transition-all ${
                   selectedLevel === 'heavy'
-                    ? 'border-orange-500/50 bg-orange-500/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
-                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05]'
+                    ? 'border-[#F0451E]/60 bg-[#F0451E]/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
+                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1.5 font-bold text-xs text-orange-400">
-                    <Frown className="w-4 h-4" /> Heavy Pressure
+                  <div className="flex items-center gap-1.5 font-mono font-bold text-xs text-[#FF6340] uppercase">
+                    <Frown className="w-3.5 h-3.5" /> Heavy Load
                   </div>
                   <span className="led-indicator led-amber" />
                 </div>
-                <p className="text-[11px] text-slate-400 leading-tight">
+                <p className="text-[10px] text-slate-400 leading-tight">
                   Deadlines or test today. Lighten non-critical blocks.
                 </p>
               </button>
@@ -156,17 +165,17 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
                 onClick={() => { sound.playClick(); setSelectedLevel('overwhelmed'); }}
                 className={`p-3 rounded-xl border text-left transition-all ${
                   selectedLevel === 'overwhelmed'
-                    ? 'border-rose-500/50 bg-rose-500/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
-                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05]'
+                    ? 'border-rose-500/60 bg-rose-950/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
+                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1.5 font-bold text-xs text-rose-400">
-                    <AlertTriangle className="w-4 h-4" /> Overwhelmed
+                  <div className="flex items-center gap-1.5 font-mono font-bold text-xs text-rose-400 uppercase">
+                    <AlertTriangle className="w-3.5 h-3.5" /> Overwhelmed
                   </div>
                   <span className="led-indicator led-rose" />
                 </div>
-                <p className="text-[11px] text-slate-400 leading-tight">
+                <p className="text-[10px] text-slate-400 leading-tight">
                   Fatigued. Shift heavy tasks to weekend, keep light review.
                 </p>
               </button>
@@ -174,62 +183,57 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
             </div>
           </div>
 
-          {/* Stress Slider */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
-                Cognitive Fatigue / Stress Level: <span className="text-pink-400 font-bold">{stressRating} / 5</span>
-              </label>
-              <span className="text-[11px] text-slate-400">
-                {stressRating <= 2 ? 'Low Pressure' : stressRating === 3 ? 'Moderate' : 'High Load'}
+          {/* Physical Fader Slider for Stress Rating */}
+          <div className="p-4 rounded-xl bg-[#141519] border border-white/10 space-y-2">
+            <div className="flex justify-between items-center text-xs font-mono text-slate-300">
+              <span className="font-bold uppercase tracking-widest text-[10px]">
+                Cognitive Fatigue / Stress Potentiometer
+              </span>
+              <span className="text-[#F0451E] font-bold text-sm">
+                LEVEL {stressRating} / 5
               </span>
             </div>
-            <input
-              type="range"
-              min="1"
-              max="5"
-              step="1"
+            <FaderSlider
               value={stressRating}
-              onChange={(e) => setStressRating(Number(e.target.value))}
-              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-pink-500"
+              min={1}
+              max={5}
+              step={1}
+              width="100%"
+              variant="dark"
+              leftLabel="1 - Relaxed"
+              rightLabel="5 - Exhausted"
+              onChange={(val) => setStressRating(val)}
             />
-            <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
-              <span>1 - Relaxed</span>
-              <span>2</span>
-              <span>3 - Average</span>
-              <span>4</span>
-              <span>5 - Exhausted</span>
-            </div>
           </div>
 
-          {/* Daily Context Note */}
+          {/* Context Note */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5 font-mono">
-              Academic Context (Optional)
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 font-mono">
+              Academic Context / Notes
             </label>
             <input
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Lab report due, 3 back-to-back lectures..."
-              className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50"
+              placeholder="e.g. Lab report due, exams approaching..."
+              className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-[#F0451E]/50"
             />
           </div>
 
           {/* Ethical Disclaimer Warning */}
-          <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-500/20 flex items-start gap-2.5">
-            <AlertCircle className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              <strong className="text-purple-300 font-semibold">Academic Study Planning Notice:</strong> Mind Bridge AI redistributes study blocks to prevent fatigue and preserve retention. This tool does not provide medical or mental-health assessments.
+          <div className="p-3 rounded-xl bg-black/40 border border-white/10 flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 text-[#F0451E] flex-shrink-0 mt-0.5" />
+            <p className="text-[10px] text-slate-300 font-mono leading-relaxed">
+              <strong className="text-white">Academic Study Planning Notice:</strong> Mind Bridge AI redistributes study blocks to prevent fatigue. This tool does not provide medical or psychological diagnosis.
             </p>
           </div>
 
           {/* Result Alert if adapted */}
           {resultMessage && (
-            <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2.5 animate-fade-in">
+            <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2.5 animate-fade-in font-mono">
               <CalendarCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
               <div>
-                <p className="font-semibold text-emerald-300">Timetable Adapted Successfully!</p>
+                <p className="font-bold text-emerald-300 uppercase">Timetable Recalibrated</p>
                 <p className="text-[11px] text-emerald-200/80">{resultMessage}</p>
               </div>
             </div>
@@ -238,24 +242,23 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
         </div>
 
         {/* Footer actions */}
-        <div className="mt-6 pt-4 border-t border-white/[0.08] flex items-center justify-end gap-3">
+        <div className="mt-6 pt-4 border-t border-white/[0.08] flex items-center justify-end gap-3 relative z-10">
           <button
             type="button"
             onClick={() => { sound.playClick(); onClose(); }}
-            className="btn-skeuo-glass px-4 py-2 text-xs"
+            className="btn-hw-light py-2 px-4 text-xs font-mono font-bold uppercase rounded-lg"
           >
-            {resultMessage ? 'Done' : 'Cancel'}
+            {resultMessage ? 'Close' : 'Cancel'}
           </button>
           
-          <button
-            type="button"
+          <HardwareButton
+            label={isProcessing ? 'Recalibrating...' : 'Apply Adaptation'}
+            variant="dark"
             disabled={isProcessing}
             onClick={handleRecalibrate}
-            className="btn-skeuo-primary px-5 py-2 text-xs flex items-center gap-2"
-          >
-            <Sparkles className="w-4 h-4 text-purple-200" />
-            <span>{isProcessing ? 'Adapting Timetable...' : 'Apply Workload Adaptation'}</span>
-          </button>
+            className="px-5 py-2 bg-[#F0451E] text-white"
+            icon={<Sparkles className="w-3.5 h-3.5" />}
+          />
         </div>
 
       </div>
