@@ -566,14 +566,33 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleResetMemory}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-300 text-xs transition-colors"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Memory</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm('Re-run conversational academic onboarding? This allows you to recalibrate your academic goals, degree, and study habits.')) {
+                  onUpdateProfile({
+                    ...profile,
+                    onboardingCompleted: false,
+                    onboardingStep: 1
+                  });
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-purple-500/30 hover:border-purple-400 bg-purple-500/10 text-purple-300 hover:text-white text-xs transition-colors cursor-pointer"
+              title="Recalibrate academic goals and explanation styles with AI"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Re-run Onboarding</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleResetMemory}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-300 text-xs transition-colors cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset Memory</span>
+            </button>
+          </div>
         </div>
 
         {memorySavedSuccess && (

@@ -87,16 +87,51 @@ export function App() {
   // Synchronize authenticated user data from Supabase
   const loadUserData = async (userId: string) => {
     try {
-      const p = await supabaseDataService.getProfile(userId);
-      if (p) {
-        setProfile(p);
-        storageService.saveProfile(p);
-        if (!p.onboardingCompleted) {
-          return;
-        }
+      let p = await supabaseDataService.getProfile(userId);
+      if (!p) {
+        // Brand new user without a profile in Supabase:
+        // Initialize fresh profile with onboardingCompleted: false so they go through onboarding!
+        const initialNewProfile: StudentProfile = {
+          id: userId,
+          name: authUser?.name || 'Scholar',
+          email: authUser?.email || '',
+          degree: 'B.Tech Computer Science',
+          department: 'Computer Science',
+          semester: 1,
+          cgpa: 0.0,
+          targetCgpa: 9.0,
+          streakDays: 1,
+          totalXp: 0,
+          level: 1,
+          joinedDate: new Date().toISOString().slice(0, 10),
+          onboardingCompleted: false, // Brand new user!
+          onboardingStep: 1,
+          syllabusUploaded: false
+        };
+        await supabaseDataService.saveProfile(initialNewProfile);
+        p = initialNewProfile;
       }
 
-      // Fetch user specific academic data
+      setProfile(p);
+      storageService.saveProfile(p);
+
+      // If user has not completed onboarding, halt here so they are routed to OnboardingFlow!
+      if (!p.onboardingCompleted) {
+        setSyllabus([]);
+        setGaps([]);
+        setAcademicRecords([]);
+        setTimetable([]);
+        setTests([]);
+        storageService.saveSyllabus([]);
+        storageService.saveLearningGaps([]);
+        storageService.saveAcademicRecords([]);
+        storageService.saveTimetable([]);
+        storageService.saveTests([]);
+        setNeedsSyllabusUpload(false);
+        return;
+      }
+
+      // Fetch user specific academic data for returning onboarded user
       const [userSyllabus, userGaps, userRecords, userTimetable] = await Promise.all([
         supabaseDataService.getSyllabusTopics(userId),
         supabaseDataService.getLearningGaps(userId),
@@ -197,35 +232,51 @@ export function App() {
     localStorage.setItem('mba_demo_mode', 'false');
     setNeedsSyllabusUpload(false);
 
-    const localProfile = storageService.getProfile();
     const existing = await supabaseDataService.getProfile(user.id);
-    const p: StudentProfile = existing || (localProfile && (localProfile.id === user.id || localProfile.email === user.email) ? localProfile : null) || {
-      id: user.id,
-      name: user.name || 'Scholar',
-      email: user.email,
-      degree: 'B.Tech Computer Science',
-      department: 'Computer Science',
-      semester: 1,
-      cgpa: 0.0,
-      targetCgpa: 9.0,
-      streakDays: 1,
-      totalXp: 100,
-      level: 1,
-      joinedDate: new Date().toISOString().slice(0, 10),
-      onboardingCompleted: true,
-      onboardingStep: 12,
-      syllabusUploaded: true
-    };
+    const localProfile = storageService.getProfile();
+    // Only trust localProfile if it specifically belongs to this authenticated user
+    const matchingLocal = localProfile && (localProfile.id === user.id || localProfile.email === user.email) ? localProfile : null;
 
-    // Ensure onboarding and syllabus flags are preserved for logged in users
-    if (existing?.onboardingCompleted || localProfile?.onboardingCompleted) {
-      p.onboardingCompleted = true;
-      p.syllabusUploaded = true;
-    }
+    let p: StudentProfile;
 
-    if (!existing) {
+    if (existing) {
+      // Returning user from Supabase database
+      p = existing;
+    } else if (matchingLocal) {
+      // Local profile matching this specific user
+      p = matchingLocal;
+    } else {
+      // Brand new user!
+      p = {
+        id: user.id,
+        name: user.name || 'Scholar',
+        email: user.email,
+        degree: 'B.Tech Computer Science',
+        department: 'Computer Science',
+        semester: 1,
+        cgpa: 0.0,
+        targetCgpa: 9.0,
+        streakDays: 1,
+        totalXp: 0,
+        level: 1,
+        joinedDate: new Date().toISOString().slice(0, 10),
+        onboardingCompleted: false, // Brand new user must go through onboarding!
+        onboardingStep: 1,
+        syllabusUploaded: false
+      };
       await supabaseDataService.saveProfile(p);
+      setSyllabus([]);
+      setGaps([]);
+      setAcademicRecords([]);
+      setTimetable([]);
+      setTests([]);
+      storageService.saveSyllabus([]);
+      storageService.saveLearningGaps([]);
+      storageService.saveAcademicRecords([]);
+      storageService.saveTimetable([]);
+      storageService.saveTests([]);
     }
+
     setProfile(p);
     storageService.saveProfile(p);
 
@@ -298,6 +349,7 @@ export function App() {
     setAuthUser(null);
     setIsDemoMode(false);
     localStorage.removeItem('mba_demo_mode');
+    localStorage.removeItem('mba_student_profile');
     sound.playClick();
   };
 
@@ -435,15 +487,15 @@ export function App() {
           <OnboardingFlow
             userId={authUser.id}
             initialAnswers={{
-              name: profile.name,
+              name: profile.name && profile.name !== 'Scholar' ? profile.name : (authUser.name && authUser.name !== authUser.email ? authUser.name : ''),
               college: profile.college,
               course: profile.course || profile.degree,
               specialization: profile.specialization,
-              semester: profile.semester,
-              cgpa: profile.cgpa,
-              targetCgpa: profile.targetCgpa
+              semester: profile.semester || 1,
+              cgpa: profile.cgpa || 0,
+              targetCgpa: profile.targetCgpa || 9.0
             }}
-            initialStep={profile.onboardingStep || 0}
+            initialStep={profile.onboardingStep && profile.onboardingStep < 12 ? profile.onboardingStep : 1}
             onComplete={handleOnboardingComplete}
           />
         </div>
