@@ -12,10 +12,16 @@ import {
   Cpu,
   Database,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Settings,
+  Key,
+  AlertTriangle,
+  Check,
+  RefreshCw,
+  X
 } from 'lucide-react';
 import type { TutorMessage, LearningGap, SyllabusTopic } from '../types';
-import { aiService } from '../services/aiService';
+import { aiService, type ApiStatus } from '../services/aiService';
 import { storageService } from '../services/storageService';
 import { sound } from '../services/soundService';
 import { RotaryKnob } from '../components/hardware/RotaryKnob';
@@ -43,7 +49,22 @@ export const AITutor: React.FC<AITutorProps> = ({
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   const profile = storageService.getProfile();
-  const aiSettings = storageService.getAISettings();
+  const [apiStatus, setApiStatus] = useState<ApiStatus>(() => aiService.getApiStatus());
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [keyInput, setKeyInput] = useState<string>(() => storageService.getAISettings().openRouterApiKey || '');
+  const [modelInput, setModelInput] = useState<string>(() => storageService.getAISettings().model || 'liquid/lfm-2.5-2.6b:free');
+  const [testResult, setTestResult] = useState<{ success?: boolean; message?: string; testing?: boolean } | null>(null);
+
+  useEffect(() => {
+    return aiService.subscribe((status) => {
+      setApiStatus(status);
+    });
+  }, []);
+
+  useEffect(() => {
+    // Check connection on mount
+    aiService.testConnection();
+  }, []);
 
   const quickPrompts = [
     { label: '🎯 Analyze My Gaps', prompt: 'Analyze my current learning gaps and tell me what my top priority is right now.' },
@@ -217,6 +238,25 @@ export const AITutor: React.FC<AITutorProps> = ({
   // Shared Message List Component
   const renderMessagesList = () => (
     <div className="space-y-4">
+      {/* Notice Banner if OpenRouter had an issue or was rate limited */}
+      {apiStatus.lastError && (
+        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3 text-xs text-amber-200 backdrop-blur-xl animate-fade-in shadow-lg">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            <div>
+              <span className="font-semibold text-amber-300">AI Notice: </span>
+              <span className="text-slate-300">{apiStatus.statusMessage}</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsSettingsOpen(true)}
+            className="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-[11px] font-medium transition-all flex-shrink-0"
+          >
+            Configure Key
+          </button>
+        </div>
+      )}
       {messages.map((msg) => {
         const isAi = msg.sender === 'ai';
 
@@ -405,10 +445,144 @@ export const AITutor: React.FC<AITutorProps> = ({
     </div>
   );
 
+  // Settings & Connection Diagnostic Modal
+  const renderSettingsModal = () => {
+    if (!isSettingsOpen) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4">
+        <div className="apple-liquid-glass max-w-lg w-full p-6 space-y-5 rounded-3xl border border-white/20 shadow-2xl animate-fade-in text-slate-100">
+          <div className="flex items-center justify-between pb-3 border-b border-white/10">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
+                <Key className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">OpenRouter AI Configuration</h3>
+                <p className="text-xs text-slate-400">Direct cloud inference & rate limit status</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsSettingsOpen(false)}
+              className="p-1.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Status Indicator */}
+          <div className={`p-3.5 rounded-2xl border text-xs font-mono flex items-center justify-between ${
+            apiStatus.isLive
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+              : apiStatus.isRateLimited
+              ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+              : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+          }`}>
+            <div className="flex items-center gap-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${
+                apiStatus.isLive ? 'bg-emerald-400' : apiStatus.isRateLimited ? 'bg-amber-400' : 'bg-rose-400'
+              }`} />
+              <span>{apiStatus.statusMessage}</span>
+            </div>
+            <span className="text-[10px] text-slate-400">{apiStatus.keyMasked}</span>
+          </div>
+
+          {/* Model Selection */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
+              Active Free Model
+            </label>
+            <select
+              value={modelInput}
+              onChange={(e) => setModelInput(e.target.value)}
+              className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-slate-100 focus:outline-none focus:border-purple-500"
+            >
+              <option value="liquid/lfm-2.5-2.6b:free">liquid/lfm-2.5-2.6b:free (Active / Socratic Recommended)</option>
+              <option value="meta-llama/llama-3.3-70b-instruct:free">meta-llama/llama-3.3-70b-instruct:free (High Depth)</option>
+              <option value="google/gemini-2.0-flash-exp:free">google/gemini-2.0-flash-exp:free (Fast)</option>
+              <option value="mistralai/mistral-small-3.1-24b-instruct:free">mistralai/mistral-small-3.1-24b-instruct:free</option>
+            </select>
+          </div>
+
+          {/* API Key Input */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono flex items-center justify-between">
+              <span>OpenRouter API Key</span>
+              <span className="text-[10px] text-slate-400 normal-case font-normal">
+                Stored securely in browser
+              </span>
+            </label>
+            <input
+              type="text"
+              value={keyInput}
+              onChange={(e) => setKeyInput(e.target.value)}
+              placeholder="sk-or-v1-..."
+              className="w-full text-xs font-mono px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+            />
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              OpenRouter free tier allows 50 requests/day. If your key hits quota, paste a new key here and click Save.
+            </p>
+          </div>
+
+          {/* Test Result Message */}
+          {testResult && (
+            <div className={`p-3 rounded-xl border text-xs font-mono flex items-center gap-2 ${
+              testResult.success
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+            }`}>
+              {testResult.success ? <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" /> : <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />}
+              <span className="break-all">{testResult.message}</span>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <button
+              type="button"
+              disabled={testResult?.testing}
+              onClick={async () => {
+                setTestResult({ testing: true, message: 'Pinging OpenRouter...' });
+                const res = await aiService.testConnection(keyInput, modelInput);
+                setTestResult(res);
+              }}
+              className="btn-apple-glass py-2 px-4 text-xs flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${testResult?.testing ? 'animate-spin' : ''}`} />
+              <span>Test Key</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                sound.playSuccess();
+                const current = storageService.getAISettings();
+                storageService.saveAISettings({
+                  ...current,
+                  openRouterApiKey: keyInput.trim(),
+                  model: modelInput,
+                  provider: 'openrouter'
+                });
+                setIsSettingsOpen(false);
+                setTestResult(null);
+                handleResetSession();
+              }}
+              className="btn-apple-primary py-2 px-5 text-xs font-semibold"
+            >
+              Save & Apply
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // 1. Fullscreen Overlay Mode
   if (isFullscreen) {
     return (
       <div className="fixed inset-0 z-50 bg-[#030712]/95 backdrop-blur-3xl flex flex-col p-3 sm:p-5 overflow-hidden animate-fade-in font-body">
+        {renderSettingsModal()}
         {/* Optical Chromatic Fluid Silk Ribbons Canvas */}
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-40">
           <div className="chromatic-ribbon-purple -top-[120px] left-[15%]" />
@@ -494,6 +668,33 @@ export const AITutor: React.FC<AITutorProps> = ({
                 <ArrowRight className="w-3 h-3" />
               </button>
             )}
+
+            {/* AI Status & Key Settings Pill */}
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className={`px-3 py-1.5 rounded-xl border text-[11px] font-mono flex items-center gap-1.5 transition-all ${
+                apiStatus.isLive
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20'
+                  : apiStatus.isRateLimited
+                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
+                  : 'bg-rose-500/10 border-rose-500/30 text-rose-300 hover:bg-rose-500/20'
+              }`}
+              title="AI Status: Click to configure API Key or Model"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                  apiStatus.isLive ? 'bg-emerald-400' : apiStatus.isRateLimited ? 'bg-amber-400' : 'bg-rose-400'
+                }`} />
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                  apiStatus.isLive ? 'bg-emerald-500' : apiStatus.isRateLimited ? 'bg-amber-500' : 'bg-rose-500'
+                }`} />
+              </span>
+              <Cpu className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                {apiStatus.isLive ? 'OpenRouter Live' : apiStatus.isRateLimited ? 'Rate Limited' : 'Offline'}
+              </span>
+              <Settings className="w-3 h-3 opacity-60 ml-0.5" />
+            </button>
 
             {/* Reset */}
             <button
@@ -625,16 +826,32 @@ export const AITutor: React.FC<AITutorProps> = ({
 
         {/* Hardware Status Banner: Live Model & Student Data Link */}
         <div className="flex flex-wrap items-center justify-between gap-3 mt-3.5 pt-3 border-t border-white/[0.08] text-[11px] font-mono">
-          <div className="flex items-center gap-2 bg-black/50 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-emerald-400 shadow-inner">
+          <button
+            type="button"
+            onClick={() => setIsSettingsOpen(true)}
+            className={`flex items-center gap-2 border px-3 py-1.5 rounded-lg text-xs font-mono shadow-inner transition-all ${
+              apiStatus.isLive
+                ? 'bg-black/50 border-emerald-500/30 text-emerald-400 hover:border-emerald-500/50'
+                : apiStatus.isRateLimited
+                ? 'bg-black/50 border-amber-500/30 text-amber-400 hover:border-amber-500/50'
+                : 'bg-black/50 border-rose-500/30 text-rose-400 hover:border-rose-500/50'
+            }`}
+            title="Click to view AI status, test connection or change API key"
+          >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                apiStatus.isLive ? 'bg-emerald-400' : apiStatus.isRateLimited ? 'bg-amber-400' : 'bg-rose-400'
+              }`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                apiStatus.isLive ? 'bg-emerald-500' : apiStatus.isRateLimited ? 'bg-amber-500' : 'bg-rose-500'
+              }`}></span>
             </span>
-            <Cpu className="w-3.5 h-3.5 text-emerald-400" />
+            <Cpu className="w-3.5 h-3.5" />
             <span className="font-semibold uppercase tracking-wider">
-              AI Engine: {aiSettings.model || 'liquid/lfm-2.5-2.6b:free'}
+              AI Engine: {apiStatus.model} ({apiStatus.isLive ? 'Live' : apiStatus.isRateLimited ? 'Rate Limited' : 'Offline'})
             </span>
-          </div>
+            <Settings className="w-3.5 h-3.5 ml-1 text-slate-400" />
+          </button>
 
           <div className="flex items-center gap-2 bg-black/50 border border-purple-500/30 px-3 py-1.5 rounded-lg text-purple-300 shadow-inner">
             <Database className="w-3.5 h-3.5 text-purple-400" />
@@ -723,6 +940,7 @@ export const AITutor: React.FC<AITutorProps> = ({
         </div>
       </div>
 
+      {renderSettingsModal()}
     </div>
   );
 };

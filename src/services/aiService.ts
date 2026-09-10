@@ -12,14 +12,49 @@ export interface TutorResponse {
   masteryDelta?: number; // e.g. +5% or +10%
 }
 
+export interface ApiStatus {
+  isLive: boolean;
+  isRateLimited: boolean;
+  lastError: string | null;
+  statusMessage: string;
+  model: string;
+  keyMasked: string;
+}
+
 class AIService {
-  private apiStatus = {
+  private apiStatus: ApiStatus = {
+    isLive: false,
     isRateLimited: false,
-    statusMessage: 'Ready'
+    lastError: null,
+    statusMessage: 'Ready',
+    model: 'liquid/lfm-2.5-2.6b:free',
+    keyMasked: ''
   };
 
-  public getApiStatus() {
-    return this.apiStatus;
+  private listeners: Array<(status: ApiStatus) => void> = [];
+
+  public getApiStatus(): ApiStatus {
+    const settings = storageService.getAISettings();
+    const rawKey = (settings.openRouterApiKey || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
+    const masked = rawKey.length > 12 ? `${rawKey.slice(0, 10)}...${rawKey.slice(-4)}` : (rawKey ? '••••••••' : 'None');
+    return {
+      ...this.apiStatus,
+      model: settings.model || 'liquid/lfm-2.5-2.6b:free',
+      keyMasked: masked
+    };
+  }
+
+  public subscribe(cb: (status: ApiStatus) => void): () => void {
+    this.listeners.push(cb);
+    cb(this.getApiStatus());
+    return () => {
+      this.listeners = this.listeners.filter((l) => l !== cb);
+    };
+  }
+
+  private notify() {
+    const status = this.getApiStatus();
+    this.listeners.forEach((cb) => cb(status));
   }
 
   /**
@@ -127,9 +162,10 @@ ${weakTopics || 'All syllabus topics above 50%'}
     const settings = storageService.getAISettings();
     const studentContext = this.getStudentContext();
     const activeModel = settings.model || 'liquid/lfm-2.5-2.6b:free';
+    const apiKey = (settings.openRouterApiKey || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
 
     // Try OpenRouter if API key is provided
-    if (settings.provider === 'openrouter' && settings.openRouterApiKey) {
+    if (apiKey) {
       try {
         const systemPrompt = `You are Mind Bridge AI, the personal AI academic tutor and learning assistant for the student described below.
 You have direct, authenticated access to the student's real academic record, exam marks, diagnosed learning gaps, personalized syllabus, and daily timetable.
@@ -143,14 +179,13 @@ YOUR INSTRUCTIONS:
    - If the student asks about their grades, learning gaps, schedule, weak topics, or how to improve, cite their actual numbers (e.g. 8.42 CGPA, 38% mastery in B-Trees, 62% DBMS Midterm, today's schedule).
    - Tailor all learning explanations and advice to their level (B.Tech CSE Semester 6) and visual/hands-on learning style.
 
-2. ACADEMIC TUTORING & EXPLANATIONS:
-   - When teaching or answering concept questions, provide deep yet crystal-clear, intuitive explanations.
-   - Use vivid analogies, step-by-step logic, and edge-case examples.
-   - Keep conversational explanations structured, rich, and complete without getting cut off prematurely.
+2. ACADEMIC TUTORING & GENERAL QUESTIONS:
+   - When teaching or answering concept questions, provide deep yet crystal-clear, intuitive explanations with analogies and examples.
+   - If the student asks general knowledge questions (e.g. about Paris, world history, science, geography, or culture), answer them helpfully, accurately, and eloquently while maintaining your role as an encouraging tutor.
 
 3. INTERACTIVE SOCRATIC CONCEPT CHECK:
-   - When teaching or clarifying an academic topic, include a targeted multiple-choice question in "conceptCheck" to test if they truly grasp the concept.
-   - If the student is asking a general inquiry about their grades, gaps, timetable, or study strategy, set "conceptCheck" to null.
+   - When teaching or clarifying an academic syllabus topic, include a targeted multiple-choice question in "conceptCheck" to test if they truly grasp the concept.
+   - If the student asks a general knowledge inquiry, asks about their marks/schedule, or says casual greetings, set "conceptCheck" to null.
    - For "conceptCheck", provide:
      * "question": The targeted question.
      * "options": Exactly 4 clear choices.
@@ -159,7 +194,7 @@ YOUR INSTRUCTIONS:
 
 4. MATHEMATICAL & MARKDOWN FORMATTING:
    - ALWAYS format mathematical expressions, time complexities, asymptotic notations, and formulas in standard LaTeX math notation:
-     * Inline math with single dollar signs: $O(\log n)$, $O(\log_2 N)$, $\lceil t/2 \rceil$, $t - 1$, $O(N)$, $O(1)$.
+     * Inline math with single dollar signs: $O(\\log n)$, $O(\\log_2 N)$, $\\lceil t/2 \\rceil$, $t - 1$, $O(N)$, $O(1)$.
      * Display math with double dollar signs: $$...$$ for standalone formulas.
    - Use bold markdown asterisks (**term**) for core definitions and vital takeaways.
    - Use markdown headings (## and ###), structured bullet points (- ), and fenced code blocks for tree/code visualizations.
@@ -190,8 +225,8 @@ YOUR INSTRUCTIONS:
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${settings.openRouterApiKey}`,
-            'HTTP-Referer': 'https://mindbridge.ai',
+            Authorization: `Bearer ${apiKey}`,
+            'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://mindbridge.ai',
             'X-Title': 'Mind Bridge AI'
           },
           body: JSON.stringify({
@@ -203,7 +238,6 @@ YOUR INSTRUCTIONS:
         });
 
         if (response.ok) {
-          this.apiStatus = { isRateLimited: false, statusMessage: `Live Connected: ${activeModel}` };
           const data = await response.json();
           const content = data.choices?.[0]?.message?.content;
           if (content) {
@@ -218,14 +252,31 @@ YOUR INSTRUCTIONS:
             try {
               const parsed: TutorResponse = JSON.parse(cleaned);
               if (parsed.message) {
+                this.apiStatus = {
+                  isLive: true,
+                  isRateLimited: false,
+                  lastError: null,
+                  statusMessage: `OpenRouter Live: ${activeModel}`,
+                  model: activeModel,
+                  keyMasked: `${apiKey.slice(0, 10)}...${apiKey.slice(-4)}`
+                };
+                this.notify();
                 this.speak(parsed.message);
                 return parsed;
               }
             } catch (jsonErr) {
               console.warn('JSON parse error from LLM output, attempting recovery:', jsonErr);
-              // Regex fallback to extract message if JSON was truncated
               const msgMatch = cleaned.match(/"message"\s*:\s*"([\s\S]*?)(?:",\s*"conceptCheck"|"$|"\s*})/);
               const extractedMsg = msgMatch ? msgMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : cleaned;
+              this.apiStatus = {
+                isLive: true,
+                isRateLimited: false,
+                lastError: null,
+                statusMessage: `OpenRouter Live: ${activeModel}`,
+                model: activeModel,
+                keyMasked: `${apiKey.slice(0, 10)}...${apiKey.slice(-4)}`
+              };
+              this.notify();
               this.speak(extractedMsg);
               return {
                 message: extractedMsg,
@@ -236,15 +287,45 @@ YOUR INSTRUCTIONS:
           }
         } else {
           const errBody = await response.text();
+          let parsedErrMsg = errBody;
+          try {
+            const errJson = JSON.parse(errBody);
+            parsedErrMsg = errJson.error?.message || errBody;
+          } catch {}
+
           if (response.status === 429) {
             this.apiStatus = {
+              isLive: false,
               isRateLimited: true,
-              statusMessage: 'OpenRouter Free Tier Limit (50/day) Reached — Socratic Engine Active'
+              lastError: `Rate limit (429): ${parsedErrMsg}`,
+              statusMessage: 'OpenRouter Free Tier Limit (50/day) Reached — Socratic Engine Active',
+              model: activeModel,
+              keyMasked: `${apiKey.slice(0, 10)}...${apiKey.slice(-4)}`
+            };
+          } else {
+            this.apiStatus = {
+              isLive: false,
+              isRateLimited: false,
+              lastError: `HTTP ${response.status}: ${parsedErrMsg}`,
+              statusMessage: `OpenRouter Error (${response.status}) — Local Engine Active`,
+              model: activeModel,
+              keyMasked: `${apiKey.slice(0, 10)}...${apiKey.slice(-4)}`
             };
           }
-          console.warn('OpenRouter API returned error status:', response.status, errBody);
+          this.notify();
+          console.warn('OpenRouter API returned error status:', response.status, parsedErrMsg);
         }
-      } catch (err) {
+      } catch (err: unknown) {
+        const error = err as Error;
+        this.apiStatus = {
+          isLive: false,
+          isRateLimited: false,
+          lastError: `Network error: ${error.message || 'Failed to fetch'}`,
+          statusMessage: 'Network Connection Failed — Local Engine Active',
+          model: activeModel,
+          keyMasked: `${apiKey.slice(0, 10)}...${apiKey.slice(-4)}`
+        };
+        this.notify();
         console.warn('OpenRouter API call error, falling back to local reasoning engine:', err);
       }
     }
@@ -253,12 +334,101 @@ YOUR INSTRUCTIONS:
     return this.getLocalTutorResponse(topic, userMessage, history.length);
   }
 
+  /**
+   * Tests connection to OpenRouter with a specific key and model.
+   */
+  public async testConnection(customKey?: string, customModel?: string): Promise<{ success: boolean; message: string; latencyMs?: number }> {
+    const settings = storageService.getAISettings();
+    const key = (customKey || settings.openRouterApiKey || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
+    const model = customModel || settings.model || 'liquid/lfm-2.5-2.6b:free';
+
+    if (!key) {
+      return { success: false, message: 'No OpenRouter API key found.' };
+    }
+
+    const startTime = Date.now();
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${key}`,
+          'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://mindbridge.ai',
+          'X-Title': 'Mind Bridge AI'
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: 'Say OK' }],
+          max_tokens: 16
+        })
+      });
+
+      const latencyMs = Date.now() - startTime;
+      if (res.ok) {
+        this.apiStatus = {
+          isLive: true,
+          isRateLimited: false,
+          lastError: null,
+          statusMessage: `OpenRouter Live: ${model}`,
+          model,
+          keyMasked: `${key.slice(0, 10)}...${key.slice(-4)}`
+        };
+        this.notify();
+        return {
+          success: true,
+          message: `Connected successfully to ${model}! Latency: ${latencyMs}ms`,
+          latencyMs
+        };
+      } else {
+        const errText = await res.text();
+        let parsed = errText;
+        try {
+          const json = JSON.parse(errText);
+          parsed = json.error?.message || errText;
+        } catch {}
+
+        this.apiStatus = {
+          isLive: false,
+          isRateLimited: res.status === 429,
+          lastError: `HTTP ${res.status}: ${parsed}`,
+          statusMessage: res.status === 429 ? 'Rate Limit (429) Reached' : `Error ${res.status}`,
+          model,
+          keyMasked: `${key.slice(0, 10)}...${key.slice(-4)}`
+        };
+        this.notify();
+        return {
+          success: false,
+          message: `HTTP ${res.status}: ${parsed}`
+        };
+      }
+    } catch (e: unknown) {
+      const err = e as Error;
+      return {
+        success: false,
+        message: `Network failure: ${err.message || 'Unable to connect to OpenRouter'}`
+      };
+    }
+  }
+
   private getLocalTutorResponse(topic: string, userMessage: string, turnCount: number): TutorResponse {
     const lowerTopic = topic.toLowerCase();
     const lowerUser = userMessage.toLowerCase();
     const profile = storageService.getProfile();
     const gaps = storageService.getLearningGaps();
     const timetable = storageService.getTimetable();
+
+    // 0. General non-academic questions fallback (e.g. Paris, general queries)
+    if (lowerUser.includes('paris') || lowerUser.includes('france') || lowerUser.includes('capital of france')) {
+      const msg = `**Paris** is the capital and most populous city of France, situated along the Seine River. Famous worldwide as the "City of Light" (*La Ville Lumière*), it is celebrated for landmarks like the Eiffel Tower, the Louvre Museum, and Notre-Dame Cathedral, as well as its rich heritage in philosophy, art, and cuisine!
+      
+*(Note: I am currently responding using my offline backup engine. To unlock live conversational intelligence with OpenRouter, verify your API key connection in the AI Settings pill above).*`;
+      this.speak(msg);
+      return {
+        message: msg,
+        conceptCheck: null,
+        masteryDelta: 0
+      };
+    }
 
     // Student asks about gaps or performance
     if (lowerUser.includes('gap') || lowerUser.includes('weak') || lowerUser.includes('mark') || lowerUser.includes('score') || lowerUser.includes('grade')) {
@@ -333,7 +503,9 @@ A **B-Tree** solves this by having high fan-out: each node holds hundreds of key
         };
       }
 
-      if (lowerUser.includes('split') || lowerUser.includes('median') || lowerUser.includes('fanout') || lowerUser.includes('disk') || lowerUser.includes('b') || lowerUser.includes('io')) {
+      // Check specifically for B-Tree splitting / fanout keywords without false positives on single letters
+      const isSplitQuery = /\b(split|splitting|median|fanout|leaf node|internal node|order m|m-way)\b/i.test(lowerUser);
+      if (isSplitQuery) {
         const msg = `Spot on! You understand the fundamental disk latency motivation. 
         
 Now let's examine the **Node Splitting rule**: When a node reaches its capacity (order $m$) and a new key arrives, the node splits around the **median key**. The median key is promoted to the parent node, and two half-sized child nodes are formed.`;
@@ -352,6 +524,22 @@ Now let's examine the **Node Splitting rule**: When a node reaches its capacity 
             explanation: "In B+ Trees, internal nodes only act as an index router. All data keys stay in the sequentially linked leaf nodes!"
           },
           masteryDelta: 10
+        };
+      }
+
+      // Check if user is asking something completely outside the topic
+      const isTopicRelevant = /\b(tree|b-tree|b\+|btree|index|indexing|disk|page|block|node|root|leaf|key|search|seek)\b/i.test(lowerUser);
+      if (!isTopicRelevant && turnCount > 1) {
+        const msg = `You asked: "${userMessage}".
+
+I am currently running in **Curriculum Focus Mode** for **${topic}**. 
+
+If you would like to ask open-ended questions or get real-time reasoning from our cloud LLM, check the **AI Settings** pill above to ensure your OpenRouter API key is connected. Would you like to continue mastering **${topic}**?`;
+        this.speak(msg);
+        return {
+          message: msg,
+          conceptCheck: null,
+          masteryDelta: 0
         };
       }
 

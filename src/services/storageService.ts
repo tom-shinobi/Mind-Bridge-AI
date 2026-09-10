@@ -138,13 +138,23 @@ class StorageService {
 
   public getAISettings(): AISettings {
     const loaded = this.load<AISettings>(STORAGE_KEYS.AI_SETTINGS, initialAISettings);
+    
+    // Always prioritize the environment variable if present
+    const envKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+    if (envKey && typeof envKey === 'string' && envKey.trim()) {
+      const cleanKey = envKey.trim();
+      // If loaded key doesn't match the environment key or is empty, synchronize it
+      if (!loaded.openRouterApiKey || loaded.openRouterApiKey !== cleanKey) {
+        loaded.openRouterApiKey = cleanKey;
+        loaded.provider = 'openrouter';
+        this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
+      }
+    }
+
     // Ensure model defaults to liquid/lfm-2.5-2.6b:free if set to older default
     if (!loaded.model || loaded.model.includes('gemini') || loaded.model === 'default') {
       loaded.model = 'liquid/lfm-2.5-2.6b:free';
-    }
-    const envKey = (import.meta as unknown as { env?: { VITE_OPENROUTER_API_KEY?: string } }).env?.VITE_OPENROUTER_API_KEY;
-    if (!loaded.openRouterApiKey && envKey) {
-      loaded.openRouterApiKey = envKey;
+      this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
     return loaded;
   }
