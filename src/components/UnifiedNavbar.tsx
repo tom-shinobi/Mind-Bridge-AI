@@ -337,6 +337,21 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               <span>Rebalance</span>
             </button>
 
+            {/* Atmosphere Theme Switcher (Dusk vs Nebula) */}
+            <button
+              type="button"
+              onClick={() => {
+                const nextTheme = (aiSettings.theme === 'nebula') ? 'dusk' : 'nebula';
+                sound.playClick();
+                onUpdateSettings({ ...aiSettings, theme: nextTheme });
+              }}
+              className="px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 hover:border-white/30 transition-all cursor-pointer flex items-center gap-1.5 text-slate-200"
+              title={aiSettings.theme === 'nebula' ? "Switch to Sunlight Dusk Galaxy (🌅)" : "Switch to Cosmic Nebula (🌌)"}
+            >
+              <span>{aiSettings.theme === 'nebula' ? '🌌' : '🌅'}</span>
+              <span className="hidden sm:inline">{aiSettings.theme === 'nebula' ? 'Nebula' : 'Dusk'}</span>
+            </button>
+
             {/* Sound FX Toggle */}
             <button
               type="button"
@@ -641,6 +656,19 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
                       <span>Sound Off</span>
                     </>
                   )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextTheme = (aiSettings.theme === 'nebula') ? 'dusk' : 'nebula';
+                    sound.playClick();
+                    onUpdateSettings({ ...aiSettings, theme: nextTheme });
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-slate-200 font-medium flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <span>{aiSettings.theme === 'nebula' ? '🌌' : '🌅'}</span>
+                  <span>{aiSettings.theme === 'nebula' ? 'Cosmic Nebula' : 'Dusk Sun'}</span>
                 </button>
               </div>
 

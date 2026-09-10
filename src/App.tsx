@@ -472,27 +472,51 @@ export function App() {
     );
   }
 
+  const currentTheme = aiSettings.theme || 'dusk';
+
   // 5. Main Dashboard & Workspace (Preserves all 10 pages and current layout)
   return (
     <div className="min-h-screen bg-[#020409] text-[#F5F5F7] flex flex-col relative selection:bg-white/20 selection:text-white font-body">
       
-      {/* Dynamic Moving Particles & Vibrant Glowing Chromatic Aurora Canvas */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Dynamic Colorful Flowing Chromatic Mesh */}
-        <div className="dynamic-chromatic-mesh absolute inset-0 opacity-80 pointer-events-none" />
-        
-        {/* Luminous Glowing Aurora Orbs (Cyan, Violet, Magenta, Emerald, Amber) */}
-        <div className="aurora-orb-violet -top-[140px] left-[5%] opacity-75" />
-        <div className="aurora-orb-cyan top-[20%] -right-[120px] opacity-75" />
-        <div className="aurora-orb-magenta -bottom-[120px] left-[15%] opacity-70" />
-        <div className="aurora-orb-emerald top-[48%] left-[28%] opacity-65" />
-        <div className="aurora-orb-amber -top-[80px] right-[18%] opacity-65" />
+      {/* Dynamic Moving Particles & Glowing Chromatic Canvas (Sunlight Dusk vs Cosmic Nebula) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-700">
+        {currentTheme === 'dusk' ? (
+          <>
+            {/* Dusk Flowing Chromatic Mesh: Sunset Sky merging into Cosmic Twilight */}
+            <div className="dusk-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
+
+            {/* Glowing Dusk Sun Orb: Solar Tangerine & Warm Amber */}
+            <div className="dusk-sun-orb -top-[120px] left-[10%] opacity-80" />
+
+            {/* Dusk Horizon Rose & Magenta Aura */}
+            <div className="dusk-horizon-rose top-[18%] -right-[100px] opacity-75" />
+
+            {/* Twilight Galaxy Nebula Violet */}
+            <div className="dusk-nebula-violet -bottom-[120px] left-[15%] opacity-70" />
+
+            {/* Solar Gold Corona Ray */}
+            <div className="dusk-solar-gold top-[45%] left-[25%] opacity-65" />
+
+            {/* Deep Cosmic Starlight Indigo */}
+            <div className="dusk-cosmic-indigo -top-[80px] right-[20%] opacity-65" />
+          </>
+        ) : (
+          <>
+            {/* Cosmic Aurora Mesh */}
+            <div className="dynamic-chromatic-mesh absolute inset-0 opacity-80 pointer-events-none" />
+            <div className="aurora-orb-violet -top-[140px] left-[5%] opacity-75" />
+            <div className="aurora-orb-cyan top-[20%] -right-[120px] opacity-75" />
+            <div className="aurora-orb-magenta -bottom-[120px] left-[15%] opacity-70" />
+            <div className="aurora-orb-emerald top-[48%] left-[28%] opacity-65" />
+            <div className="aurora-orb-amber -top-[80px] right-[18%] opacity-65" />
+          </>
+        )}
 
         {/* Atmospheric Contrast Vignette (Preserves Deep Contrast for Razor-Sharp Text) */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_25%,rgba(2,4,9,0.38)_65%,rgba(2,4,9,0.82)_100%)] pointer-events-none" />
 
-        {/* Luminous Interactive Dynamic Particles Floating On Top of Gradients */}
-        <ParticleBackground />
+        {/* Luminous Interactive Dynamic Particles with Matching Theme Palette Floating On Top */}
+        <ParticleBackground theme={currentTheme} />
       </div>
 
       {/* Real Snell's Law SVG Displacement Map Filter */}

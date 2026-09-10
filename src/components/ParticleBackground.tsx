@@ -13,7 +13,11 @@ interface Particle {
   color: string;
 }
 
-const PARTICLE_COLORS = [
+interface ParticleProps {
+  theme?: 'dusk' | 'nebula';
+}
+
+const NEBULA_PARTICLE_COLORS = [
   '56, 189, 248',  // Sky / Cyan
   '168, 85, 247', // Purple / Violet
   '244, 114, 182', // Rose / Pink
@@ -21,7 +25,16 @@ const PARTICLE_COLORS = [
   '251, 191, 36'   // Amber / Gold
 ];
 
-export const ParticleBackground: React.FC = () => {
+const DUSK_PARTICLE_COLORS = [
+  '251, 191, 36',  // Warm Amber / Solar Gold
+  '251, 146, 60',  // Solar Tangerine / Sunset Orange
+  '244, 114, 182', // Sunset Rose / Horizon Pink
+  '192, 132, 252', // Twilight Lavender / Nebula Violet
+  '254, 215, 170', // Sunbeam Warm Cream
+  '239, 68, 68'    // Solar Flare Crimson
+];
+
+export const ParticleBackground: React.FC<ParticleProps> = ({ theme = 'dusk' }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -82,11 +95,12 @@ export const ParticleBackground: React.FC = () => {
     // Particle pool
     const count = Math.min(Math.floor((width * height) / 18000), 75);
     let particles: Particle[] = [];
+    const activePalette = theme === 'nebula' ? NEBULA_PARTICLE_COLORS : DUSK_PARTICLE_COLORS;
 
     const initParticles = () => {
       particles = [];
       for (let i = 0; i < count; i++) {
-        const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)];
+        const color = activePalette[Math.floor(Math.random() * activePalette.length)];
         const baseAlpha = 0.25 + Math.random() * 0.45;
         particles.push({
           x: Math.random() * width,
@@ -199,7 +213,7 @@ export const ParticleBackground: React.FC = () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [theme]);
 
   return (
     <canvas

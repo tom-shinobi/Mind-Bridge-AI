@@ -221,10 +221,13 @@ export interface AdaptiveAuditEntry {
   impactDescription: string;
 }
 
+export type AtmosphereTheme = 'dusk' | 'nebula';
+
 export interface AISettings {
   provider: 'openrouter' | 'local_intelligent';
   openRouterApiKey: string;
   model: string;
   speechEnabled: boolean;
   soundFxEnabled: boolean;
+  theme?: AtmosphereTheme;
 }

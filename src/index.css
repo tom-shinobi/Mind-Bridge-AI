@@ -127,6 +127,81 @@
   100% { opacity: 0.9; filter: hue-rotate(-10deg); }
 }
 
+/* ==========================================================================
+   SUNLIGHT DUSK WITH GALAXY NEBULA THEME (SOLAR DUSK + COSMIC TWILIGHT)
+   ========================================================================== */
+
+.dusk-sun-orb {
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 45% 45%, rgba(251, 146, 60, 0.82) 0%, rgba(245, 158, 11, 0.6) 32%, rgba(239, 68, 68, 0.35) 58%, transparent 72%);
+  filter: blur(80px);
+  pointer-events: none;
+  animation: auroraFlow1 17s ease-in-out infinite alternate;
+}
+
+.dusk-horizon-rose {
+  position: absolute;
+  width: 850px;
+  height: 850px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.75) 0%, rgba(217, 70, 239, 0.52) 36%, rgba(139, 92, 246, 0.3) 62%, transparent 75%);
+  filter: blur(85px);
+  pointer-events: none;
+  animation: auroraFlow2 21s ease-in-out infinite alternate;
+}
+
+.dusk-nebula-violet {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 40% 40%, rgba(124, 58, 237, 0.72) 0%, rgba(79, 70, 229, 0.5) 42%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  animation: auroraFlow3 19s ease-in-out infinite alternate;
+}
+
+.dusk-solar-gold {
+  position: absolute;
+  width: 750px;
+  height: 750px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 45% 45%, rgba(254, 215, 170, 0.75) 0%, rgba(251, 191, 36, 0.52) 36%, rgba(245, 158, 11, 0.32) 60%, transparent 72%);
+  filter: blur(75px);
+  pointer-events: none;
+  animation: auroraFlow4 23s ease-in-out infinite alternate;
+}
+
+.dusk-cosmic-indigo {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.65) 0%, rgba(168, 85, 247, 0.42) 45%, transparent 70%);
+  filter: blur(75px);
+  pointer-events: none;
+  animation: auroraFlow1 25s ease-in-out infinite alternate-reverse;
+}
+
+.dusk-chromatic-mesh {
+  background: 
+    radial-gradient(at 15% 15%, rgba(251, 146, 60, 0.42) 0px, transparent 55%),
+    radial-gradient(at 85% 12%, rgba(244, 63, 94, 0.38) 0px, transparent 52%),
+    radial-gradient(at 50% 45%, rgba(245, 158, 11, 0.35) 0px, transparent 58%),
+    radial-gradient(at 85% 85%, rgba(124, 58, 237, 0.35) 0px, transparent 52%),
+    radial-gradient(at 15% 85%, rgba(79, 70, 229, 0.32) 0px, transparent 52%);
+  animation: meshPulseDusk 15s ease-in-out infinite alternate;
+}
+
+@keyframes meshPulseDusk {
+  0% { opacity: 0.85; filter: hue-rotate(0deg); }
+  50% { opacity: 1; filter: hue-rotate(12deg); }
+  100% { opacity: 0.9; filter: hue-rotate(-8deg); }
+}
+
 /* Ambient Glow Aliases */
 .glow-azure, .glow-mint {
   position: absolute;

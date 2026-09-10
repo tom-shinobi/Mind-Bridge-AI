@@ -546,6 +546,7 @@ export const initialAISettings: AISettings = {
   openRouterApiKey: (import.meta as unknown as { env?: { VITE_OPENROUTER_API_KEY?: string } }).env?.VITE_OPENROUTER_API_KEY || '',
   model: 'liquid/lfm-2.5-2.6b:free',
   speechEnabled: true,
-  soundFxEnabled: true
+  soundFxEnabled: true,
+  theme: 'dusk'
 };
 

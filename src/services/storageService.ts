@@ -156,6 +156,12 @@ class StorageService {
       loaded.model = 'liquid/lfm-2.5-2.6b:free';
       this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
+
+    // Default atmosphere theme to dusk if unset
+    if (!loaded.theme) {
+      loaded.theme = 'dusk';
+      this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
+    }
     return loaded;
   }
 

@@ -19,7 +19,7 @@ import {
   Loader2,
   Lock
 } from 'lucide-react';
-import type { StudentProfile, AISettings, MemorySummary } from '../types';
+import type { StudentProfile, AISettings, MemorySummary, AtmosphereTheme } from '../types';
 import { sound } from '../services/soundService';
 import { authService } from '../services/authService';
 import { supabaseDataService } from '../services/supabaseDataService';
@@ -51,6 +51,7 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
   const [model, setModel] = useState(aiSettings.model);
   const [speechEnabled, setSpeechEnabled] = useState(aiSettings.speechEnabled);
   const [soundFxEnabled, setSoundFxEnabled] = useState(aiSettings.soundFxEnabled);
+  const [theme, setTheme] = useState<AtmosphereTheme>(aiSettings.theme || 'dusk');
 
   // Persistent Academic Memory State
   const defaultMemory: MemorySummary = {
@@ -106,6 +107,20 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
     setTimeout(() => setSavedSuccess(false), 3000);
   };
 
+  const handleSelectTheme = (newTheme: AtmosphereTheme) => {
+    sound.playClick();
+    setTheme(newTheme);
+    onUpdateAISettings({
+      ...aiSettings,
+      provider,
+      openRouterApiKey: apiKey,
+      model,
+      speechEnabled,
+      soundFxEnabled,
+      theme: newTheme
+    });
+  };
+
   const handleSaveAI = (e: React.FormEvent) => {
     e.preventDefault();
     sound.playSuccess();
@@ -114,7 +129,8 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
       openRouterApiKey: apiKey,
       model,
       speechEnabled,
-      soundFxEnabled
+      soundFxEnabled,
+      theme
     });
     sound.setEnabled(soundFxEnabled);
     setSavedSuccess(true);
@@ -399,6 +415,57 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
                 <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku</option>
                 <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B Instruct</option>
               </select>
+            </div>
+
+            {/* Atmosphere Theme Selector */}
+            <div>
+              <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1.5 flex items-center justify-between">
+                <span>Atmosphere & Background Theme</span>
+                <span className="text-amber-400 text-[10px]">Real-time Dynamic Shader</span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => handleSelectTheme('dusk')}
+                  className={`p-3 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
+                    theme === 'dusk'
+                      ? 'bg-gradient-to-r from-orange-500/20 via-pink-500/15 to-purple-500/20 border-orange-400/60 shadow-[0_0_15px_rgba(251,146,60,0.25)] text-white'
+                      : 'bg-white/[0.04] border-white/10 hover:border-white/20 text-slate-300'
+                  }`}
+                >
+                  <span className="text-xl">🌅</span>
+                  <div>
+                    <div className="text-xs font-semibold flex items-center gap-1.5">
+                      <span>Sunlight Dusk</span>
+                      {theme === 'dusk' && <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />}
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">
+                      Solar amber dusk sun setting over cosmic twilight nebula
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectTheme('nebula')}
+                  className={`p-3 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
+                    theme === 'nebula'
+                      ? 'bg-gradient-to-r from-purple-500/20 via-cyan-500/15 to-blue-500/20 border-cyan-400/60 shadow-[0_0_15px_rgba(56,189,248,0.25)] text-white'
+                      : 'bg-white/[0.04] border-white/10 hover:border-white/20 text-slate-300'
+                  }`}
+                >
+                  <span className="text-xl">🌌</span>
+                  <div>
+                    <div className="text-xs font-semibold flex items-center gap-1.5">
+                      <span>Cosmic Nebula</span>
+                      {theme === 'nebula' && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />}
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">
+                      Deep obsidian space with electric violet, neon cyan & starlight
+                    </p>
+                  </div>
+                </button>
+              </div>
             </div>
 
             {/* Audio Toggles */}
