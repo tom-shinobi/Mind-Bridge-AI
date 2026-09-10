@@ -543,8 +543,8 @@ export const initialAuditLog: AdaptiveAuditEntry[] = [
 
 export const initialAISettings: AISettings = {
   provider: 'openrouter',
-  openRouterApiKey: (import.meta as unknown as { env?: { VITE_OPENROUTER_API_KEY?: string } }).env?.VITE_OPENROUTER_API_KEY || '',
-  model: 'liquid/lfm-2.5-2.6b:free',
+  openRouterApiKey: (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string; VITE_OPENROUTER_API_KEY?: string } }).env?.VITE_GEMINI_API_KEY || (import.meta as unknown as { env?: { VITE_OPENROUTER_API_KEY?: string } }).env?.VITE_OPENROUTER_API_KEY || 'AIzaSyC_7GwAKor3ZIFj9uvq1trZHYcHctOiQcU',
+  model: 'gemini-2.5-flash',
   speechEnabled: true,
   soundFxEnabled: true,
   theme: 'dusk'

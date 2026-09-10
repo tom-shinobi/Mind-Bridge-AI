@@ -47,8 +47,8 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
 
   // AI settings
   const [provider, setProvider] = useState(aiSettings.provider);
-  const [apiKey, setApiKey] = useState(aiSettings.openRouterApiKey);
-  const [model, setModel] = useState(aiSettings.model);
+  const [apiKey, setApiKey] = useState('');
+  const [model, setModel] = useState(aiSettings.model || 'gemini-2.5-flash');
   const [speechEnabled, setSpeechEnabled] = useState(aiSettings.speechEnabled);
   const [soundFxEnabled, setSoundFxEnabled] = useState(aiSettings.soundFxEnabled);
   const [theme, setTheme] = useState<AtmosphereTheme>(aiSettings.theme || 'dusk');
@@ -110,10 +110,11 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
   const handleSelectTheme = (newTheme: AtmosphereTheme) => {
     sound.playClick();
     setTheme(newTheme);
+    const finalApiKey = apiKey.trim() || aiSettings.openRouterApiKey;
     onUpdateAISettings({
       ...aiSettings,
       provider,
-      openRouterApiKey: apiKey,
+      openRouterApiKey: finalApiKey,
       model,
       speechEnabled,
       soundFxEnabled,
@@ -124,14 +125,16 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
   const handleSaveAI = (e: React.FormEvent) => {
     e.preventDefault();
     sound.playSuccess();
+    const finalApiKey = apiKey.trim() || aiSettings.openRouterApiKey;
     onUpdateAISettings({
       provider,
-      openRouterApiKey: apiKey,
+      openRouterApiKey: finalApiKey,
       model,
       speechEnabled,
       soundFxEnabled,
       theme
     });
+    setApiKey('');
     sound.setEnabled(soundFxEnabled);
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
@@ -385,15 +388,15 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
             {/* API Key */}
             <div>
               <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1 flex items-center justify-between">
-                <span>OpenRouter API Key</span>
-                <span className="text-purple-400 text-[10px]">Configured for OpenRouter</span>
+                <span>AI Provider API Key</span>
+                <span className="text-emerald-400 text-[10px]">Active & Encrypted (Hidden)</span>
               </label>
               <div className="relative">
                 <input
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="sk-or-v1-..."
+                  placeholder="•••••••••••••••••••••••••••••••• (Leave blank to keep active key)"
                   className="w-full px-3.5 py-2.5 rounded-xl liquid-glass-input text-white font-mono text-xs focus:outline-none focus:border-purple-500/50"
                 />
                 <Key className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2" />
@@ -410,10 +413,10 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
                 onChange={(e) => setModel(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl liquid-glass-input text-white text-xs"
               >
-                <option value="liquid/lfm-2.5-2.6b:free">LiquidAI: LFM 2.5 2.6B (Free - Recommended)</option>
-                <option value="google/gemini-2.0-flash-001">Google Gemini 2.0 Flash</option>
-                <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku</option>
+                <option value="gemini-2.5-flash">Google Gemini 2.5 Flash (Google AI Studio - Active Default)</option>
+                <option value="liquid/lfm-2.5-2.6b:free">LiquidAI: LFM 2.5 2.6B (Free)</option>
                 <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B Instruct</option>
+                <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku</option>
               </select>
             </div>
 

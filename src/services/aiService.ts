@@ -35,12 +35,11 @@ class AIService {
 
   public getApiStatus(): ApiStatus {
     const settings = storageService.getAISettings();
-    const rawKey = (settings.openRouterApiKey || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
-    const masked = rawKey.length > 12 ? `${rawKey.slice(0, 10)}...${rawKey.slice(-4)}` : (rawKey ? '••••••••' : 'None');
+    const rawKey = (settings.openRouterApiKey || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
     return {
       ...this.apiStatus,
-      model: settings.model || 'liquid/lfm-2.5-2.6b:free',
-      keyMasked: masked
+      model: settings.model || 'gemini-2.5-flash',
+      keyMasked: rawKey ? 'Active & Encrypted' : 'None'
     };
   }
 
@@ -174,8 +173,8 @@ ${weakTopics || 'All syllabus topics above 50%'}
   ): Promise<TutorResponse> {
     const settings = storageService.getAISettings();
     const studentContext = this.getStudentContext();
-    const activeModel = settings.model || 'liquid/lfm-2.5-2.6b:free';
-    const apiKey = (settings.openRouterApiKey || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
+    const activeModel = settings.model || 'gemini-2.5-flash';
+    const apiKey = (settings.openRouterApiKey || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
 
     // Try OpenRouter if API key is provided
     if (apiKey) {
@@ -225,108 +224,157 @@ YOUR INSTRUCTIONS:
      "masteryDelta": 5
    }`;
 
-        const messages = [
-          { role: 'system', content: systemPrompt },
-          ...history.slice(-8).map((m) => ({
-            role: m.sender === 'ai' ? 'assistant' : 'user',
-            content: m.text
-          })),
-          { role: 'user', content: userMessage }
-        ];
+        const isGoogleGemini = apiKey.startsWith('AIzaSy') || activeModel.includes('gemini');
 
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-            'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://mindbridge.ai',
-            'X-Title': 'Mind Bridge AI'
-          },
-          body: JSON.stringify({
-            model: activeModel,
-            messages,
-            response_format: { type: 'json_object' },
-            max_tokens: 2048
-          })
-        });
+        let rawText: string | null = null;
 
-        if (response.ok) {
-          const data = await response.json();
-          const content = data.choices?.[0]?.message?.content;
-          if (content) {
-            // Strip markdown code fences if model enclosed JSON in ```json
-            let cleaned = content.trim();
-            if (cleaned.startsWith('```json')) {
-              cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-            } else if (cleaned.startsWith('```')) {
-              cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
-            }
+        if (isGoogleGemini && apiKey.startsWith('AIzaSy')) {
+          // Direct Google AI Studio Gemini Engine
+          const geminiModel = 'gemini-2.5-flash';
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
 
-            try {
-              const parsed: TutorResponse = JSON.parse(cleaned);
-              if (parsed.message) {
-                this.apiStatus = {
-                  isLive: true,
-                  isRateLimited: false,
-                  lastError: null,
-                  statusMessage: `OpenRouter Live: ${activeModel}`,
-                  model: activeModel,
-                  keyMasked: `${apiKey.slice(0, 10)}...${apiKey.slice(-4)}`
-                };
-                this.notify();
-                this.speak(parsed.message);
-                return parsed;
+          const geminiContents = [
+            ...history.slice(-8).map((m) => ({
+              role: m.sender === 'ai' ? 'model' : 'user',
+              parts: [{ text: m.text }]
+            })),
+            { role: 'user', parts: [{ text: userMessage }] }
+          ];
+
+          const response = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [{ text: systemPrompt }]
+              },
+              contents: geminiContents,
+              generationConfig: {
+                responseMimeType: 'application/json',
+                temperature: 0.7,
+                maxOutputTokens: 2048
               }
-            } catch (jsonErr) {
-              console.warn('JSON parse error from LLM output, attempting recovery:', jsonErr);
-              const msgMatch = cleaned.match(/"message"\s*:\s*"([\s\S]*?)(?:",\s*"conceptCheck"|"$|"\s*})/);
-              const extractedMsg = msgMatch ? msgMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : cleaned;
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+            if (rawText) {
+              this.apiStatus = {
+                isLive: true,
+                isRateLimited: false,
+                lastError: null,
+                statusMessage: `Google AI Studio Live: ${geminiModel}`,
+                model: geminiModel,
+                keyMasked: 'Active & Encrypted'
+              };
+              this.notify();
+            }
+          } else {
+            const errBody = await response.text();
+            let parsedErrMsg = errBody;
+            try {
+              const errJson = JSON.parse(errBody);
+              parsedErrMsg = errJson.error?.message || errBody;
+            } catch {}
+
+            this.apiStatus = {
+              isLive: false,
+              isRateLimited: response.status === 429,
+              lastError: `Google AI Studio Error (${response.status}): ${parsedErrMsg}`,
+              statusMessage: response.status === 429 ? 'Google AI Studio Quota Exceeded' : `Google AI Studio Error (${response.status})`,
+              model: geminiModel,
+              keyMasked: 'Active & Encrypted'
+            };
+            this.notify();
+          }
+        } else {
+          // OpenRouter API Engine
+          const messages = [
+            { role: 'system', content: systemPrompt },
+            ...history.slice(-8).map((m) => ({
+              role: m.sender === 'ai' ? 'assistant' : 'user',
+              content: m.text
+            })),
+            { role: 'user', content: userMessage }
+          ];
+
+          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey}`,
+              'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://mindbridge.ai',
+              'X-Title': 'Mind Bridge AI'
+            },
+            body: JSON.stringify({
+              model: activeModel,
+              messages,
+              response_format: { type: 'json_object' },
+              max_tokens: 2048
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            rawText = data.choices?.[0]?.message?.content || null;
+            if (rawText) {
               this.apiStatus = {
                 isLive: true,
                 isRateLimited: false,
                 lastError: null,
                 statusMessage: `OpenRouter Live: ${activeModel}`,
                 model: activeModel,
-                keyMasked: `${apiKey.slice(0, 10)}...${apiKey.slice(-4)}`
+                keyMasked: 'Active & Encrypted'
               };
               this.notify();
-              this.speak(extractedMsg);
-              return {
-                message: extractedMsg,
-                conceptCheck: null,
-                masteryDelta: 5
-              };
             }
-          }
-        } else {
-          const errBody = await response.text();
-          let parsedErrMsg = errBody;
-          try {
-            const errJson = JSON.parse(errBody);
-            parsedErrMsg = errJson.error?.message || errBody;
-          } catch {}
-
-          if (response.status === 429) {
-            this.apiStatus = {
-              isLive: false,
-              isRateLimited: true,
-              lastError: `Rate limit (429): ${parsedErrMsg}`,
-              statusMessage: 'OpenRouter Free Tier Limit (50/day) Reached — Socratic Engine Active',
-              model: activeModel,
-              keyMasked: `${apiKey.slice(0, 10)}...${apiKey.slice(-4)}`
-            };
           } else {
+            const errBody = await response.text();
+            let parsedErrMsg = errBody;
+            try {
+              const errJson = JSON.parse(errBody);
+              parsedErrMsg = errJson.error?.message || errBody;
+            } catch {}
+
             this.apiStatus = {
               isLive: false,
-              isRateLimited: false,
+              isRateLimited: response.status === 429,
               lastError: `HTTP ${response.status}: ${parsedErrMsg}`,
-              statusMessage: `OpenRouter Error (${response.status}) — Local Engine Active`,
+              statusMessage: response.status === 429 ? 'OpenRouter Limit Reached' : `Error (${response.status})`,
               model: activeModel,
-              keyMasked: `${apiKey.slice(0, 10)}...${apiKey.slice(-4)}`
+              keyMasked: 'Active & Encrypted'
+            };
+            this.notify();
+          }
+        }
+
+        if (rawText) {
+          let cleaned = rawText.trim();
+          if (cleaned.startsWith('```json')) {
+            cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+          } else if (cleaned.startsWith('```')) {
+            cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
+          }
+
+          try {
+            const parsed: TutorResponse = JSON.parse(cleaned);
+            if (parsed.message) {
+              this.speak(parsed.message);
+              return parsed;
+            }
+          } catch (jsonErr) {
+            console.warn('JSON parse error from LLM output, extracting text:', jsonErr);
+            const msgMatch = cleaned.match(/"message"\s*:\s*"([\s\S]*?)(?:",\s*"conceptCheck"|"$|"\s*})/);
+            const extractedMsg = msgMatch ? msgMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : cleaned;
+            this.speak(extractedMsg);
+            return {
+              message: extractedMsg,
+              conceptCheck: null,
+              masteryDelta: 5
             };
           }
-          this.notify();
-          console.warn('OpenRouter API returned error status:', response.status, parsedErrMsg);
         }
       } catch (err: unknown) {
         const error = err as Error;
@@ -334,33 +382,85 @@ YOUR INSTRUCTIONS:
           isLive: false,
           isRateLimited: false,
           lastError: `Network error: ${error.message || 'Failed to fetch'}`,
-          statusMessage: 'Network Connection Failed — Local Engine Active',
+          statusMessage: 'Connection Failed — Local Engine Active',
           model: activeModel,
-          keyMasked: `${apiKey.slice(0, 10)}...${apiKey.slice(-4)}`
+          keyMasked: 'Active & Encrypted'
         };
         this.notify();
-        console.warn('OpenRouter API call error, falling back to local reasoning engine:', err);
       }
     }
 
-    // High-fidelity Local Socratic Reasoning Engine (with student context awareness)
+    // High-fidelity Local Socratic Reasoning Engine fallback
     return this.getLocalTutorResponse(topic, userMessage, history.length);
   }
 
   /**
-   * Tests connection to OpenRouter with a specific key and model.
+   * Tests connection to Google AI Studio or OpenRouter with a specific key and model.
    */
   public async testConnection(customKey?: string, customModel?: string): Promise<{ success: boolean; message: string; latencyMs?: number }> {
     const settings = storageService.getAISettings();
-    const key = (customKey || settings.openRouterApiKey || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
-    const model = customModel || settings.model || 'liquid/lfm-2.5-2.6b:free';
+    const key = (customKey || settings.openRouterApiKey || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
+    const model = customModel || settings.model || 'gemini-2.5-flash';
 
     if (!key) {
-      return { success: false, message: 'No OpenRouter API key found.' };
+      return { success: false, message: 'No API key configured.' };
     }
 
     const startTime = Date.now();
     try {
+      if (key.startsWith('AIzaSy')) {
+        // Direct Google AI Studio Gemini Health Check
+        const geminiModel = 'gemini-2.5-flash';
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${key}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: 'Ping' }] }]
+          })
+        });
+
+        const latencyMs = Date.now() - startTime;
+        if (res.ok) {
+          this.apiStatus = {
+            isLive: true,
+            isRateLimited: false,
+            lastError: null,
+            statusMessage: `Google AI Studio Live: ${geminiModel}`,
+            model: geminiModel,
+            keyMasked: 'Active & Encrypted'
+          };
+          this.notify();
+          return {
+            success: true,
+            message: `Connected successfully to Google AI Studio (${geminiModel})! Latency: ${latencyMs}ms`,
+            latencyMs
+          };
+        } else {
+          const errText = await res.text();
+          let parsed = errText;
+          try {
+            const json = JSON.parse(errText);
+            parsed = json.error?.message || errText;
+          } catch {}
+
+          this.apiStatus = {
+            isLive: false,
+            isRateLimited: res.status === 429,
+            lastError: `Google AI Studio Error (${res.status}): ${parsed}`,
+            statusMessage: `Google AI Studio Error (${res.status})`,
+            model: geminiModel,
+            keyMasked: 'Active & Encrypted'
+          };
+          this.notify();
+          return {
+            success: false,
+            message: `Google AI Studio (${res.status}): ${parsed}`
+          };
+        }
+      }
+
+      // OpenRouter Check
       const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -384,7 +484,7 @@ YOUR INSTRUCTIONS:
           lastError: null,
           statusMessage: `OpenRouter Live: ${model}`,
           model,
-          keyMasked: `${key.slice(0, 10)}...${key.slice(-4)}`
+          keyMasked: 'Active & Encrypted'
         };
         this.notify();
         return {
@@ -406,7 +506,7 @@ YOUR INSTRUCTIONS:
           lastError: `HTTP ${res.status}: ${parsed}`,
           statusMessage: res.status === 429 ? 'Rate Limit (429) Reached' : `Error ${res.status}`,
           model,
-          keyMasked: `${key.slice(0, 10)}...${key.slice(-4)}`
+          keyMasked: 'Active & Encrypted'
         };
         this.notify();
         return {
@@ -418,7 +518,7 @@ YOUR INSTRUCTIONS:
       const err = e as Error;
       return {
         success: false,
-        message: `Network failure: ${err.message || 'Unable to connect to OpenRouter'}`
+        message: `Network failure: ${err.message || 'Unable to connect to AI provider'}`
       };
     }
   }

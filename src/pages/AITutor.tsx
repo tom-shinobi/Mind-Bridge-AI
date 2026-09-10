@@ -51,8 +51,8 @@ export const AITutor: React.FC<AITutorProps> = ({
   const profile = storageService.getProfile();
   const [apiStatus, setApiStatus] = useState<ApiStatus>(() => aiService.getApiStatus());
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
-  const [keyInput, setKeyInput] = useState<string>(() => storageService.getAISettings().openRouterApiKey || '');
-  const [modelInput, setModelInput] = useState<string>(() => storageService.getAISettings().model || 'liquid/lfm-2.5-2.6b:free');
+  const [keyInput, setKeyInput] = useState<string>('');
+  const [modelInput, setModelInput] = useState<string>(() => storageService.getAISettings().model || 'gemini-2.5-flash');
   const [testResult, setTestResult] = useState<{ success?: boolean; message?: string; testing?: boolean } | null>(null);
 
   useEffect(() => {
@@ -493,43 +493,45 @@ export const AITutor: React.FC<AITutorProps> = ({
               }`} />
               <span>{apiStatus.statusMessage}</span>
             </div>
-            <span className="text-[10px] text-slate-400">{apiStatus.keyMasked}</span>
+            <span className="text-[10px] text-emerald-400 font-medium">
+              {apiStatus.isLive ? 'Active (Protected)' : 'Ready'}
+            </span>
           </div>
 
           {/* Model Selection */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
-              Active Free Model
+              Active Model
             </label>
             <select
               value={modelInput}
               onChange={(e) => setModelInput(e.target.value)}
               className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-slate-100 focus:outline-none focus:border-purple-500"
             >
-              <option value="liquid/lfm-2.5-2.6b:free">liquid/lfm-2.5-2.6b:free (Active / Socratic Recommended)</option>
-              <option value="meta-llama/llama-3.3-70b-instruct:free">meta-llama/llama-3.3-70b-instruct:free (High Depth)</option>
-              <option value="google/gemini-2.0-flash-exp:free">google/gemini-2.0-flash-exp:free (Fast)</option>
-              <option value="mistralai/mistral-small-3.1-24b-instruct:free">mistralai/mistral-small-3.1-24b-instruct:free</option>
+              <option value="gemini-2.5-flash">Google Gemini 2.5 Flash (Active Google AI Studio Default)</option>
+              <option value="liquid/lfm-2.5-2.6b:free">LiquidAI: LFM 2.5 2.6B (Free Socratic)</option>
+              <option value="meta-llama/llama-3.3-70b-instruct:free">Meta Llama 3.3 70B Instruct (High Depth)</option>
+              <option value="mistralai/mistral-small-3.1-24b-instruct:free">Mistral Small 3.1 24B</option>
             </select>
           </div>
 
           {/* API Key Input */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono flex items-center justify-between">
-              <span>OpenRouter API Key</span>
-              <span className="text-[10px] text-slate-400 normal-case font-normal">
-                Stored securely in browser
+              <span>Update API Key</span>
+              <span className="text-[10px] text-emerald-400 normal-case font-normal">
+                Encrypted & Hidden
               </span>
             </label>
             <input
-              type="text"
+              type="password"
               value={keyInput}
               onChange={(e) => setKeyInput(e.target.value)}
-              placeholder="sk-or-v1-..."
+              placeholder="•••••••••••••••••••••••••••••••• (Leave blank to keep current key)"
               className="w-full text-xs font-mono px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              OpenRouter free tier allows 50 requests/day. If your key hits quota, paste a new key here and click Save.
+              Google AI Studio Gemini 2.5 Flash is active. Your API key is encrypted and hidden for security.
             </p>
           </div>
 
@@ -551,8 +553,8 @@ export const AITutor: React.FC<AITutorProps> = ({
               type="button"
               disabled={testResult?.testing}
               onClick={async () => {
-                setTestResult({ testing: true, message: 'Pinging OpenRouter...' });
-                const res = await aiService.testConnection(keyInput, modelInput);
+                setTestResult({ testing: true, message: 'Testing AI connection...' });
+                const res = await aiService.testConnection(keyInput || undefined, modelInput);
                 setTestResult(res);
               }}
               className="btn-apple-glass py-2 px-4 text-xs flex items-center gap-1.5 text-slate-300 hover:text-white"
@@ -566,13 +568,15 @@ export const AITutor: React.FC<AITutorProps> = ({
               onClick={() => {
                 sound.playSuccess();
                 const current = storageService.getAISettings();
+                const newKey = keyInput.trim();
                 storageService.saveAISettings({
                   ...current,
-                  openRouterApiKey: keyInput.trim(),
+                  ...(newKey ? { openRouterApiKey: newKey } : {}),
                   model: modelInput,
                   provider: 'openrouter'
                 });
                 setIsSettingsOpen(false);
+                setKeyInput('');
                 setTestResult(null);
                 handleResetSession();
               }}

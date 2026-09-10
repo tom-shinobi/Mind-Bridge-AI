@@ -139,21 +139,18 @@ class StorageService {
   public getAISettings(): AISettings {
     const loaded = this.load<AISettings>(STORAGE_KEYS.AI_SETTINGS, initialAISettings);
     
-    // Always prioritize the environment variable if present
-    const envKey = import.meta.env.VITE_OPENROUTER_API_KEY;
-    if (envKey && typeof envKey === 'string' && envKey.trim()) {
-      const cleanKey = envKey.trim();
-      // If loaded key doesn't match the environment key or is empty, synchronize it
-      if (!loaded.openRouterApiKey || loaded.openRouterApiKey !== cleanKey) {
-        loaded.openRouterApiKey = cleanKey;
-        loaded.provider = 'openrouter';
+    // Prioritize Gemini / OpenRouter environment key or default Google AI Studio key
+    const envKey = (import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || 'AIzaSyC_7GwAKor3ZIFj9uvq1trZHYcHctOiQcU').trim();
+    if (envKey) {
+      if (!loaded.openRouterApiKey || loaded.openRouterApiKey.startsWith('sk-or') || loaded.openRouterApiKey !== envKey) {
+        loaded.openRouterApiKey = envKey;
         this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
       }
     }
 
-    // Ensure model defaults to liquid/lfm-2.5-2.6b:free if set to older default
-    if (!loaded.model || loaded.model.includes('gemini') || loaded.model === 'default') {
-      loaded.model = 'liquid/lfm-2.5-2.6b:free';
+    // Default model to gemini-2.5-flash
+    if (!loaded.model || loaded.model.includes('liquid') || loaded.model.includes('gemini-2.0') || loaded.model === 'default') {
+      loaded.model = 'gemini-2.5-flash';
       this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
 

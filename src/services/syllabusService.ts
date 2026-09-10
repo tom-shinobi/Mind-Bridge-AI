@@ -1,4 +1,4 @@
-﻿import * as pdfjsLib from 'pdfjs-dist';
+import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
 import { createWorker } from 'tesseract.js';
 import { storageService } from './storageService';
@@ -93,8 +93,8 @@ class SyllabusService {
    */
   public async structureSyllabusWithAI(rawText: string, contextSubject = ''): Promise<ExtractedSyllabus> {
     const settings = storageService.getAISettings();
-    const apiKey = (settings.openRouterApiKey || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
-    const model = settings.model || 'liquid/lfm-2.5-2.6b:free';
+    const apiKey = (settings.openRouterApiKey || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
+    const model = settings.model || 'gemini-2.5-flash';
 
     const systemPrompt = `You are MindBridge Academic Intelligence, an expert curriculum parser.
 Your task is to analyze the provided university syllabus text and extract a clean, organized, hierarchical syllabus structure.
@@ -127,43 +127,76 @@ You MUST return ONLY valid JSON matching this exact structure:
 
     if (apiKey && rawText.trim().length > 20) {
       try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-            'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://mindbridge.ai',
-            'X-Title': 'Mind Bridge AI Syllabus Parser'
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              {
-                role: 'user',
-                content: `Here is the syllabus text to parse (Subject hint: ${contextSubject}):\n\n${rawText.slice(0, 4500)}`
+        let rawContent: string | null = null;
+
+        if (apiKey.startsWith('AIzaSy')) {
+          // Direct Google AI Studio Gemini Engine
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+          const response = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [{ text: systemPrompt }]
+              },
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: `Here is the syllabus text to parse (Subject hint: ${contextSubject}):\n\n${rawText.slice(0, 4500)}` }]
+                }
+              ],
+              generationConfig: {
+                responseMimeType: 'application/json',
+                temperature: 0.2,
+                maxOutputTokens: 2048
               }
-            ],
-            response_format: { type: 'json_object' },
-            max_tokens: 2048
-          })
-        });
+            })
+          });
 
-        if (response.ok) {
-          const data = await response.json();
-          const rawContent = data.choices?.[0]?.message?.content;
-          if (rawContent) {
-            let cleaned = rawContent.trim();
-            if (cleaned.startsWith('```json')) {
-              cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-            } else if (cleaned.startsWith('```')) {
-              cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
-            }
+          if (response.ok) {
+            const data = await response.json();
+            rawContent = data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+          }
+        } else {
+          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey}`,
+              'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://mindbridge.ai',
+              'X-Title': 'Mind Bridge AI Syllabus Parser'
+            },
+            body: JSON.stringify({
+              model,
+              messages: [
+                { role: 'system', content: systemPrompt },
+                {
+                  role: 'user',
+                  content: `Here is the syllabus text to parse (Subject hint: ${contextSubject}):\n\n${rawText.slice(0, 4500)}`
+                }
+              ],
+              response_format: { type: 'json_object' },
+              max_tokens: 2048
+            })
+          });
 
-            const parsed: ExtractedSyllabus = JSON.parse(cleaned);
-            if (parsed.subject && Array.isArray(parsed.modules)) {
-              return parsed;
-            }
+          if (response.ok) {
+            const data = await response.json();
+            rawContent = data.choices?.[0]?.message?.content || null;
+          }
+        }
+
+        if (rawContent) {
+          let cleaned = rawContent.trim();
+          if (cleaned.startsWith('```json')) {
+            cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+          } else if (cleaned.startsWith('```')) {
+            cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
+          }
+
+          const parsed: ExtractedSyllabus = JSON.parse(cleaned);
+          if (parsed.subject && Array.isArray(parsed.modules)) {
+            return parsed;
           }
         }
       } catch (err) {
