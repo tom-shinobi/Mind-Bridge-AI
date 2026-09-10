@@ -58,7 +58,7 @@ export const LearningGaps: React.FC<LearningGapsProps> = ({ gaps, onNavigate }) 
     <div className="space-y-6 animate-fade-in pb-12">
       
       {/* Header Banner */}
-      <div className="liquid-glass-card p-6 relative overflow-hidden">
+      <div className="apple-liquid-glass p-6 sm:p-8 relative overflow-hidden">
         <div className="glow-orange -top-24 -right-24 opacity-20" />
         
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -70,32 +70,32 @@ export const LearningGaps: React.FC<LearningGapsProps> = ({ gaps, onNavigate }) 
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Learning Gap Identification
             </h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
               Mind Bridge AI analyzes prior test mistakes and conceptual check-ins to isolate the exact micro-concepts holding your performance back, categorizing each by severity.
             </p>
           </div>
 
           <div className="flex items-center gap-2 font-mono text-xs">
-            <span className="px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-slate-300">
-              Active: <strong className="text-rose-400">{gaps.filter(g => g.status !== 'resolved').length}</strong>
+            <span className="px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/15 backdrop-blur-md text-slate-200">
+              Active: <strong className="text-rose-400 font-bold">{gaps.filter(g => g.status !== 'resolved').length}</strong>
             </span>
-            <span className="px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-slate-300">
-              Resolved: <strong className="text-emerald-400">{gaps.filter(g => g.status === 'resolved').length}</strong>
+            <span className="px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/15 backdrop-blur-md text-slate-200">
+              Resolved: <strong className="text-emerald-400 font-bold">{gaps.filter(g => g.status === 'resolved').length}</strong>
             </span>
           </div>
         </div>
 
         {/* Severity Legend */}
         <div className="flex flex-wrap gap-2.5 mt-5 pt-4 border-t border-white/[0.08]">
-          <span className="text-xs text-slate-400 font-mono self-center mr-2">Severity Filter:</span>
+          <span className="text-xs text-slate-300 font-mono self-center mr-2">Severity Filter:</span>
           {(['all', 'critical', 'high', 'medium', 'resolved'] as const).map((lvl) => (
             <button
               key={lvl}
               onClick={() => { sound.playClick(); setFilter(lvl); }}
-              className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold uppercase transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-mono font-medium uppercase transition-all ${
                 filter === lvl
-                  ? 'btn-skeuo-primary text-white shadow-md'
-                  : 'bg-white/[0.03] text-slate-400 border border-white/10 hover:text-white'
+                  ? 'bg-white/[0.18] text-white border border-white/40 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_8px_20px_rgba(0,0,0,0.3)]'
+                  : 'bg-white/[0.04] text-[#A1A1A6] border border-white/10 hover:text-white hover:bg-white/[0.08]'
               }`}
             >
               {lvl}
@@ -127,12 +127,12 @@ export const LearningGaps: React.FC<LearningGapsProps> = ({ gaps, onNavigate }) 
               return (
                 <div
                   key={gap.id}
-                  className={`liquid-glass-card p-5 space-y-3 transition-all ${
+                  className={`p-5 space-y-3 transition-all ${
                     isResolved
-                      ? 'border-emerald-500/30 bg-emerald-950/10'
+                      ? 'liquid-glass-success'
                       : isCritical
-                      ? 'border-rose-500/40 bg-rose-950/15 shadow-[0_4px_20px_rgba(244,63,94,0.12)]'
-                      : 'border-white/10'
+                      ? 'liquid-glass-danger'
+                      : 'liquid-glass-block'
                   }`}
                 >
                   {/* Card Header */}
@@ -198,9 +198,9 @@ export const LearningGaps: React.FC<LearningGapsProps> = ({ gaps, onNavigate }) 
                           sound.playClick();
                           onNavigate('tutor', { topic: gap.topic });
                         }}
-                        className="btn-skeuo-primary py-1.5 px-3 text-xs flex items-center gap-1.5"
+                        className="btn-apple-primary py-1.5 px-3 text-xs flex items-center gap-1.5"
                       >
-                        <Sparkles className="w-3.5 h-3.5" />
+                        <Sparkles className="w-3.5 h-3.5 text-white" />
                         <span>AI Tutor Drill</span>
                       </button>
 
@@ -209,10 +209,10 @@ export const LearningGaps: React.FC<LearningGapsProps> = ({ gaps, onNavigate }) 
                           sound.playClick();
                           onNavigate('tests', { topic: gap.topic });
                         }}
-                        className="btn-skeuo-orange py-1.5 px-3 text-xs flex items-center gap-1.5"
+                        className="btn-apple-glass py-1.5 px-3 text-xs flex items-center gap-1.5"
                       >
                         <span>Verify with Test</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <ArrowRight className="w-3.5 h-3.5 text-white/90" />
                       </button>
                     </div>
                   </div>
@@ -236,11 +236,11 @@ export const LearningGaps: React.FC<LearningGapsProps> = ({ gaps, onNavigate }) 
             {strongTopics.map((strong, idx) => (
               <div
                 key={idx}
-                className="liquid-glass-card p-4 space-y-2 border-emerald-500/20 bg-emerald-950/10"
+                className="liquid-glass-success p-4 space-y-2"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="text-[10px] font-mono font-semibold text-emerald-400 block mb-0.5">
+                    <span className="text-[10px] font-mono font-semibold text-emerald-300 block mb-0.5">
                       {strong.subject}
                     </span>
                     <h5 className="text-xs font-bold text-white leading-snug">{strong.topic}</h5>
@@ -250,7 +250,7 @@ export const LearningGaps: React.FC<LearningGapsProps> = ({ gaps, onNavigate }) 
                   </span>
                 </div>
 
-                <p className="text-[10px] text-slate-400 font-mono bg-black/30 p-1.5 rounded-lg border border-white/5">
+                <p className="text-[10px] text-slate-300 font-mono bg-white/[0.05] p-2 rounded-xl border border-white/10">
                   Verified: {strong.provenBy}
                 </p>
 
@@ -262,12 +262,12 @@ export const LearningGaps: React.FC<LearningGapsProps> = ({ gaps, onNavigate }) 
             ))}
           </div>
 
-          <div className="liquid-glass p-4 rounded-xl space-y-2 text-xs text-slate-400">
+          <div className="liquid-glass-block p-4 rounded-2xl space-y-2 text-xs text-slate-300">
             <p className="font-semibold text-white flex items-center gap-1.5">
               <Brain className="w-4 h-4 text-purple-400" />
               How Gaps Drive Your Schedule
             </p>
-            <p className="text-[11px] leading-relaxed">
+            <p className="text-[11px] leading-relaxed text-slate-400">
               Weak topics are automatically allocated 75% of your weekly deep work slots. Mastered topics receive short 15-minute maintenance check-ins.
             </p>
           </div>

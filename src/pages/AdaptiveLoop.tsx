@@ -125,7 +125,7 @@ export const AdaptiveLoop: React.FC<AdaptiveLoopProps> = ({
     <div className="space-y-6 animate-fade-in pb-12">
       
       {/* Header */}
-      <div className="liquid-glass-card p-6 relative overflow-hidden">
+      <div className="apple-liquid-glass p-6 sm:p-8 relative overflow-hidden">
         <div className="glow-purple -top-24 -right-24 opacity-25" />
         <div className="glow-orange -bottom-24 -left-24 opacity-20" />
         
@@ -138,7 +138,7 @@ export const AdaptiveLoop: React.FC<AdaptiveLoopProps> = ({
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Mind Bridge AI Adaptive Engine
             </h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
               The core differentiator: every test submission, tutoring session, and workload check-in feeds directly into our closed loop, keeping your academic trajectory perpetually optimized.
             </p>
           </div>
@@ -149,23 +149,23 @@ export const AdaptiveLoop: React.FC<AdaptiveLoopProps> = ({
                 sound.playClick();
                 onNavigate('tests', { topic: gaps[0]?.topic || 'B-Trees & B+ Tree Indexing' });
               }}
-              className="btn-skeuo-primary py-2.5 px-4 text-xs font-semibold flex items-center gap-2"
+              className="btn-apple-primary py-2.5 px-4 text-xs font-semibold flex items-center gap-2"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 text-white" />
               <span>Test Loop with Diagnostic</span>
             </button>
           </div>
         </div>
 
         {/* Central Concept Callout */}
-        <div className="mt-6 p-4 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-4 flex-wrap">
+        <div className="mt-6 p-4 rounded-2xl liquid-glass-adaptive flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <span className="led-indicator led-emerald" />
             <p className="text-xs text-slate-200">
               <strong>Core Philosophy:</strong> Understand the student → Identify the gap → Personalize the learning → Measure the result → Adapt the plan.
             </p>
           </div>
-          <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+          <span className="text-[10px] font-mono px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 border border-purple-400/40">
             100% Autonomous Feedback
           </span>
         </div>
@@ -174,7 +174,7 @@ export const AdaptiveLoop: React.FC<AdaptiveLoopProps> = ({
       {/* Visual 11-Step Interactive Pipeline Flow */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono flex items-center gap-2">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono flex items-center gap-2">
             <span>The 11-Step Adaptive Workflow Pipeline</span>
           </h3>
           <span className="text-[11px] text-purple-400 font-mono">Interactive Nodes</span>
@@ -191,7 +191,7 @@ export const AdaptiveLoop: React.FC<AdaptiveLoopProps> = ({
                   sound.playClick();
                   onNavigate(step.targetTab);
                 }}
-                className="liquid-glass-card p-4 space-y-2 border-white/10 hover:border-purple-500/50 cursor-pointer transition-all group relative overflow-hidden"
+                className="liquid-glass-block p-4 space-y-2 border-white/15 hover:border-purple-500/50 cursor-pointer transition-all group relative overflow-hidden"
               >
                 <div className="flex items-center justify-between text-[11px] font-mono">
                   <span className="text-purple-400 font-bold">{step.num}</span>
@@ -224,7 +224,7 @@ export const AdaptiveLoop: React.FC<AdaptiveLoopProps> = ({
       </div>
 
       {/* Real-Time Adaptive Audit Log */}
-      <div className="liquid-glass-card p-6 space-y-4">
+      <div className="apple-liquid-glass p-6 space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
           <div className="flex items-center gap-2.5">
             <Clock className="w-4 h-4 text-purple-400" />
@@ -241,7 +241,7 @@ export const AdaptiveLoop: React.FC<AdaptiveLoopProps> = ({
           {auditLog.map((log) => (
             <div
               key={log.id}
-              className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-2 hover:border-white/10 transition-colors"
+              className="p-4 rounded-xl liquid-glass-block space-y-2 hover:border-white/20 transition-colors"
             >
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">

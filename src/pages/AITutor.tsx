@@ -294,27 +294,27 @@ export const AITutor: React.FC<AITutorProps> = ({
 
               {/* Embedded Socratic Concept Check Question */}
               {isAi && msg.conceptCheck && (
-                <div className="mt-3 p-4 rounded-xl bg-black/50 border border-purple-500/30 space-y-3 shadow-inner">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-pink-400 font-bold flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
-                      Conceptual Understanding Check
+                <div className="mt-3 p-5 rounded-2xl liquid-glass-adaptive border border-purple-500/30 space-y-3.5 shadow-inner">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <span className="text-xs font-mono uppercase tracking-wider text-purple-300 font-semibold flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30">
+                      <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                      Concept Understanding Check
                     </span>
                     {msg.conceptCheck.studentAnswer && (
                       <span
-                        className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                        className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
                           msg.conceptCheck.isCorrect
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                            : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
+                            : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                         }`}
                       >
                         {msg.conceptCheck.isCorrect ? (
                           <>
-                            <CheckCircle2 className="w-3 h-3" /> Correct (+15% Mastery)
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Correct (+15% Mastery)
                           </>
                         ) : (
                           <>
-                            <XCircle className="w-3 h-3" /> Conceptual Misconception
+                            <XCircle className="w-3.5 h-3.5" /> Conceptual Misconception
                           </>
                         )}
                       </span>
@@ -323,28 +323,36 @@ export const AITutor: React.FC<AITutorProps> = ({
 
                   <FormattedContent
                     content={msg.conceptCheck.question}
-                    className="text-xs sm:text-sm font-semibold text-white break-words"
+                    className="text-xs sm:text-sm font-semibold text-white break-words leading-relaxed"
                   />
 
-                  {/* Options */}
+                  {/* Options (Exact Match to Quest & Test MCQ System) */}
                   {msg.conceptCheck.options && (
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {msg.conceptCheck.options.map((opt, optIdx) => {
                         const isSelected = msg.conceptCheck?.studentAnswer === opt;
                         const isTheCorrectAnswer = opt === msg.conceptCheck?.correctAnswer;
                         const hasAnswered = !!msg.conceptCheck?.studentAnswer;
 
                         let btnStyle =
-                          'bg-white/[0.04] border-white/10 hover:bg-white/[0.08] text-slate-300';
+                          'border-white/15 bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] hover:border-white/30';
+                        let badgeStyle =
+                          'border-white/20 bg-white/[0.08] text-slate-300';
+
                         if (hasAnswered) {
                           if (isTheCorrectAnswer) {
                             btnStyle =
-                              'bg-emerald-950/40 border-emerald-500/50 text-emerald-200 font-semibold';
+                              'bg-emerald-500/20 border-emerald-400/50 text-emerald-100 font-semibold shadow-[0_0_12px_rgba(16,185,129,0.2)]';
+                            badgeStyle =
+                              'border-emerald-400 bg-emerald-500/40 text-emerald-200';
                           } else if (isSelected && !msg.conceptCheck?.isCorrect) {
                             btnStyle =
-                              'bg-rose-950/40 border-rose-500/50 text-rose-200 line-through';
+                              'bg-rose-500/20 border-rose-400/50 text-rose-100 line-through';
+                            badgeStyle =
+                              'border-rose-400 bg-rose-500/40 text-rose-200';
                           } else {
-                            btnStyle = 'bg-white/[0.02] border-white/5 opacity-50';
+                            btnStyle = 'opacity-40 border-white/5 bg-white/[0.02] text-slate-400';
+                            badgeStyle = 'border-white/10 bg-white/[0.04] text-slate-500';
                           }
                         }
 
@@ -353,12 +361,12 @@ export const AITutor: React.FC<AITutorProps> = ({
                             key={optIdx}
                             disabled={hasAnswered}
                             onClick={() => handleOptionSelect(msg.id, opt)}
-                            className={`w-full text-left p-3 rounded-xl border text-xs sm:text-sm transition-all flex items-start gap-2.5 break-words ${btnStyle}`}
+                            className={`w-full text-left p-3 rounded-2xl border text-xs sm:text-sm transition-all flex items-center gap-3 backdrop-blur-xl cursor-pointer break-words ${btnStyle}`}
                           >
-                            <span className="w-5 h-5 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center font-mono font-bold text-[10px] flex-shrink-0 mt-0.5">
+                            <span className={`w-6 h-6 rounded-xl border flex items-center justify-center font-mono font-bold text-xs flex-shrink-0 ${badgeStyle}`}>
                               {String.fromCharCode(65 + optIdx)}
                             </span>
-                            <FormattedContent content={opt} className="inline text-xs sm:text-sm break-words" />
+                            <FormattedContent content={opt} className="inline text-xs sm:text-sm break-words leading-snug" />
                           </button>
                         );
                       })}
@@ -367,8 +375,8 @@ export const AITutor: React.FC<AITutorProps> = ({
 
                   {/* Explanation after answering */}
                   {msg.conceptCheck.studentAnswer && msg.conceptCheck.explanation && (
-                    <div className="p-3 rounded-lg bg-white/[0.03] border border-white/5 text-xs text-slate-300 leading-relaxed break-words">
-                      <strong className="text-purple-300 font-mono">Why: </strong>
+                    <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-slate-200 leading-relaxed backdrop-blur-md break-words">
+                      <strong className="text-purple-300 font-mono">Pedagogical Rationale: </strong>
                       <FormattedContent content={msg.conceptCheck.explanation} className="inline text-xs" />
                     </div>
                   )}
@@ -776,7 +784,7 @@ export const AITutor: React.FC<AITutorProps> = ({
                   sound.playClick();
                   setSelectedTopic(e.target.value);
                 }}
-                className="text-xs px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-slate-200 focus:outline-none focus:border-purple-500/50"
+                className="text-xs px-3.5 py-2 rounded-xl liquid-glass-input text-slate-200 focus:outline-none focus:border-purple-500/50"
               >
                 <option value="General Academic Advisor & Learning Gaps">
                   🎓 General Academic Advisor (All Gaps & Records)
@@ -829,12 +837,12 @@ export const AITutor: React.FC<AITutorProps> = ({
           <button
             type="button"
             onClick={() => setIsSettingsOpen(true)}
-            className={`flex items-center gap-2 border px-3 py-1.5 rounded-lg text-xs font-mono shadow-inner transition-all ${
+            className={`flex items-center gap-2 border px-3 py-1.5 rounded-xl text-xs font-mono shadow-inner transition-all ${
               apiStatus.isLive
-                ? 'bg-black/50 border-emerald-500/30 text-emerald-400 hover:border-emerald-500/50'
+                ? 'liquid-glass-emerald border-emerald-500/30 text-emerald-300 hover:border-emerald-500/50'
                 : apiStatus.isRateLimited
-                ? 'bg-black/50 border-amber-500/30 text-amber-400 hover:border-amber-500/50'
-                : 'bg-black/50 border-rose-500/30 text-rose-400 hover:border-rose-500/50'
+                ? 'liquid-glass-amber border-amber-500/30 text-amber-300 hover:border-amber-500/50'
+                : 'liquid-glass-danger border-rose-500/30 text-rose-300 hover:border-rose-500/50'
             }`}
             title="Click to view AI status, test connection or change API key"
           >
@@ -853,7 +861,7 @@ export const AITutor: React.FC<AITutorProps> = ({
             <Settings className="w-3.5 h-3.5 ml-1 text-slate-400" />
           </button>
 
-          <div className="flex items-center gap-2 bg-black/50 border border-purple-500/30 px-3 py-1.5 rounded-lg text-purple-300 shadow-inner">
+          <div className="flex items-center gap-2 liquid-glass-adaptive border border-purple-500/30 px-3.5 py-1.5 rounded-xl text-purple-200 shadow-inner">
             <Database className="w-3.5 h-3.5 text-purple-400" />
             <span className="font-medium">
               Student Context Synced: <strong className="text-white">{profile.name}</strong> • CGPA <strong className="text-pink-400">{profile.cgpa}</strong> • <strong className="text-amber-400">{gaps.length} Active Gaps</strong>

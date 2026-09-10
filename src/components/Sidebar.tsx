@@ -140,17 +140,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   return (
-    <aside className="w-full lg:w-72 flex-shrink-0 flex flex-col justify-between py-6 px-3.5 lg:min-h-[calc(100vh-4rem)] border-r border-white/[0.08] bg-[#000000]/40 backdrop-blur-3xl select-none">
+    <aside className="w-full lg:w-72 flex-shrink-0 flex flex-col justify-between py-6 px-3.5 lg:min-h-[calc(100vh-4rem)] border-r border-white/[0.08] bg-[#030712]/50 backdrop-blur-3xl select-none">
       
       {/* Categorized Navigation Modules */}
       <div className="space-y-5">
-        <div className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#A1A1A6] font-mono flex items-center justify-between border-b border-white/[0.08]">
-          <span className="flex items-center gap-1.5 text-white/90">
-            <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_#ffffff] animate-pulse" />
-            Workspace
+        {/* Workspace Brand Capsule */}
+        <div className="px-3 py-2 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-xl flex items-center justify-between text-[11px] font-mono">
+          <span className="flex items-center gap-2 text-white/95 font-medium tracking-wide">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400 shadow-[0_0_8px_#38BDF8]" />
+            </span>
+            <span>Workspace Modules</span>
           </span>
-          <span className="text-[10px] text-[#86868B] font-mono">
-            4 Modules
+          <span className="text-[10px] text-[#A1A1A6] px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10">
+            4 Sectors
           </span>
         </div>
 
@@ -158,7 +162,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div key={idx} className="space-y-1">
             {/* Module Category Header */}
             <div className="px-2 pt-1 pb-1 flex items-center justify-between">
-              <span className="text-[10px] font-mono font-semibold tracking-wider text-[#86868B] uppercase">
+              <span className="text-[10px] font-mono font-semibold tracking-wider text-[#86868B] uppercase flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-white/40" />
                 {section.title}
               </span>
               {section.badge && (
@@ -180,29 +185,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     sound.playClick();
                     onSelectTab(item.id);
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-2xl text-left transition-all group relative ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-2xl text-left transition-all duration-200 group relative ${
                     isActive
-                      ? 'bg-white/[0.12] text-white border border-white/30 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_8px_20px_rgba(0,0,0,0.3)]'
-                      : 'text-[#A1A1A6] hover:text-white hover:bg-white/[0.05] border border-transparent'
+                      ? 'bg-gradient-to-r from-white/[0.16] via-white/[0.10] to-white/[0.04] text-white border border-white/30 border-t-white/60 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_8px_24px_rgba(0,0,0,0.35)]'
+                      : 'text-[#A1A1A6] hover:text-white hover:bg-white/[0.06] hover:border-white/15 border border-transparent'
                   }`}
                 >
-                  {/* Active Apple liquid glass sheen indicator */}
-                  {isActive && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-5 rounded-r-full bg-white shadow-[0_0_10px_#FFFFFF]" />
-                  )}
-
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
-                      className={`p-1.5 rounded-xl transition-colors ${
+                      className={`p-2 rounded-xl transition-all ${
                         isActive
-                          ? 'bg-white/20 text-white border border-white/30 shadow-[0_0_10px_rgba(255,255,255,0.3)]'
-                          : 'text-[#86868B] group-hover:text-white bg-white/[0.03] group-hover:bg-white/10'
+                          ? 'bg-gradient-to-br from-white/30 to-white/10 text-white border border-white/40 shadow-[0_0_14px_rgba(255,255,255,0.35)]'
+                          : 'text-[#86868B] group-hover:text-white bg-white/[0.04] group-hover:bg-white/10 border border-transparent group-hover:border-white/15'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
                     </div>
                     <div className="truncate">
-                      <p className="text-xs font-medium leading-tight">{item.label}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs font-semibold leading-tight">{item.label}</p>
+                        {isActive && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#38BDF8] animate-pulse flex-shrink-0" />
+                        )}
+                      </div>
                       <p className="text-[10px] text-[#86868B] leading-tight truncate hidden sm:block mt-0.5">
                         {item.description}
                       </p>
@@ -227,11 +232,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Bottom Apple Liquid Glass Workload & Health Card */}
       <div className="mt-5 pt-3 border-t border-white/[0.08]">
-        <div className="apple-liquid-glass p-3.5 relative overflow-hidden group border border-white/20">
+        <div className="liquid-glass-block p-4 relative overflow-hidden group border border-white/20 shadow-xl">
           <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center gap-2">
               <HeartPulse className="w-4 h-4 text-pink-400 animate-pulse drop-shadow-[0_0_6px_rgba(244,114,182,0.6)]" />
-              <span className="text-xs font-medium text-[#F5F5F7]">Workload Balance</span>
+              <span className="text-xs font-semibold text-[#F5F5F7]">Workload Balance</span>
             </div>
             <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34D399]" />
           </div>

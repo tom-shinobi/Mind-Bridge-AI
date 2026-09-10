@@ -34,7 +34,7 @@ export const PersonalizedSyllabus: React.FC<PersonalizedSyllabusProps> = ({
     <div className="space-y-6 animate-fade-in pb-12">
       
       {/* Header */}
-      <div className="liquid-glass-card p-6 relative overflow-hidden">
+      <div className="apple-liquid-glass p-6 sm:p-8 relative overflow-hidden">
         <div className="glow-purple -top-24 -right-24 opacity-25" />
         
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -46,7 +46,7 @@ export const PersonalizedSyllabus: React.FC<PersonalizedSyllabusProps> = ({
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Personalized Syllabus
             </h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
               Unlike a fixed university syllabus that treats all students identically, Mind Bridge AI dynamically re-orders topics to tackle your verified performance gaps first.
             </p>
           </div>
@@ -54,7 +54,7 @@ export const PersonalizedSyllabus: React.FC<PersonalizedSyllabusProps> = ({
           <div className="flex items-center gap-3">
             <div className="text-right">
               <span className="text-xs text-slate-400 font-mono block">Curriculum Completion</span>
-              <span className="text-xl font-bold font-mono text-purple-300">
+              <span className="text-2xl font-bold font-mono text-purple-300">
                 {Math.round(
                   (syllabus.filter((s) => s.status === 'mastered').length / syllabus.length) * 100
                 )}%
@@ -66,14 +66,14 @@ export const PersonalizedSyllabus: React.FC<PersonalizedSyllabusProps> = ({
         {/* Filter Controls */}
         <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-4 border-t border-white/[0.08]">
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
-              <Filter className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
+              <Filter className="w-3.5 h-3.5 text-purple-400" />
               <span>Subject:</span>
             </div>
             <select
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              className="text-xs px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-purple-500/50"
+              className="liquid-glass-input text-xs px-3.5 py-1.5 rounded-xl"
             >
               <option value="all">All Subjects ({syllabus.length} topics)</option>
               {subjects.map((sub) => (
@@ -81,13 +81,13 @@ export const PersonalizedSyllabus: React.FC<PersonalizedSyllabusProps> = ({
               ))}
             </select>
 
-            <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono ml-2">
+            <div className="flex items-center gap-1.5 text-xs text-slate-300 font-mono ml-2">
               <span>Status:</span>
             </div>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="text-xs px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-purple-500/50"
+              className="liquid-glass-input text-xs px-3.5 py-1.5 rounded-xl"
             >
               <option value="all">All Statuses</option>
               <option value="in_progress">In Progress</option>
@@ -112,19 +112,19 @@ export const PersonalizedSyllabus: React.FC<PersonalizedSyllabusProps> = ({
           return (
             <div
               key={topic.id}
-              className={`liquid-glass-card p-4 sm:p-5 transition-all ${
+              className={`p-4 sm:p-5 transition-all ${
                 isMastered
-                  ? 'border-emerald-500/20 bg-emerald-950/5'
+                  ? 'liquid-glass-success'
                   : isRemediation
-                  ? 'border-purple-500/30 bg-purple-950/15'
-                  : 'border-white/10'
+                  ? 'liquid-glass-adaptive'
+                  : 'liquid-glass-block'
               }`}
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 
                 {/* Topic Info */}
                 <div className="flex items-start gap-3.5">
-                  <div className="w-8 h-8 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center font-mono font-bold text-xs text-purple-300 flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-white/[0.08] border border-white/15 backdrop-blur-md flex items-center justify-center font-mono font-bold text-xs text-purple-300 flex-shrink-0 mt-0.5">
                     #{index + 1}
                   </div>
 
@@ -133,7 +133,7 @@ export const PersonalizedSyllabus: React.FC<PersonalizedSyllabusProps> = ({
                       <span className="text-xs font-mono font-semibold text-purple-300">
                         {topic.subject}
                       </span>
-                      <span className="text-[11px] text-slate-500 font-mono">• {topic.moduleName}</span>
+                      <span className="text-[11px] text-slate-400 font-mono">• {topic.moduleName}</span>
 
                       {isRemediation && !isMastered && (
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-pink-500/20 text-pink-300 border border-pink-500/30 flex items-center gap-1">
@@ -148,7 +148,7 @@ export const PersonalizedSyllabus: React.FC<PersonalizedSyllabusProps> = ({
                             ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                             : topic.status === 'in_progress'
                             ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
-                            : 'bg-slate-700/40 text-slate-300'
+                            : 'bg-white/10 text-slate-300 border border-white/15'
                         }`}
                       >
                         {topic.status.replace('_', ' ')}
@@ -159,7 +159,7 @@ export const PersonalizedSyllabus: React.FC<PersonalizedSyllabusProps> = ({
 
                     <div className="flex items-center gap-4 text-xs text-slate-400 font-mono mt-2">
                       <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />
+                        <Clock className="w-3.5 h-3.5 text-purple-400" />
                         {topic.completedHours}h / {topic.estimatedHours}h Estimated
                       </span>
                       <span>•</span>
@@ -175,7 +175,7 @@ export const PersonalizedSyllabus: React.FC<PersonalizedSyllabusProps> = ({
                       <span>Progress</span>
                       <span>{topic.masteryPercentage}%</span>
                     </div>
-                    <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-white/[0.08] rounded-full h-1.5 overflow-hidden border border-white/10">
                       <div
                         className={`h-full rounded-full transition-all ${
                           isMastered ? 'bg-emerald-500' : 'bg-gradient-to-r from-purple-500 to-pink-500'
@@ -190,8 +190,8 @@ export const PersonalizedSyllabus: React.FC<PersonalizedSyllabusProps> = ({
                       sound.playClick();
                       onNavigate('tutor', { topic: topic.topic });
                     }}
-                    className={`py-1.5 px-3.5 text-xs flex items-center gap-1.5 whitespace-nowrap ${
-                      isMastered ? 'btn-skeuo-glass' : 'btn-skeuo-primary'
+                    className={`py-2 px-4 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap ${
+                      isMastered ? 'btn-apple-glass' : 'btn-apple-primary'
                     }`}
                   >
                     <Bot className="w-3.5 h-3.5" />

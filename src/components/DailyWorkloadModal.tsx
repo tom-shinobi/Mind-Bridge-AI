@@ -14,8 +14,6 @@ import type { WorkloadLevel, TimetableBlock, AdaptiveAuditEntry } from '../types
 import { adaptiveEngine } from '../services/adaptiveEngine';
 import { sound } from '../services/soundService';
 import { FaderSlider } from './hardware/FaderSlider';
-import { HardwareButton } from './hardware/HardwareButton';
-import { ScrewRivet } from './hardware/ScrewRivet';
 
 interface DailyWorkloadModalProps {
   isOpen: boolean;
@@ -49,21 +47,15 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in">
       <div 
-        className="hardware-chassis max-w-lg w-full relative p-6 sm:p-7 shadow-[0_30px_70px_rgba(0,0,0,0.95)]"
+        className="apple-liquid-glass max-w-lg w-full relative p-6 sm:p-7 rounded-3xl border border-white/20 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Hardware Corner Screws */}
-        <ScrewRivet className="absolute top-3.5 left-3.5" angle={45} />
-        <ScrewRivet className="absolute top-3.5 right-3.5" angle={135} />
-        <ScrewRivet className="absolute bottom-3.5 left-3.5" angle={90} />
-        <ScrewRivet className="absolute bottom-3.5 right-3.5" angle={180} />
-
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-white/[0.08] relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#F0451E]/20 border border-[#F0451E]/40 flex items-center justify-center text-[#F0451E]">
+            <div className="w-10 h-10 rounded-2xl bg-[#F0451E]/20 border border-[#F0451E]/40 flex items-center justify-center text-[#F0451E]">
               <HeartPulse className="w-5 h-5 animate-pulse" />
             </div>
             <div>
@@ -80,7 +72,7 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
               sound.playClick();
               onClose();
             }}
-            className="w-7 h-7 rounded-full bg-[#1C1D22] border border-white/10 text-slate-400 hover:text-white flex items-center justify-center"
+            className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-all"
           >
             <X className="w-4 h-4" />
           </button>
@@ -94,16 +86,16 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
             <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-2 font-mono">
               Academic Capacity State
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               
               {/* Light */}
               <button
                 type="button"
                 onClick={() => { sound.playClick(); setSelectedLevel('light'); }}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3.5 rounded-2xl border text-left transition-all ${
                   selectedLevel === 'light'
-                    ? 'border-emerald-500/50 bg-emerald-950/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
-                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]'
+                    ? 'liquid-glass-emerald border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.25)]'
+                    : 'liquid-glass-block border-white/[0.08] hover:border-white/20'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -112,7 +104,7 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
                   </div>
                   <span className="led-indicator led-emerald" />
                 </div>
-                <p className="text-[10px] text-slate-400 leading-tight">
+                <p className="text-[10px] text-slate-300 leading-tight">
                   High mental capacity. Peak energy for deep work.
                 </p>
               </button>
@@ -121,10 +113,10 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
               <button
                 type="button"
                 onClick={() => { sound.playClick(); setSelectedLevel('balanced'); }}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3.5 rounded-2xl border text-left transition-all ${
                   selectedLevel === 'balanced'
-                    ? 'border-purple-500/50 bg-purple-950/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
-                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]'
+                    ? 'liquid-glass-adaptive border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.25)]'
+                    : 'liquid-glass-block border-white/[0.08] hover:border-white/20'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -133,7 +125,7 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
                   </div>
                   <span className="led-indicator led-violet" />
                 </div>
-                <p className="text-[10px] text-slate-400 leading-tight">
+                <p className="text-[10px] text-slate-300 leading-tight">
                   Standard college day. Maintain regular pacing.
                 </p>
               </button>
@@ -142,19 +134,19 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
               <button
                 type="button"
                 onClick={() => { sound.playClick(); setSelectedLevel('heavy'); }}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3.5 rounded-2xl border text-left transition-all ${
                   selectedLevel === 'heavy'
-                    ? 'border-[#F0451E]/60 bg-[#F0451E]/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
-                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]'
+                    ? 'liquid-glass-amber border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.25)]'
+                    : 'liquid-glass-block border-white/[0.08] hover:border-white/20'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1.5 font-mono font-bold text-xs text-[#FF6340] uppercase">
+                  <div className="flex items-center gap-1.5 font-mono font-bold text-xs text-amber-400 uppercase">
                     <Frown className="w-3.5 h-3.5" /> Heavy Load
                   </div>
                   <span className="led-indicator led-amber" />
                 </div>
-                <p className="text-[10px] text-slate-400 leading-tight">
+                <p className="text-[10px] text-slate-300 leading-tight">
                   Deadlines or test today. Lighten non-critical blocks.
                 </p>
               </button>
@@ -163,10 +155,10 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
               <button
                 type="button"
                 onClick={() => { sound.playClick(); setSelectedLevel('overwhelmed'); }}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3.5 rounded-2xl border text-left transition-all ${
                   selectedLevel === 'overwhelmed'
-                    ? 'border-rose-500/60 bg-rose-950/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]'
-                    : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]'
+                    ? 'liquid-glass-danger border-rose-500/60 shadow-[0_0_20px_rgba(244,63,94,0.25)]'
+                    : 'liquid-glass-block border-white/[0.08] hover:border-white/20'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -175,7 +167,7 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
                   </div>
                   <span className="led-indicator led-rose" />
                 </div>
-                <p className="text-[10px] text-slate-400 leading-tight">
+                <p className="text-[10px] text-slate-300 leading-tight">
                   Fatigued. Shift heavy tasks to weekend, keep light review.
                 </p>
               </button>
@@ -184,7 +176,7 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
           </div>
 
           {/* Physical Fader Slider for Stress Rating */}
-          <div className="p-4 rounded-xl bg-[#141519] border border-white/10 space-y-2">
+          <div className="p-4 rounded-2xl liquid-glass-block space-y-2">
             <div className="flex justify-between items-center text-xs font-mono text-slate-300">
               <span className="font-bold uppercase tracking-widest text-[10px]">
                 Cognitive Fatigue / Stress Potentiometer
@@ -216,12 +208,12 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Lab report due, exams approaching..."
-              className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-[#F0451E]/50"
+              className="w-full px-3.5 py-2.5 rounded-xl liquid-glass-input text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-purple-500/50"
             />
           </div>
 
           {/* Ethical Disclaimer Warning */}
-          <div className="p-3 rounded-xl bg-black/40 border border-white/10 flex items-start gap-2.5">
+          <div className="p-3.5 rounded-2xl liquid-glass-block flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 text-[#F0451E] flex-shrink-0 mt-0.5" />
             <p className="text-[10px] text-slate-300 font-mono leading-relaxed">
               <strong className="text-white">Academic Study Planning Notice:</strong> Mind Bridge AI redistributes study blocks to prevent fatigue. This tool does not provide medical or psychological diagnosis.
@@ -230,7 +222,7 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
 
           {/* Result Alert if adapted */}
           {resultMessage && (
-            <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2.5 animate-fade-in font-mono">
+            <div className="p-3.5 rounded-2xl liquid-glass-emerald border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2.5 animate-fade-in font-mono">
               <CalendarCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
               <div>
                 <p className="font-bold text-emerald-300 uppercase">Timetable Recalibrated</p>
@@ -246,19 +238,20 @@ export const DailyWorkloadModal: React.FC<DailyWorkloadModalProps> = ({
           <button
             type="button"
             onClick={() => { sound.playClick(); onClose(); }}
-            className="btn-hw-light py-2 px-4 text-xs font-mono font-bold uppercase rounded-lg"
+            className="btn-apple-glass py-2 px-4 text-xs font-semibold"
           >
             {resultMessage ? 'Close' : 'Cancel'}
           </button>
           
-          <HardwareButton
-            label={isProcessing ? 'Recalibrating...' : 'Apply Adaptation'}
-            variant="dark"
+          <button
+            type="button"
             disabled={isProcessing}
             onClick={handleRecalibrate}
-            className="px-5 py-2 bg-[#F0451E] text-white"
-            icon={<Sparkles className="w-3.5 h-3.5" />}
-          />
+            className="btn-apple-primary py-2 px-5 text-xs font-semibold flex items-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{isProcessing ? 'Recalibrating...' : 'Apply Adaptation'}</span>
+          </button>
         </div>
 
       </div>

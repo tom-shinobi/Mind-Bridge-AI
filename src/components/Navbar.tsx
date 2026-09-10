@@ -6,7 +6,9 @@ import {
   VolumeX,
   RotateCcw,
   Zap,
-  ShieldAlert
+  ShieldAlert,
+  User,
+  LogOut
 } from 'lucide-react';
 import type { StudentProfile, LearningGap, AISettings } from '../types';
 import { sound } from '../services/soundService';
@@ -19,6 +21,9 @@ interface NavbarProps {
   onResetDemo: () => void;
   onNavigate: (tab: string) => void;
   activeTab: string;
+  isDemoMode?: boolean;
+  onSignOut?: () => void;
+  onOpenAuth?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -27,7 +32,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   aiSettings,
   onUpdateSettings,
   onResetDemo,
-  onNavigate
+  onNavigate,
+  isDemoMode = false,
+  onSignOut,
+  onOpenAuth
 }) => {
   const activeGapsCount = gaps.filter((g) => g.status !== 'resolved').length;
 
@@ -145,13 +153,49 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Reset Demo</span>
           </button>
 
+          {/* Mode Badge or Switcher */}
+          {isDemoMode && onOpenAuth && (
+            <button
+              onClick={() => {
+                sound.playClick();
+                onOpenAuth();
+              }}
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-purple-200 hover:text-white bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 backdrop-blur-xl transition-all"
+              title="Switch to Real Authenticated Account"
+            >
+              <User className="w-3 h-3 text-purple-300" />
+              <span>Real Auth</span>
+            </button>
+          )}
+
+          {/* Sign out button if real user logged in */}
+          {!isDemoMode && onSignOut && (
+            <button
+              onClick={() => {
+                if (confirm('Sign out of MindBridge AI?')) {
+                  sound.playClick();
+                  onSignOut();
+                }
+              }}
+              className="p-2 rounded-full text-[#A1A1A6] hover:text-rose-300 bg-white/[0.05] border border-white/15 hover:border-rose-500/30 backdrop-blur-xl transition-all"
+              title="Sign out of account"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          )}
+
           {/* Student Profile Avatar Capsule */}
           <div 
             onClick={() => { sound.playClick(); onNavigate('settings'); }}
             className="flex items-center gap-2 pl-1.5 py-1 pr-3 rounded-full bg-white/[0.06] border border-white/20 hover:border-white/40 backdrop-blur-2xl cursor-pointer transition-all shadow-sm"
           >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-white/25 via-white/15 to-white/5 border border-white/40 flex items-center justify-center font-semibold text-[11px] text-white shadow-inner">
-              JA
+            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-500/40 via-cyan-500/30 to-pink-500/40 border border-white/40 flex items-center justify-center font-semibold text-[11px] text-white shadow-inner">
+              {(() => {
+                const parts = (profile.name || 'Scholar').trim().split(/\s+/);
+                return parts.length === 1
+                  ? parts[0].slice(0, 2).toUpperCase()
+                  : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+              })()}
             </div>
             <div className="text-left hidden lg:block">
               <p className="text-xs font-medium text-[#F5F5F7] leading-tight">{profile.name}</p>

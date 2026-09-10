@@ -43,7 +43,7 @@ export const SmartTimetable: React.FC<SmartTimetableProps> = ({
     <div className="space-y-6 animate-fade-in pb-12">
       
       {/* Header */}
-      <div className="liquid-glass-card p-6 relative overflow-hidden">
+      <div className="apple-liquid-glass p-6 sm:p-8 relative overflow-hidden">
         <div className="glow-purple -top-24 -right-24 opacity-25" />
         
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -55,7 +55,7 @@ export const SmartTimetable: React.FC<SmartTimetableProps> = ({
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               AI-Generated Study Timetable
             </h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
               Standard college schedules are static. Mind Bridge AI continuously optimizes your study blocks, reserving peak energy slots for your highest-severity gaps and dynamically adapting when workload surges.
             </p>
           </div>
@@ -66,9 +66,9 @@ export const SmartTimetable: React.FC<SmartTimetableProps> = ({
                 sound.playClick();
                 onOpenWorkloadModal();
               }}
-              className="btn-skeuo-orange py-2.5 px-4 text-xs font-semibold flex items-center gap-2"
+              className="btn-apple-glass py-2.5 px-4 text-xs font-semibold flex items-center gap-2 text-white"
             >
-              <HeartPulse className="w-4 h-4" />
+              <HeartPulse className="w-4 h-4 text-pink-400 animate-pulse" />
               <span>Simulate Workload Shift</span>
             </button>
           </div>
@@ -87,14 +87,16 @@ export const SmartTimetable: React.FC<SmartTimetableProps> = ({
                   sound.playClick();
                   setSelectedDay(day);
                 }}
-                className={`py-2 px-3.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${
+                className={`py-2 px-4 rounded-full text-xs font-medium transition-all flex items-center gap-2 ${
                   isSelected
-                    ? 'btn-skeuo-primary text-white shadow-lg'
-                    : 'bg-white/[0.03] text-slate-400 border border-white/10 hover:text-white hover:bg-white/[0.06]'
+                    ? 'bg-white/[0.18] text-white border border-white/40 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_8px_20px_rgba(0,0,0,0.3)]'
+                    : 'bg-white/[0.04] text-[#A1A1A6] border border-white/10 hover:text-white hover:bg-white/[0.08] hover:border-white/20'
                 }`}
               >
                 <span>{day}</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-black/40 text-slate-300">
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                  isSelected ? 'bg-white/20 text-white border border-white/30' : 'bg-white/[0.06] text-[#86868B]'
+                }`}>
                   {count}
                 </span>
               </button>
@@ -104,14 +106,14 @@ export const SmartTimetable: React.FC<SmartTimetableProps> = ({
       </div>
 
       {/* Adaptive Summary Banner */}
-      <div className="p-4 rounded-xl bg-purple-950/30 border border-purple-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2 text-slate-300">
-          <Info className="w-4 h-4 text-purple-400 flex-shrink-0" />
+      <div className="liquid-glass-adaptive p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 text-white/90">
+          <Info className="w-4 h-4 text-purple-300 flex-shrink-0" />
           <span>
-            Currently displaying <strong className="text-white">{selectedDay}'s</strong> schedule. Total adaptive blocks in system: <strong className="text-purple-300 font-mono">{adaptiveBlocksCount}</strong>.
+            Currently displaying <strong className="text-white">{selectedDay}'s</strong> schedule. Total adaptive blocks in system: <strong className="text-purple-200 font-mono">{adaptiveBlocksCount}</strong>.
           </span>
         </div>
-        <span className="text-[11px] text-purple-400 font-mono">
+        <span className="text-[11px] text-purple-200/90 font-mono">
           Auto-recalibrates upon test submission or workload checks
         </span>
       </div>
@@ -130,12 +132,12 @@ export const SmartTimetable: React.FC<SmartTimetableProps> = ({
           dayBlocks.map((block) => (
             <div
               key={block.id}
-              className={`liquid-glass-card p-5 transition-all ${
+              className={`p-5 transition-all ${
                 block.completed
-                  ? 'border-white/5 bg-white/[0.02] opacity-60'
+                  ? 'liquid-glass-block opacity-50 border-white/10'
                   : block.isAdaptive
-                  ? 'border-purple-500/40 bg-purple-950/20 shadow-[0_4px_24px_rgba(168,85,247,0.12)]'
-                  : 'border-white/10'
+                  ? 'liquid-glass-adaptive shadow-[0_8px_30px_rgba(168,85,247,0.2)]'
+                  : 'liquid-glass-block'
               }`}
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -151,7 +153,7 @@ export const SmartTimetable: React.FC<SmartTimetableProps> = ({
                     {block.completed ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                     ) : (
-                      <Circle className="w-5 h-5" />
+                      <Circle className="w-5 h-5 text-white/40 hover:text-white" />
                     )}
                   </button>
 
@@ -169,7 +171,7 @@ export const SmartTimetable: React.FC<SmartTimetableProps> = ({
                             ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
                             : block.blockType === 'tutor'
                             ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30'
-                            : 'bg-slate-700/40 text-slate-300'
+                            : 'bg-white/10 text-slate-300 border border-white/15'
                         }`}
                       >
                         {block.blockType.replace('_', ' ')}
@@ -189,8 +191,8 @@ export const SmartTimetable: React.FC<SmartTimetableProps> = ({
                     <p className="text-xs text-purple-300/80 font-mono mt-0.5">{block.subject}</p>
 
                     {block.adaptiveReason && (
-                      <div className="mt-2.5 p-2 rounded-lg bg-black/40 border border-white/5 text-[11px] text-slate-300 leading-relaxed max-w-xl">
-                        <span className="text-amber-400 font-semibold font-mono">System Justification: </span>
+                      <div className="mt-2.5 p-3 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] text-slate-200 leading-relaxed max-w-xl backdrop-blur-md">
+                        <span className="text-amber-300 font-semibold font-mono">System Justification: </span>
                         {block.adaptiveReason}
                       </div>
                     )}
@@ -210,7 +212,7 @@ export const SmartTimetable: React.FC<SmartTimetableProps> = ({
                         onNavigate('tutor', { topic: block.topic });
                       }
                     }}
-                    className="btn-skeuo-primary py-2 px-4 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap self-start sm:self-center"
+                    className="btn-apple-primary py-2 px-4 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap self-start sm:self-center"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
                     <span>Launch Session</span>

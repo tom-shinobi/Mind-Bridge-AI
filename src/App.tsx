@@ -9,12 +9,23 @@ import type {
   TestAttempt,
   Achievement,
   AdaptiveAuditEntry,
-  AISettings
+  AISettings,
+  AuthUser,
+  OnboardingAnswers,
+  MemorySummary
 } from './types';
 import { storageService } from './services/storageService';
-import { Navbar } from './components/Navbar';
-import { Sidebar } from './components/Sidebar';
+import { authService } from './services/authService';
+import { supabaseDataService } from './services/supabaseDataService';
+import { isSupabaseConfigured } from './services/supabaseClient';
+import { sound } from './services/soundService';
+
+import { UnifiedNavbar } from './components/UnifiedNavbar';
+import { ParticleBackground } from './components/ParticleBackground';
 import { DailyWorkloadModal } from './components/DailyWorkloadModal';
+import { AuthPortal } from './components/auth/AuthPortal';
+import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
+import { SyllabusUploadView } from './components/onboarding/SyllabusUploadView';
 
 // Pages
 import { Dashboard } from './pages/Dashboard';
@@ -33,39 +44,264 @@ export function App() {
   const [targetTopic, setTargetTopic] = useState<string | undefined>(undefined);
   const [isWorkloadModalOpen, setIsWorkloadModalOpen] = useState<boolean>(false);
 
-  // Core App State
-  const [profile, setProfile] = useState<StudentProfile>(() => storageService.getProfile());
-  const [academicRecords, setAcademicRecords] = useState<AcademicRecord[]>(() =>
-    storageService.getAcademicRecords()
+  // Authentication & Mode State
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
+    const savedDemo = localStorage.getItem('mba_demo_mode');
+    if (savedDemo !== null) return savedDemo === 'true';
+    return !isSupabaseConfigured();
+  });
+  const [authChecking, setAuthChecking] = useState<boolean>(true);
+  const [needsSyllabusUpload, setNeedsSyllabusUpload] = useState<boolean>(false);
+
+  // Core App State (Strictly isolate demo mode from logged-in user profile)
+  const isInitialDemo = localStorage.getItem('mba_demo_mode') === 'true' || !isSupabaseConfigured();
+  const [profile, setProfile] = useState<StudentProfile>(() =>
+    isInitialDemo ? storageService.getDemoProfile() : storageService.getProfile()
   );
-  const [gaps, setGaps] = useState<LearningGap[]>(() => storageService.getLearningGaps());
-  const [syllabus, setSyllabus] = useState<SyllabusTopic[]>(() => storageService.getSyllabus());
-  const [timetable, setTimetable] = useState<TimetableBlock[]>(() => storageService.getTimetable());
-  const [tests, setTests] = useState<Test[]>(() => storageService.getTests());
+  const [academicRecords, setAcademicRecords] = useState<AcademicRecord[]>(() =>
+    isInitialDemo ? storageService.getDemoAcademicRecords() : storageService.getAcademicRecords()
+  );
+  const [gaps, setGaps] = useState<LearningGap[]>(() =>
+    isInitialDemo ? storageService.getDemoLearningGaps() : storageService.getLearningGaps()
+  );
+  const [syllabus, setSyllabus] = useState<SyllabusTopic[]>(() =>
+    isInitialDemo ? storageService.getDemoSyllabus() : storageService.getSyllabus()
+  );
+  const [timetable, setTimetable] = useState<TimetableBlock[]>(() =>
+    isInitialDemo ? storageService.getDemoTimetable() : storageService.getTimetable()
+  );
+  const [tests, setTests] = useState<Test[]>(() =>
+    isInitialDemo ? storageService.getDemoTests() : storageService.getTests()
+  );
   const [achievements, setAchievements] = useState<Achievement[]>(() =>
-    storageService.getAchievements()
+    isInitialDemo ? storageService.getDemoAchievements() : storageService.getAchievements()
   );
   const [auditLog, setAuditLog] = useState<AdaptiveAuditEntry[]>(() =>
-    storageService.getAuditLog()
+    isInitialDemo ? storageService.getDemoAuditLog() : storageService.getAuditLog()
   );
   const [aiSettings, setAISettings] = useState<AISettings>(() => storageService.getAISettings());
 
-  // Refresh all state from storage helper
-  const reloadStateFromStorage = () => {
-    setProfile(storageService.getProfile());
-    setAcademicRecords(storageService.getAcademicRecords());
-    setGaps(storageService.getLearningGaps());
-    setSyllabus(storageService.getSyllabus());
-    setTimetable(storageService.getTimetable());
-    setTests(storageService.getTests());
-    setAchievements(storageService.getAchievements());
-    setAuditLog(storageService.getAuditLog());
-    setAISettings(storageService.getAISettings());
+
+
+  // Synchronize authenticated user data from Supabase
+  const loadUserData = async (userId: string) => {
+    try {
+      const p = await supabaseDataService.getProfile(userId);
+      if (p) {
+        setProfile(p);
+        storageService.saveProfile(p);
+        if (!p.onboardingCompleted) {
+          return;
+        }
+      }
+
+      // Fetch user specific academic data
+      const [userSyllabus, userGaps, userRecords, userTimetable] = await Promise.all([
+        supabaseDataService.getSyllabusTopics(userId),
+        supabaseDataService.getLearningGaps(userId),
+        supabaseDataService.getAcademicRecords(userId),
+        supabaseDataService.getTimetable(userId)
+      ]);
+
+      if (userSyllabus.length > 0) {
+        setSyllabus(userSyllabus);
+        storageService.saveSyllabus(userSyllabus);
+        setNeedsSyllabusUpload(false);
+      } else if (p && p.onboardingCompleted && !p.syllabusUploaded) {
+        setNeedsSyllabusUpload(true);
+      }
+
+      if (userGaps.length > 0) {
+        setGaps(userGaps);
+        storageService.saveLearningGaps(userGaps);
+      }
+
+      if (userRecords.length > 0) {
+        setAcademicRecords(userRecords);
+        storageService.saveAcademicRecords(userRecords);
+      }
+
+      if (userTimetable.length > 0) {
+        setTimetable(userTimetable);
+        storageService.saveTimetable(userTimetable);
+      }
+    } catch (e) {
+      console.warn('Error syncing real Supabase user data:', e);
+    }
   };
 
+  // Auth Lifecycle listener
   useEffect(() => {
-    reloadStateFromStorage();
+    let mounted = true;
+
+    const checkSession = async () => {
+      try {
+        const session = await authService.getSession();
+        const savedDemo = localStorage.getItem('mba_demo_mode');
+        if (savedDemo === 'true') {
+          setIsDemoMode(true);
+          setAuthUser(null);
+          return;
+        }
+        if (session?.user && mounted) {
+          const u: AuthUser = {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email
+          };
+          setAuthUser(u);
+          setIsDemoMode(false);
+          await loadUserData(u.id);
+        }
+      } catch (e) {
+        console.warn('Auth check error:', e);
+      } finally {
+        if (mounted) setAuthChecking(false);
+      }
+    };
+
+    checkSession();
+
+    const unsubscribe = authService.onAuthStateChange(async (user) => {
+      if (!mounted) return;
+      const currentDemo = localStorage.getItem('mba_demo_mode');
+      if (currentDemo === 'true') {
+        // In demo mode - do not switch to authenticated user automatically
+        return;
+      }
+      if (user) {
+        setAuthUser(user);
+        setIsDemoMode(false);
+        localStorage.setItem('mba_demo_mode', 'false');
+        await loadUserData(user.id);
+      } else {
+        setAuthUser(null);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, []);
+
+  const handleAuthSuccess = async (user: AuthUser) => {
+    setAuthUser(user);
+    setIsDemoMode(false);
+    localStorage.setItem('mba_demo_mode', 'false');
+
+    const existing = await supabaseDataService.getProfile(user.id);
+    const p: StudentProfile = existing || {
+      id: user.id,
+      name: user.name || 'Scholar',
+      email: user.email,
+      degree: 'B.Tech Computer Science',
+      department: 'Computer Science',
+      semester: 1,
+      cgpa: 0.0,
+      targetCgpa: 9.0,
+      streakDays: 1,
+      totalXp: 100,
+      level: 1,
+      joinedDate: new Date().toISOString().slice(0, 10),
+      onboardingCompleted: false,
+      onboardingStep: 0,
+      syllabusUploaded: false
+    };
+
+    if (!existing) {
+      await supabaseDataService.saveProfile(p);
+    }
+    setProfile(p);
+    storageService.saveProfile(p);
+
+    if (p.onboardingCompleted) {
+      await loadUserData(user.id);
+    }
+  };
+
+  const handleOnboardingComplete = async (
+    answers: OnboardingAnswers,
+    memorySummary: MemorySummary
+  ) => {
+    if (!authUser) return;
+    sound.playSuccess();
+
+    const updatedProfile: StudentProfile = {
+      ...profile,
+      name: answers.name || profile.name,
+      college: answers.college,
+      course: answers.course,
+      degree: answers.course,
+      department: answers.course,
+      specialization: answers.specialization,
+      semester: answers.semester,
+      cgpa: answers.cgpa,
+      targetCgpa: answers.targetCgpa,
+      onboardingCompleted: true,
+      onboardingStep: 12,
+      memorySummary
+    };
+
+    setProfile(updatedProfile);
+    storageService.saveProfile(updatedProfile);
+
+    await supabaseDataService.completeOnboarding(authUser.id, answers, memorySummary);
+
+    // After conversational Q&A, transition directly to syllabus upload/review
+    setNeedsSyllabusUpload(true);
+  };
+
+  const handleSyllabusComplete = async (
+    topics: SyllabusTopic[],
+    newGaps: LearningGap[]
+  ) => {
+    sound.playSuccess();
+    setSyllabus(topics);
+    setGaps(newGaps);
+    storageService.saveSyllabus(topics);
+    storageService.saveLearningGaps(newGaps);
+
+    const updatedProfile: StudentProfile = {
+      ...profile,
+      syllabusUploaded: true
+    };
+    setProfile(updatedProfile);
+    storageService.saveProfile(updatedProfile);
+
+    if (authUser) {
+      await supabaseDataService.saveSyllabusTopics(authUser.id, topics);
+      await supabaseDataService.saveLearningGaps(authUser.id, newGaps);
+      await supabaseDataService.saveProfile(updatedProfile);
+    }
+
+    setNeedsSyllabusUpload(false);
+    setActiveTab('dashboard');
+  };
+
+  const handleSignOut = async () => {
+    await authService.signOut();
+    setAuthUser(null);
+    setIsDemoMode(false);
+    localStorage.removeItem('mba_demo_mode');
+    sound.playClick();
+  };
+
+  const handleContinueDemo = () => {
+    setIsDemoMode(true);
+    localStorage.setItem('mba_demo_mode', 'true');
+    setAuthUser(null);
+    setProfile(storageService.getDemoProfile());
+    setAcademicRecords(storageService.getDemoAcademicRecords());
+    setGaps(storageService.getDemoLearningGaps());
+    setSyllabus(storageService.getDemoSyllabus());
+    setTimetable(storageService.getDemoTimetable());
+    setTests(storageService.getDemoTests());
+    setAchievements(storageService.getDemoAchievements());
+    setAuditLog(storageService.getDemoAuditLog());
+    sound.playClick();
+  };
 
   const handleNavigate = (tab: string, extra?: { topic?: string }) => {
     setActiveTab(tab);
@@ -77,7 +313,14 @@ export function App() {
 
   const handleResetDemo = () => {
     storageService.resetToDemo();
-    reloadStateFromStorage();
+    setProfile(storageService.getDemoProfile());
+    setAcademicRecords(storageService.getDemoAcademicRecords());
+    setGaps(storageService.getDemoLearningGaps());
+    setSyllabus(storageService.getDemoSyllabus());
+    setTimetable(storageService.getDemoTimetable());
+    setTests(storageService.getDemoTests());
+    setAchievements(storageService.getDemoAchievements());
+    setAuditLog(storageService.getDemoAuditLog());
     setActiveTab('dashboard');
   };
 
@@ -85,12 +328,18 @@ export function App() {
     const updated = timetable.map((b) => (b.id === blockId ? { ...b, completed: !b.completed } : b));
     setTimetable(updated);
     storageService.saveTimetable(updated);
+    if (authUser) {
+      supabaseDataService.saveTimetable(authUser.id, updated);
+    }
   };
 
   const handleAddAcademicRecord = (record: AcademicRecord) => {
     const updated = [record, ...academicRecords];
     setAcademicRecords(updated);
     storageService.saveAcademicRecords(updated);
+    if (authUser) {
+      supabaseDataService.saveAcademicRecord(authUser.id, record);
+    }
   };
 
   const handleScheduleAdapted = (
@@ -99,10 +348,14 @@ export function App() {
   ) => {
     setTimetable(newTimetable);
     setAuditLog([newAudit, ...auditLog]);
+    storageService.saveTimetable(newTimetable);
+    if (authUser) {
+      supabaseDataService.saveTimetable(authUser.id, newTimetable);
+    }
   };
 
   const handleTestComplete = (
-    _attempt: TestAttempt,
+    attempt: TestAttempt,
     adaptationResult: any
   ) => {
     if (adaptationResult) {
@@ -113,11 +366,17 @@ export function App() {
       setAchievements(adaptationResult.updatedAchievements);
       setAuditLog([...adaptationResult.newAuditEntries, ...auditLog]);
     }
+    if (authUser) {
+      supabaseDataService.saveTestAttempt(authUser.id, attempt);
+    }
   };
 
   const handleUpdateProfile = (newProfile: StudentProfile) => {
     setProfile(newProfile);
     storageService.saveProfile(newProfile);
+    if (authUser) {
+      supabaseDataService.saveProfile(newProfile);
+    }
   };
 
   const handleUpdateAISettings = (newSettings: AISettings) => {
@@ -125,20 +384,111 @@ export function App() {
     storageService.saveAISettings(newSettings);
   };
 
-  const activeGapsCount = gaps.filter((g) => g.status !== 'resolved').length;
+  // 1. Initial Authentication Check Loader
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-[#030712] flex items-center justify-center font-body">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-white/[0.08] border border-white/20 flex items-center justify-center animate-pulse">
+            <span className="w-3.5 h-3.5 rounded-full bg-cyan-400 shadow-[0_0_12px_#22d3ee]" />
+          </div>
+          <p className="text-xs font-mono text-slate-400">Initializing MindBridge Intelligence Engine...</p>
+        </div>
+      </div>
+    );
+  }
 
+  // 2. Unauthenticated and Not in Demo Mode -> Render Real Auth Portal
+  if (!isDemoMode && !authUser) {
+    return (
+      <AuthPortal
+        onSuccess={handleAuthSuccess}
+        onContinueDemo={handleContinueDemo}
+      />
+    );
+  }
+
+  // 3. Authenticated New User -> Render Conversational Onboarding Flow
+  if (authUser && !profile.onboardingCompleted) {
+    return (
+      <div className="min-h-screen bg-[#020409] text-[#F5F5F7] relative flex flex-col font-body">
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          <ParticleBackground />
+          <div className="chromatic-ribbon-purple -top-[140px] left-[10%] opacity-25" />
+          <div className="chromatic-ribbon-cyan -bottom-[120px] left-[15%] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_20%,rgba(2,4,9,0.85)_100%)] pointer-events-none" />
+        </div>
+        <div className="relative z-10 flex-1 flex flex-col">
+          <OnboardingFlow
+            userId={authUser.id}
+            initialAnswers={{
+              name: profile.name,
+              college: profile.college,
+              course: profile.course || profile.degree,
+              specialization: profile.specialization,
+              semester: profile.semester,
+              cgpa: profile.cgpa,
+              targetCgpa: profile.targetCgpa
+            }}
+            initialStep={profile.onboardingStep || 0}
+            onComplete={handleOnboardingComplete}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // 4. Authenticated User without Syllabus -> Render Document Upload & Extraction View
+  if (authUser && needsSyllabusUpload) {
+    return (
+      <div className="min-h-screen bg-[#020409] text-[#F5F5F7] relative flex flex-col font-body">
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          <ParticleBackground />
+          <div className="chromatic-ribbon-magenta top-[20%] -right-[100px] opacity-25" />
+          <div className="chromatic-ribbon-cyan -bottom-[120px] left-[15%] opacity-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_20%,rgba(2,4,9,0.85)_100%)] pointer-events-none" />
+        </div>
+        <div className="relative z-10 flex-1 flex flex-col p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
+          <SyllabusUploadView
+            userId={authUser.id}
+            onboardingAnswers={{
+              name: profile.name,
+              college: profile.college || 'University',
+              course: profile.course || profile.degree,
+              specialization: profile.specialization || 'Computer Science',
+              semester: profile.semester || 1,
+              cgpa: profile.cgpa || 0,
+              targetCgpa: profile.targetCgpa || 9.0,
+              subjects: [profile.degree || 'Database Management Systems'],
+              dailyStudyHours: 3,
+              preferredStudyTime: 'Morning',
+              difficultTopics: profile.memorySummary?.difficultTopics || [],
+              explanationStyle: profile.memorySummary?.learningStyle || 'Conceptual'
+            }}
+            onComplete={handleSyllabusComplete}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // 5. Main Dashboard & Workspace (Preserves all 10 pages and current layout)
   return (
-    <div className="min-h-screen bg-[#030712] text-[#F5F5F7] flex flex-col relative selection:bg-white/20 selection:text-white font-body">
+    <div className="min-h-screen bg-[#020409] text-[#F5F5F7] flex flex-col relative selection:bg-white/20 selection:text-white font-body">
       
-      {/* Real Optical Chromatic Fluid Silk Ribbons Canvas (Matching Reference Image 2) */}
+      {/* Dynamic Moving Particles & Moody Dark Chromatic Canvas */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="chromatic-ribbon-purple -top-[140px] left-[10%] opacity-55" />
-        <div className="chromatic-ribbon-magenta top-[30%] -right-[140px] opacity-45" />
-        <div className="chromatic-ribbon-cyan -bottom-[120px] left-[15%] opacity-50" />
-        <div className="chromatic-ribbon-amber top-[55%] left-[40%] opacity-35" />
-        
-        {/* Subtle Apple Ambient Grid / Starfield Vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_0%,rgba(3,7,18,0.7)_70%,rgba(3,7,18,0.95)_100%)] pointer-events-none" />
+        {/* Luminous Interactive Particle Constellation */}
+        <ParticleBackground />
+
+        {/* Deep, Moody, Subdued Aurora Glows */}
+        <div className="dynamic-chromatic-mesh absolute inset-0 opacity-40 pointer-events-none" />
+        <div className="aurora-orb-violet -top-[160px] left-[5%] opacity-35" />
+        <div className="aurora-orb-cyan top-[22%] -right-[140px] opacity-30" />
+        <div className="aurora-orb-magenta -bottom-[140px] left-[18%] opacity-25" />
+        <div className="aurora-orb-emerald top-[52%] left-[30%] opacity-20" />
+        <div className="aurora-orb-amber -top-[90px] right-[20%] opacity-25" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_15%,rgba(2,4,9,0.55)_55%,rgba(2,4,9,0.92)_100%)] pointer-events-none" />
       </div>
 
       {/* Real Snell's Law SVG Displacement Map Filter */}
@@ -151,30 +501,24 @@ export function App() {
         </defs>
       </svg>
 
-      {/* Top Navbar */}
-      <Navbar
+      {/* Unified Floating Apple Liquid Glass Dynamic Header */}
+      <UnifiedNavbar
         profile={profile}
         gaps={gaps}
         aiSettings={aiSettings}
+        activeTab={activeTab}
+        isDemoMode={isDemoMode}
+        onNavigate={handleNavigate}
         onUpdateSettings={handleUpdateAISettings}
         onResetDemo={handleResetDemo}
-        onNavigate={handleNavigate}
-        activeTab={activeTab}
+        onOpenWorkloadModal={() => setIsWorkloadModalOpen(true)}
+        onSignOut={handleSignOut}
+        onOpenAuth={() => setIsDemoMode(false)}
       />
 
-      {/* Main Container Layout */}
-      <div className="flex-1 max-w-7xl w-full mx-auto flex flex-col lg:flex-row relative z-10">
-        
-        {/* Sidebar Navigation */}
-        <Sidebar
-          activeTab={activeTab}
-          onSelectTab={handleNavigate}
-          activeGapsCount={activeGapsCount}
-          onOpenWorkloadModal={() => setIsWorkloadModalOpen(true)}
-        />
-
-        {/* Viewport Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
+      {/* Symmetrical Centered Viewport Container */}
+      <div className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <main className="w-full pb-16">
           {activeTab === 'dashboard' && (
             <Dashboard
               profile={profile}
@@ -249,6 +593,7 @@ export function App() {
               achievements={achievements}
               syllabus={syllabus}
               onNavigate={handleNavigate}
+              onUpdateProfile={handleUpdateProfile}
             />
           )}
 
@@ -258,6 +603,7 @@ export function App() {
               aiSettings={aiSettings}
               onUpdateProfile={handleUpdateProfile}
               onUpdateAISettings={handleUpdateAISettings}
+              onSignOut={handleSignOut}
             />
           )}
         </main>
@@ -273,4 +619,5 @@ export function App() {
     </div>
   );
 }
+
 export default App;

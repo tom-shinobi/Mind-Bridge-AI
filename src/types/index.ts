@@ -3,12 +3,65 @@ export type TopicStatus = 'pending' | 'in_progress' | 'mastered';
 export type BlockType = 'deep_work' | 'revision' | 'test' | 'break' | 'tutor';
 export type WorkloadLevel = 'light' | 'balanced' | 'heavy' | 'overwhelmed';
 
+export interface MemorySummary {
+  learningStyle: string;
+  currentFocus: string;
+  academicGoal: string;
+  studyPreferences: string;
+  difficultTopics: string[];
+  strengths: string[];
+  notes?: string;
+  lastUpdated: string;
+}
+
+export interface OnboardingAnswers {
+  name: string;
+  college: string;
+  course: string;
+  specialization: string;
+  semester: number;
+  cgpa: number;
+  targetCgpa: number;
+  subjects: string[];
+  dailyStudyHours: number;
+  preferredStudyTime: string;
+  difficultTopics: string[];
+  explanationStyle: string;
+}
+
+export interface ExtractedTopic {
+  topic: string;
+  priority?: 'high' | 'medium' | 'low';
+  estimatedHours?: number;
+  subtopics?: string[];
+}
+
+export interface ExtractedModule {
+  moduleName: string;
+  topics: ExtractedTopic[];
+}
+
+export interface ExtractedSyllabus {
+  subject: string;
+  modules: ExtractedModule[];
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name?: string;
+  avatarUrl?: string;
+}
+
 export interface StudentProfile {
   id: string;
   name: string;
   email: string;
   degree: string;
   department: string;
+  college?: string;
+  course?: string;
+  specialization?: string;
   semester: number;
   cgpa: number;
   targetCgpa: number;
@@ -17,6 +70,12 @@ export interface StudentProfile {
   level: number;
   avatarUrl?: string;
   joinedDate: string;
+  onboardingCompleted?: boolean;
+  onboardingStep?: number;
+  onboardingAnswers?: OnboardingAnswers;
+  syllabusUploaded?: boolean;
+  memorySummary?: MemorySummary;
+  biometricEnabled?: boolean;
 }
 
 export interface AcademicRecord {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   GraduationCap,
   Plus,
-  CheckCircle,
+  CheckCircle2,
   FileSpreadsheet,
   X
 } from 'lucide-react';
@@ -87,7 +87,7 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Student Academic History
             </h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
               Every course, exam grade, and topic evaluation is ingested into Mind Bridge AI to pinpoint knowledge gaps and dynamically shape your personalized syllabus.
             </p>
           </div>
@@ -97,30 +97,30 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
               sound.playClick();
               setIsModalOpen(true);
             }}
-            className="btn-skeuo-primary py-2.5 px-4 text-xs font-semibold"
+            className="btn-apple-primary py-2.5 px-4 text-xs font-semibold flex items-center gap-2"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-white" />
             <span>Add Academic Record</span>
           </button>
         </div>
 
         {/* Stats Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/[0.08]">
-          <div className="p-3 rounded-xl bg-black/30 border border-white/5">
+          <div className="liquid-glass-block p-4 space-y-1">
             <span className="text-[10px] uppercase font-mono text-slate-400 block">Current CGPA</span>
-            <span className="text-xl sm:text-2xl font-bold text-white">{profile.cgpa} / 10.0</span>
+            <span className="text-xl sm:text-2xl font-bold text-white font-heading">{profile.cgpa} / 10.0</span>
           </div>
-          <div className="p-3 rounded-xl bg-black/30 border border-white/5">
+          <div className="liquid-glass-block p-4 space-y-1">
             <span className="text-[10px] uppercase font-mono text-slate-400 block">Target CGPA</span>
-            <span className="text-xl sm:text-2xl font-bold text-purple-300">{profile.targetCgpa} / 10.0</span>
+            <span className="text-xl sm:text-2xl font-bold text-purple-300 font-heading">{profile.targetCgpa} / 10.0</span>
           </div>
-          <div className="p-3 rounded-xl bg-black/30 border border-white/5">
+          <div className="liquid-glass-block p-4 space-y-1">
             <span className="text-[10px] uppercase font-mono text-slate-400 block">Avg Exam Score</span>
-            <span className="text-xl sm:text-2xl font-bold text-emerald-400">{avgScore}%</span>
+            <span className="text-xl sm:text-2xl font-bold text-emerald-400 font-heading">{avgScore}%</span>
           </div>
-          <div className="p-3 rounded-xl bg-black/30 border border-white/5">
+          <div className="liquid-glass-block p-4 space-y-1">
             <span className="text-[10px] uppercase font-mono text-slate-400 block">Total Ingested Tests</span>
-            <span className="text-xl sm:text-2xl font-bold text-orange-400">{records.length} Records</span>
+            <span className="text-xl sm:text-2xl font-bold text-orange-400 font-heading">{records.length} Records</span>
           </div>
         </div>
       </div>
@@ -129,17 +129,17 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <FileSpreadsheet className="w-4 h-4 text-purple-400" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono">
             Academic Performance Log
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 font-mono">Semester:</span>
+          <span className="text-xs text-slate-300 font-mono">Semester:</span>
           <select
             value={filterSemester}
             onChange={(e) => setFilterSemester(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-            className="text-xs px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-slate-200 focus:outline-none focus:border-purple-500/40"
+            className="liquid-glass-input text-xs px-3.5 py-1.5 rounded-xl"
           >
             <option value="all">All Semesters</option>
             <option value={6}>Semester 6 (Current)</option>
@@ -149,18 +149,18 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
       </div>
 
       {/* Records Table */}
-      <div className="liquid-glass-card overflow-hidden">
+      <div className="apple-liquid-glass overflow-hidden border border-white/20">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-black/40 text-slate-400 font-mono uppercase text-[10px] border-b border-white/[0.08]">
+            <thead className="bg-white/[0.04] text-slate-300 font-mono uppercase text-[10px] border-b border-white/[0.08]">
               <tr>
-                <th className="py-3 px-4">Subject & Code</th>
-                <th className="py-3 px-3">Exam Type</th>
-                <th className="py-3 px-3">Date</th>
-                <th className="py-3 px-3">Score</th>
-                <th className="py-3 px-3">Grade</th>
-                <th className="py-3 px-4">Evaluated Topics</th>
-                <th className="py-3 px-4 text-right">Adaptive Action</th>
+                <th className="py-3.5 px-4">Subject & Code</th>
+                <th className="py-3.5 px-3">Exam Type</th>
+                <th className="py-3.5 px-3">Date</th>
+                <th className="py-3.5 px-3">Score</th>
+                <th className="py-3.5 px-3">Grade</th>
+                <th className="py-3.5 px-4">Evaluated Topics</th>
+                <th className="py-3.5 px-4 text-right">Adaptive Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.05] text-slate-300">
@@ -168,18 +168,18 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
                 const isWeak = r.percentage < 65;
 
                 return (
-                  <tr key={r.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3 px-4">
+                  <tr key={r.id} className="hover:bg-white/[0.04] transition-colors">
+                    <td className="py-3.5 px-4">
                       <p className="font-semibold text-white">{r.subjectName}</p>
                       <p className="text-[10px] text-purple-300/80 font-mono">{r.subjectCode} • Sem {r.semester}</p>
                     </td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 rounded-full bg-white/[0.05] border border-white/10 text-[10px] font-mono">
+                    <td className="py-3.5 px-3">
+                      <span className="px-2.5 py-0.5 rounded-full bg-white/[0.06] border border-white/15 text-[10px] font-mono">
                         {r.examType}
                       </span>
                     </td>
-                    <td className="py-3 px-3 font-mono text-slate-400 text-[11px]">{r.date}</td>
-                    <td className="py-3 px-3">
+                    <td className="py-3.5 px-3 font-mono text-slate-400 text-[11px]">{r.date}</td>
+                    <td className="py-3.5 px-3">
                       <div className="flex items-center gap-2">
                         <span className={`font-mono font-bold text-sm ${isWeak ? 'text-rose-400' : 'text-emerald-400'}`}>
                           {r.score}/{r.totalMarks}
@@ -187,7 +187,7 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
                         <span className="text-[10px] text-slate-400 font-mono">({r.percentage}%)</span>
                       </div>
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="py-3.5 px-3">
                       <span
                         className={`px-2 py-0.5 rounded-md font-mono font-bold text-[11px] ${
                           r.grade.startsWith('A')
@@ -200,15 +200,15 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
                         {r.grade}
                       </span>
                     </td>
-                    <td className="py-3 px-4 max-w-xs">
+                    <td className="py-3.5 px-4 max-w-xs">
                       <div className="flex flex-wrap gap-1">
                         {r.topicsEvaluated.map((top, idx) => (
                           <span
                             key={idx}
-                            className={`px-1.5 py-0.5 rounded text-[10px] ${
+                            className={`px-2 py-0.5 rounded text-[10px] ${
                               isWeak && idx >= 2
                                 ? 'bg-rose-950/40 text-rose-300 border border-rose-500/30 font-semibold'
-                                : 'bg-white/[0.04] text-slate-300'
+                                : 'bg-white/[0.06] text-slate-200 border border-white/10'
                             }`}
                           >
                             {top}
@@ -216,20 +216,20 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
                         ))}
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       {isWeak ? (
                         <button
                           onClick={() => {
                             sound.playClick();
                             onNavigate('gaps');
                           }}
-                          className="btn-skeuo-orange py-1 px-2 text-[10px]"
+                          className="btn-apple-glass py-1 px-3 text-[10px] text-pink-300 border-pink-500/30 hover:border-pink-400"
                         >
                           View Gap
                         </button>
                       ) : (
                         <span className="text-[10px] text-emerald-400 flex items-center justify-end gap-1 font-mono">
-                          <CheckCircle className="w-3 h-3" /> Mastered
+                          <CheckCircle2 className="w-3 h-3" /> Mastered
                         </span>
                       )}
                     </td>
@@ -243,8 +243,8 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
 
       {/* Add Academic Record Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="liquid-glass-card max-w-md w-full p-6 relative border border-white/15 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fade-in">
+          <div className="apple-liquid-glass max-w-md w-full p-6 sm:p-7 relative rounded-3xl border border-white/20 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Plus className="w-4 h-4 text-purple-400" />
@@ -252,7 +252,7 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white"
+                className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-slate-400 hover:text-white flex items-center justify-center transition-all"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -269,7 +269,7 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
                     required
                     value={subjectCode}
                     onChange={(e) => setSubjectCode(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-purple-500/50"
+                    className="w-full px-3.5 py-2 rounded-xl liquid-glass-input text-white focus:outline-none focus:border-purple-500/50"
                   />
                 </div>
                 <div>
@@ -282,7 +282,7 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
                     max="8"
                     value={semester}
                     onChange={(e) => setSemester(Number(e.target.value))}
-                    className="w-full px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-purple-500/50"
+                    className="w-full px-3.5 py-2 rounded-xl liquid-glass-input text-white focus:outline-none focus:border-purple-500/50"
                   />
                 </div>
               </div>
@@ -296,7 +296,7 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
                   required
                   value={subjectName}
                   onChange={(e) => setSubjectName(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-purple-500/50"
+                  className="w-full px-3.5 py-2 rounded-xl liquid-glass-input text-white focus:outline-none focus:border-purple-500/50"
                 />
               </div>
 
@@ -308,12 +308,12 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
                   <select
                     value={examType}
                     onChange={(e) => setExamType(e.target.value as any)}
-                    className="w-full px-2 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white"
+                    className="w-full px-3 py-2 rounded-xl liquid-glass-input text-white"
                   >
-                    <option value="Midterm">Midterm</option>
-                    <option value="Quiz">Quiz</option>
-                    <option value="End Semester">End Sem</option>
-                    <option value="Lab Test">Lab Test</option>
+                    <option value="Midterm" className="bg-[#0b0f19]">Midterm</option>
+                    <option value="Quiz" className="bg-[#0b0f19]">Quiz</option>
+                    <option value="End Semester" className="bg-[#0b0f19]">End Sem</option>
+                    <option value="Lab Test" className="bg-[#0b0f19]">Lab Test</option>
                   </select>
                 </div>
                 <div>
@@ -324,7 +324,7 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
                     type="number"
                     value={score}
                     onChange={(e) => setScore(Number(e.target.value))}
-                    className="w-full px-2 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white"
+                    className="w-full px-3 py-2 rounded-xl liquid-glass-input text-white"
                   />
                 </div>
                 <div>
@@ -335,7 +335,7 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
                     type="number"
                     value={totalMarks}
                     onChange={(e) => setTotalMarks(Number(e.target.value))}
-                    className="w-full px-2 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white"
+                    className="w-full px-3 py-2 rounded-xl liquid-glass-input text-white"
                   />
                 </div>
               </div>
@@ -348,22 +348,22 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
                   type="text"
                   value={topicsString}
                   onChange={(e) => setTopicsString(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-purple-500/50"
+                  className="w-full px-3.5 py-2 rounded-xl liquid-glass-input text-white focus:outline-none focus:border-purple-500/50"
                   placeholder="e.g. Topic 1, Topic 2, Topic 3"
                 />
               </div>
 
-              <div className="pt-3 border-t border-white/[0.08] flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-white/[0.08] flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn-skeuo-glass px-3 py-1.5 text-xs"
+                  className="btn-apple-glass py-2 px-4 text-xs font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn-skeuo-primary px-4 py-1.5 text-xs"
+                  className="btn-apple-primary py-2 px-5 text-xs font-semibold"
                 >
                   Ingest & Analyze
                 </button>

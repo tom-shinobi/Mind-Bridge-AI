@@ -159,8 +159,8 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
       <div className="space-y-6 animate-fade-in pb-12">
         {/* Results Banner */}
         <div
-          className={`liquid-glass-card p-6 sm:p-8 relative overflow-hidden ${
-            isPassed ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-orange-500/40 bg-orange-950/20'
+          className={`p-6 sm:p-8 relative overflow-hidden ${
+            isPassed ? 'liquid-glass-success' : 'liquid-glass-amber'
           }`}
         >
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -179,7 +179,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
                 Diagnostic Analysis: {activeTest.topic}
               </h2>
-              <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
+              <p className="text-xs text-slate-200 mt-1 max-w-xl leading-relaxed">
                 {attemptResult.feedback}
               </p>
             </div>
@@ -197,13 +197,13 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
 
           {/* Adaptive Loop Output Notification */}
           {adaptationMessage && (
-            <div className="mt-6 p-4 rounded-xl bg-purple-950/50 border border-purple-500/30 text-xs text-purple-200 flex items-start gap-3 shadow-inner">
+            <div className="mt-6 p-4 rounded-2xl liquid-glass-adaptive text-xs text-purple-200 flex items-start gap-3 shadow-xl">
               <RotateCw className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5 animate-spin-slow" />
               <div className="space-y-1">
                 <p className="font-bold text-white uppercase font-mono tracking-wider">
                   Adaptive Feedback Loop Triggered
                 </p>
-                <p className="text-slate-300 leading-relaxed">{adaptationMessage}</p>
+                <p className="text-slate-200 leading-relaxed">{adaptationMessage}</p>
                 <div className="flex flex-wrap gap-2 text-[10px] font-mono pt-1 text-purple-300">
                   <span>✓ Learning Gap Updated</span> • 
                   <span>✓ Syllabus Re-ranked</span> • 
@@ -218,7 +218,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
           <div className="mt-6 pt-5 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
             <button
               onClick={() => { sound.playClick(); setActiveTest(null); }}
-              className="btn-skeuo-glass py-2 px-4 text-xs"
+              className="btn-apple-glass py-2 px-4 text-xs text-white"
             >
               Back to Tests Catalog
             </button>
@@ -226,7 +226,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => { sound.playClick(); onNavigate('adaptive_loop'); }}
-                className="btn-skeuo-primary py-2 px-4 text-xs flex items-center gap-1.5"
+                className="btn-apple-glass py-2 px-4 text-xs flex items-center gap-1.5 text-white"
               >
                 <RotateCw className="w-3.5 h-3.5" />
                 <span>Inspect Feedback Loop</span>
@@ -234,10 +234,10 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
 
               <button
                 onClick={() => { sound.playClick(); onNavigate('dashboard'); }}
-                className="btn-skeuo-orange py-2 px-4 text-xs flex items-center gap-1.5"
+                className="btn-apple-primary py-2 px-4 text-xs flex items-center gap-1.5"
               >
                 <span>Return to Dashboard</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3.5 h-3.5 text-white" />
               </button>
             </div>
           </div>
@@ -257,17 +257,17 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
               return (
                 <div
                   key={q.id}
-                  className={`liquid-glass-card p-5 space-y-3 border ${
-                    isCorrect ? 'border-emerald-500/25 bg-emerald-950/10' : 'border-rose-500/25 bg-rose-950/10'
+                  className={`p-5 space-y-3 ${
+                    isCorrect ? 'liquid-glass-success' : 'liquid-glass-danger'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center font-mono font-bold text-xs text-purple-300">
+                      <span className="w-6 h-6 rounded-lg bg-white/[0.08] border border-white/15 flex items-center justify-center font-mono font-bold text-xs text-purple-300">
                         Q{idx + 1}
                       </span>
-                      <span className="text-[11px] font-mono text-slate-400">
-                        Concept: <strong className="text-slate-200">{q.conceptTested}</strong>
+                      <span className="text-[11px] font-mono text-slate-300">
+                        Concept: <strong className="text-white">{q.conceptTested}</strong>
                       </span>
                     </div>
 
@@ -288,7 +288,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
                   </p>
 
                   {q.codeSnippet && (
-                    <pre className="p-3 rounded-xl bg-black/60 border border-white/10 font-mono text-xs text-purple-300 overflow-x-auto">
+                    <pre className="p-3.5 rounded-xl bg-black/60 border border-white/10 font-mono text-xs text-purple-300 overflow-x-auto">
                       <code>{q.codeSnippet}</code>
                     </pre>
                   )}
@@ -298,17 +298,17 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
                       const isUserChoice = userAns === optIdx;
                       const isCorrectChoice = optIdx === q.correctIndex;
 
-                      let style = 'bg-white/[0.02] border-white/5 text-slate-400';
+                      let style = 'bg-white/[0.04] border-white/10 text-slate-300';
                       if (isCorrectChoice) {
-                        style = 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200 font-semibold';
+                        style = 'bg-emerald-500/20 border-emerald-400/50 text-emerald-100 font-semibold shadow-[0_0_12px_rgba(16,185,129,0.2)]';
                       } else if (isUserChoice && !isCorrect) {
-                        style = 'bg-rose-950/40 border-rose-500/40 text-rose-200 line-through';
+                        style = 'bg-rose-500/20 border-rose-400/50 text-rose-100 line-through';
                       }
 
                       return (
                         <div
                           key={optIdx}
-                          className={`p-2.5 rounded-xl border text-xs flex items-center justify-between ${style}`}
+                          className={`p-2.5 rounded-xl border text-xs flex items-center justify-between backdrop-blur-md ${style}`}
                         >
                           <div className="flex items-center gap-2">
                             <span className="font-mono text-[10px] font-bold">
@@ -317,7 +317,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
                             <FormattedContent content={opt} className="inline text-xs" />
                           </div>
                           {isCorrectChoice && (
-                            <span className="text-[10px] font-mono text-emerald-400 uppercase font-bold">
+                            <span className="text-[10px] font-mono text-emerald-300 uppercase font-bold">
                               Correct Key
                             </span>
                           )}
@@ -326,7 +326,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
                     })}
                   </div>
 
-                  <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-xs text-slate-300 leading-relaxed">
+                  <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-slate-200 leading-relaxed backdrop-blur-md">
                     <strong className="text-purple-300 font-mono">Pedagogical Rationale: </strong>
                     <FormattedContent content={q.explanation} className="inline text-xs" />
                   </div>
@@ -349,7 +349,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
     return (
       <div className="space-y-4 animate-fade-in max-w-3xl mx-auto pb-12">
         {/* Test HUD Top Bar */}
-        <div className="liquid-glass-card p-4 flex items-center justify-between gap-4">
+        <div className="liquid-glass-block p-4 flex items-center justify-between gap-4">
           <div>
             <span className="text-[10px] font-mono uppercase text-purple-300 font-semibold block">
               {activeTest.subject}
@@ -357,20 +357,20 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
             <h3 className="text-base font-bold text-white leading-tight">{activeTest.title}</h3>
           </div>
 
-          {/* Skeuomorphic Timer Box */}
-          <div className="skeuo-lcd px-3 py-1.5 flex items-center gap-2 border border-purple-500/30">
-            <Clock className="w-4 h-4 text-orange-400" />
-            <span className="text-sm font-mono font-bold text-slate-100">
+          {/* Timer Box */}
+          <div className="px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/20 backdrop-blur-md flex items-center gap-2 shadow-inner">
+            <Clock className="w-4 h-4 text-orange-400 animate-pulse" />
+            <span className="text-sm font-mono font-bold text-white">
               {mins.toString().padStart(2, '0')}:{secs.toString().padStart(2, '0')}
             </span>
           </div>
         </div>
 
         {/* Question Card */}
-        <div className="liquid-glass-card p-6 space-y-5">
+        <div className="apple-liquid-glass p-6 sm:p-8 space-y-5">
           {/* Progress Header */}
           <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-            <span className="text-xs font-mono text-slate-400">
+            <span className="text-xs font-mono text-slate-300">
               Question <strong className="text-white">{currentQuestionIdx + 1}</strong> of{' '}
               {activeTest.questions.length}
             </span>
@@ -402,17 +402,17 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
                   key={optIdx}
                   type="button"
                   onClick={() => handleSelectOption(currentQuestionIdx, optIdx)}
-                  className={`w-full text-left p-3 rounded-xl border text-xs sm:text-sm transition-all flex items-center gap-3 ${
+                  className={`w-full text-left p-3.5 rounded-2xl border text-xs sm:text-sm transition-all flex items-center gap-3 backdrop-blur-xl ${
                     isSelected
-                      ? 'border-purple-500/60 bg-purple-950/40 text-white shadow-[0_0_15px_rgba(168,85,247,0.25)]'
-                      : 'border-white/10 bg-white/[0.02] text-slate-300 hover:bg-white/[0.05]'
+                      ? 'border-purple-400/80 bg-purple-500/20 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_20px_rgba(168,85,247,0.3)]'
+                      : 'border-white/15 bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] hover:border-white/30'
                   }`}
                 >
                   <span
-                    className={`w-6 h-6 rounded-lg border flex items-center justify-center font-mono font-bold text-xs flex-shrink-0 ${
+                    className={`w-6 h-6 rounded-xl border flex items-center justify-center font-mono font-bold text-xs flex-shrink-0 ${
                       isSelected
-                        ? 'border-purple-400 bg-purple-500 text-white shadow-sm'
-                        : 'border-white/15 bg-black/30 text-slate-400'
+                        ? 'border-purple-300 bg-purple-500 text-white shadow-md'
+                        : 'border-white/20 bg-white/[0.08] text-slate-300'
                     }`}
                   >
                     {String.fromCharCode(65 + optIdx)}
@@ -432,7 +432,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
                 sound.playClick();
                 setCurrentQuestionIdx((prev) => Math.max(0, prev - 1));
               }}
-              className="btn-skeuo-glass py-2 px-3.5 text-xs disabled:opacity-30"
+              className="btn-apple-glass py-2 px-4 text-xs disabled:opacity-30 text-white"
             >
               Previous
             </button>
@@ -441,9 +441,9 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
               <button
                 type="button"
                 onClick={handleSubmitTest}
-                className="btn-skeuo-orange py-2 px-5 text-xs font-bold flex items-center gap-1.5"
+                className="btn-apple-primary py-2.5 px-5 text-xs font-bold flex items-center gap-1.5 shadow-xl"
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkles className="w-3.5 h-3.5 text-white" />
                 <span>Submit & Trigger Adaptive Loop</span>
               </button>
             ) : (
@@ -453,7 +453,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
                   sound.playClick();
                   setCurrentQuestionIdx((prev) => Math.min(activeTest.questions.length - 1, prev + 1));
                 }}
-                className="btn-skeuo-primary py-2 px-5 text-xs font-semibold flex items-center gap-1.5"
+                className="btn-apple-primary py-2 px-5 text-xs font-semibold flex items-center gap-1.5"
               >
                 <span>Next Question</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -470,7 +470,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
     <div className="space-y-6 animate-fade-in pb-12">
       
       {/* Header */}
-      <div className="liquid-glass-card p-6 relative overflow-hidden">
+      <div className="apple-liquid-glass p-6 sm:p-8 relative overflow-hidden">
         <div className="glow-pink -top-24 -right-24 opacity-20" />
         
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -482,7 +482,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Personalized Tests & Diagnostics
             </h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
               Standard exams ask random questions. Mind Bridge AI synthesizes tests precisely targeted at your active learning gaps to measure retention and dynamically adapt your syllabus.
             </p>
           </div>
@@ -494,14 +494,14 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
         {tests.map((test) => (
           <div
             key={test.id}
-            className="liquid-glass-card p-5 space-y-3.5 border-white/10 hover:border-purple-500/40 transition-all flex flex-col justify-between"
+            className="liquid-glass-block p-5 space-y-3.5 border-white/15 hover:border-purple-500/50 flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="text-xs font-mono font-semibold text-purple-300">
                   {test.subject}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30">
                   {test.difficulty} Difficulty
                 </span>
               </div>
@@ -521,7 +521,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
             <button
               type="button"
               onClick={() => startTest(test)}
-              className="w-full btn-skeuo-primary py-2.5 px-4 text-xs font-semibold flex items-center justify-center gap-2"
+              className="w-full btn-apple-primary py-2.5 px-4 text-xs font-semibold flex items-center justify-center gap-2 mt-2"
             >
               <FileCheck2 className="w-3.5 h-3.5" />
               <span>Begin Diagnostic Test</span>
@@ -533,14 +533,14 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
         {gaps.map((gap) => (
           <div
             key={gap.id}
-            className="liquid-glass-card p-5 space-y-3.5 border-orange-500/20 bg-orange-950/10 flex flex-col justify-between"
+            className="liquid-glass-amber p-5 space-y-3.5 flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="text-xs font-mono font-semibold text-orange-300">
                   {gap.subject}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
                   {gap.severity} Gap
                 </span>
               </div>
@@ -548,7 +548,7 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
               <h4 className="text-base font-bold text-white">
                 Auto-Generate Test: {gap.topic}
               </h4>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+              <p className="text-xs text-slate-300 mt-1 leading-relaxed">
                 Synthesize fresh diagnostic questions from your recorded exam deficiencies.
               </p>
             </div>
@@ -556,9 +556,9 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
             <button
               type="button"
               onClick={() => handleGenerateFreshTest(gap)}
-              className="w-full btn-skeuo-orange py-2.5 px-4 text-xs font-semibold flex items-center justify-center gap-2"
+              className="w-full btn-apple-glass py-2.5 px-4 text-xs font-semibold flex items-center justify-center gap-2 mt-2 text-white"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5 text-white" />
               <span>Generate & Take Test</span>
             </button>
           </div>

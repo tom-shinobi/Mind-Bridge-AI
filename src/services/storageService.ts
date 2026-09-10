@@ -171,8 +171,40 @@ class StorageService {
     this.save(STORAGE_KEYS.STUDY_SECONDS_TODAY, seconds);
   }
 
+  public getDemoProfile(): StudentProfile {
+    return { ...initialStudentProfile };
+  }
+
+  public getDemoAcademicRecords(): AcademicRecord[] {
+    return JSON.parse(JSON.stringify(initialAcademicRecords));
+  }
+
+  public getDemoLearningGaps(): LearningGap[] {
+    return JSON.parse(JSON.stringify(initialLearningGaps));
+  }
+
+  public getDemoSyllabus(): SyllabusTopic[] {
+    return JSON.parse(JSON.stringify(initialSyllabusTopics));
+  }
+
+  public getDemoTimetable(): TimetableBlock[] {
+    return JSON.parse(JSON.stringify(initialTimetableBlocks));
+  }
+
+  public getDemoTests(): Test[] {
+    return JSON.parse(JSON.stringify(initialTests));
+  }
+
+  public getDemoAchievements(): Achievement[] {
+    return JSON.parse(JSON.stringify(initialAchievements));
+  }
+
+  public getDemoAuditLog(): AdaptiveAuditEntry[] {
+    return JSON.parse(JSON.stringify(initialAuditLog));
+  }
+
   public resetToDemo(): void {
-    localStorage.clear();
+    const currentSettings = this.load<AISettings>(STORAGE_KEYS.AI_SETTINGS, initialAISettings);
     this.saveProfile(initialStudentProfile);
     this.saveAcademicRecords(initialAcademicRecords);
     this.saveLearningGaps(initialLearningGaps);
@@ -183,7 +215,10 @@ class StorageService {
     this.saveDailyCheckIns([]);
     this.saveAchievements(initialAchievements);
     this.saveAuditLog(initialAuditLog);
-    this.saveAISettings(initialAISettings);
+    this.saveAISettings({
+      ...initialAISettings,
+      openRouterApiKey: currentSettings.openRouterApiKey || initialAISettings.openRouterApiKey
+    });
     this.saveTodayStudySeconds(2540);
   }
 }

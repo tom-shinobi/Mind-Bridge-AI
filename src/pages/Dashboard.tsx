@@ -9,8 +9,6 @@ import {
   CheckCircle2,
   Circle,
   HeartPulse,
-  ChevronLeft,
-  ChevronRight,
   BookOpen,
   Trophy,
   ShieldCheck,
@@ -24,9 +22,6 @@ import type {
   Achievement
 } from '../types';
 import { RotaryKnob } from '../components/hardware/RotaryKnob';
-import { FaderSlider } from '../components/hardware/FaderSlider';
-import { HardwareButton } from '../components/hardware/HardwareButton';
-import { ScrewRivet } from '../components/hardware/ScrewRivet';
 import { StudyTimerWidget } from '../components/StudyTimerWidget';
 import { RefractiveLens } from '../components/RefractiveLens';
 import { sound } from '../services/soundService';
@@ -52,14 +47,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const criticalGap = gaps.find((g) => g.severity === 'critical') || gaps[0];
 
-  // Hardware Console States
+  // Adaptive Command Deck State
   const [leftMasteryKnob, setLeftMasteryKnob] = useState<number>(criticalGap?.masteryScore || 38);
   const [rightHoursKnob, setRightHoursKnob] = useState<number>(45); // 4.5 hrs
-  const [gainFader, setGainFader] = useState<number>(75);
-  const [mixFader, setMixFader] = useState<number>(50);
-  const [filterLow, setFilterLow] = useState<number>(25);
-  const [filterHigh, setFilterHigh] = useState<number>(75);
-  const [consoleMode, setConsoleMode] = useState<'LINK' | 'AUTO_LOOP' | 'MANUAL'>('AUTO_LOOP');
+  const [deckMode, setDeckMode] = useState<'AUTO_LOOP' | 'PRECISION' | 'CALIBRATE'>('AUTO_LOOP');
 
   // Today's blocks (Monday for demo)
   const todayBlocks = timetable.filter((b) => b.dayOfWeek === 'Monday');
@@ -99,7 +90,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           B.Tech Computer Science & Engineering • Target CGPA 9.0 • Semester 6
         </p>
 
-        {/* Apple Keynote CTA Pill Buttons (Matching iPhone Duo "Learn more" & "View pricing") */}
+        {/* Apple Keynote CTA Pill Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-3.5 pt-3">
           <button
             onClick={() => { sound.playClick(); onNavigate('tutor', { topic: criticalGap?.topic }); }}
@@ -118,7 +109,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
 
-        {/* Real 3D Optical Liquid Glass Refraction Sphere (Matching Reference Image 2) */}
+        {/* Real 3D Optical Liquid Glass Refraction Sphere */}
         <div className="pt-8 relative flex flex-col items-center">
           <RefractiveLens
             size={200}
@@ -135,114 +126,66 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
       
       {/* ==========================================================================
-          SEA-BLUE CONSOLE MK-V HARDWARE SYNTHESIZER
-          Modern skeuomorphic console: Soft Sea-Mist Cream + Electric Anime Sea-Azure
-          Dual-Channel Academic Adaptation Engine with rotary dials and central faders
+          APPLE LIQUID GLASS ADAPTIVE COMMAND DECK
+          Sleek frosted glass deck with bilateral symmetry and dual rotary controllers
           ========================================================================== */}
-      <div className="hardware-chassis relative select-none">
+      <div className="apple-liquid-glass p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl space-y-6 relative overflow-hidden backdrop-blur-3xl">
         
-        {/* Hardware Corner Screws */}
-        <ScrewRivet className="absolute top-4 left-4 z-20" angle={30} />
-        <ScrewRivet className="absolute top-4 right-4 z-20" angle={120} />
-        <ScrewRivet className="absolute bottom-4 left-4 z-20" angle={75} />
-        <ScrewRivet className="absolute bottom-4 right-4 z-20" angle={15} />
-
-        {/* Console Top Header Control Bar */}
-        <div className="relative z-10 px-6 sm:px-8 pt-5 pb-3 flex flex-wrap items-center justify-between border-b border-cyan-500/20 bg-gradient-to-b from-[#051322]/80 to-transparent">
-          
-          {/* Top-Left Hardware Fastener + Brand */}
+        {/* Command Deck Header */}
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full border border-cyan-400/40 bg-[#06182c] flex items-center justify-center shadow-inner">
-              <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#38BDF8] animate-pulse" />
-            </div>
+            <div className="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_#38BDF8] animate-pulse" />
             <div>
-              <span className="font-mono font-extrabold text-xs tracking-widest text-cyan-200 uppercase flex items-center gap-2">
-                <span>MIND BRIDGE AI // CONSOLE MK-V</span>
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 border border-pink-400/30">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold tracking-wider font-mono text-white uppercase">
+                  Adaptive Intelligence Deck
+                </h2>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 font-mono">
                   AUTONOMOUS
                 </span>
-              </span>
-              <p className="text-[9px] font-mono text-cyan-400/70 tracking-wider uppercase">
-                Dual-Channel Academic Adaptation Engine
+              </div>
+              <p className="text-xs text-[#A1A1A6] font-mono">
+                Dual-Channel Real-Time Academic Calibration Engine
               </p>
             </div>
           </div>
 
-          {/* Segmented Rocker Well: LINK, AUTO_LOOP, MANUAL */}
-          <div className="segmented-well my-1">
-            <button
-              onClick={() => { sound.playClick(); setConsoleMode('LINK'); }}
-              className={`px-3 py-1 text-[10px] font-mono font-bold tracking-wider rounded uppercase transition-all ${
-                consoleMode === 'LINK'
-                  ? 'bg-cyan-400 text-cyan-950 shadow-[0_0_10px_#38BDF8]'
-                  : 'text-slate-400 hover:text-cyan-300'
-              }`}
-            >
-              LINK
-            </button>
-            <button
-              onClick={() => { sound.playClick(); setConsoleMode('AUTO_LOOP'); }}
-              className={`px-3 py-1 text-[10px] font-mono font-bold tracking-wider rounded uppercase transition-all ${
-                consoleMode === 'AUTO_LOOP'
-                  ? 'bg-[#0284C7] text-white shadow-[0_0_10px_#0284C7]'
-                  : 'text-slate-400 hover:text-cyan-300'
-              }`}
-            >
-              AUTO LOOP
-            </button>
-            <button
-              onClick={() => { sound.playClick(); setConsoleMode('MANUAL'); }}
-              className={`px-3 py-1 text-[10px] font-mono font-bold tracking-wider rounded uppercase transition-all ${
-                consoleMode === 'MANUAL'
-                  ? 'bg-pink-500 text-white shadow-[0_0_10px_#F472B6]'
-                  : 'text-slate-400 hover:text-cyan-300'
-              }`}
-            >
-              MANUAL
-            </button>
+          {/* Mode Switcher Pills */}
+          <div className="flex items-center p-1 rounded-full bg-white/[0.06] border border-white/10 backdrop-blur-md">
+            {(['AUTO_LOOP', 'PRECISION', 'CALIBRATE'] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => {
+                  sound.playClick();
+                  setDeckMode(mode);
+                }}
+                className={`px-3.5 py-1 rounded-full text-[11px] font-mono font-medium transition-all cursor-pointer ${
+                  deckMode === mode
+                    ? 'bg-white/20 text-white shadow-sm border border-white/30'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {mode === 'AUTO_LOOP' ? 'AUTO LOOP' : mode}
+              </button>
+            ))}
           </div>
-
-          {/* Top-Right Circular Navigation Buttons (<, >) */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => { sound.playClick(); onNavigate('history'); }}
-              className="w-7 h-7 rounded-full bg-[#0a233d] border border-cyan-500/30 hover:border-cyan-400 text-cyan-200 flex items-center justify-center shadow-inner hover:shadow-[0_0_8px_rgba(6,182,212,0.3)] transition-all"
-              title="Previous Channel: Academic History"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => { sound.playClick(); onNavigate('timetable'); }}
-              className="w-7 h-7 rounded-full bg-[#0a233d] border border-cyan-500/30 hover:border-cyan-400 text-cyan-200 flex items-center justify-center shadow-inner hover:shadow-[0_0_8px_rgba(6,182,212,0.3)] transition-all"
-              title="Next Channel: Timetable Engine"
-            >
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
         </div>
 
-        {/* Dual-Tone Main Deck (Split 50/50 down the middle) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 relative">
-          
-          {/* ==============================================================
-              LEFT CHANNEL (Soft Sea-Mist Cream Chassis)
-              Dedicated to Academic Grounding, Gaps & Socratic Diagnostics
-              ============================================================== */}
-          <div className="chassis-panel-left p-6 sm:p-10 flex flex-col justify-between min-h-[380px] border-b md:border-b-0">
-            
-            {/* Channel Subheader */}
-            <div className="flex items-center justify-between">
-              <span className="hw-label hw-label-light text-cyan-900 font-bold opacity-80">
-                CH-1 // GAP DIAGNOSTICS
+        {/* Dual Channel Glass Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Channel 1: Gap Diagnostics & Mastery */}
+          <div className="liquid-glass-block p-6 rounded-2xl border border-white/10 flex flex-col justify-between items-center text-center space-y-5 hover:border-white/25 transition-all">
+            <div className="w-full flex items-center justify-between text-xs font-mono">
+              <span className="text-cyan-300 font-semibold tracking-wider uppercase flex items-center gap-1.5">
+                <Target className="w-3.5 h-3.5 text-cyan-400" />
+                CH-1 • Gap Diagnostics
               </span>
-              <span className="text-[10px] font-mono font-bold text-cyan-950 bg-cyan-200/80 px-2 py-0.5 rounded shadow-sm border border-cyan-300">
-                CRITICAL GAP: {criticalGap?.masteryScore}%
+              <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 font-bold">
+                SCORE: {leftMasteryKnob}%
               </span>
             </div>
 
-            {/* Rotary Potentiometer for Gap Mastery */}
-            <div className="my-6 flex flex-col items-center justify-center">
+            <div className="py-2 flex flex-col items-center">
               <RotaryKnob
                 value={leftMasteryKnob}
                 min={0}
@@ -250,44 +193,36 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 size="lg"
                 variant="ocean"
                 label="GAP MASTERY"
-                subLabel={`${criticalGap?.topic || 'B-Trees & Indexing'}`}
+                subLabel={criticalGap?.topic || 'B-Trees & Indexing'}
                 onChange={(val) => setLeftMasteryKnob(val)}
               />
-              <p className="text-[11px] font-mono text-cyan-950/80 mt-2 max-w-xs text-center leading-tight">
-                Deficiency identified in Midterm Exam. Calibrate knob to test Socratic response curve.
+              <p className="text-xs text-[#A1A1A6] mt-3 max-w-xs leading-relaxed">
+                Calibrate baseline proficiency. The Socratic Tutor adapts question depth according to this score.
               </p>
             </div>
 
-            {/* Bottom Push Button: SYNC */}
-            <div className="flex justify-center pt-2">
-              <HardwareButton
-                label="SYNC SOCRATIC TUTOR"
-                variant="light"
-                onClick={handleSyncGaps}
-                className="px-6 py-2 shadow-md border-cyan-300"
-              />
-            </div>
-
+            <button
+              onClick={handleSyncGaps}
+              className="btn-apple-primary w-full py-2.5 text-xs flex items-center justify-center gap-2 shadow-lg"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-white" />
+              <span>Launch Socratic Session</span>
+            </button>
           </div>
 
-          {/* ==============================================================
-              RIGHT CHANNEL (Vibrant Anime Sea-Azure Chassis)
-              Dedicated to Adaptive Engine, Timetable & Study Pacing
-              ============================================================== */}
-          <div className="chassis-panel-right p-6 sm:p-10 flex flex-col justify-between min-h-[380px]">
-            
-            {/* Channel Subheader */}
-            <div className="flex items-center justify-between">
-              <span className="hw-label hw-label-dark text-white opacity-95">
-                CH-2 // ADAPTIVE ENGINE
+          {/* Channel 2: Adaptive Study Load */}
+          <div className="liquid-glass-block p-6 rounded-2xl border border-white/10 flex flex-col justify-between items-center text-center space-y-5 hover:border-white/25 transition-all">
+            <div className="w-full flex items-center justify-between text-xs font-mono">
+              <span className="text-pink-300 font-semibold tracking-wider uppercase flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-pink-400" />
+                CH-2 • Study Pacing
               </span>
-              <span className="text-[10px] font-mono font-bold text-white bg-black/30 px-2 py-0.5 rounded border border-white/20">
-                LOAD TARGET: {(rightHoursKnob / 10).toFixed(1)} HRS
+              <span className="px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-200 border border-pink-400/30 font-bold">
+                TARGET: {(rightHoursKnob / 10).toFixed(1)} HRS
               </span>
             </div>
 
-            {/* Rotary Potentiometer for Adaptive Hours */}
-            <div className="my-6 flex flex-col items-center justify-center">
+            <div className="py-2 flex flex-col items-center">
               <RotaryKnob
                 value={rightHoursKnob}
                 min={10}
@@ -299,111 +234,44 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 subLabel="Adaptive Hours / Day"
                 onChange={(val) => setRightHoursKnob(val)}
               />
-              <p className="text-[11px] font-mono text-cyan-100/90 mt-2 max-w-xs text-center leading-tight">
-                Dynamically weighted for weak topics with auto-rebalancing across the week.
+              <p className="text-xs text-[#A1A1A6] mt-3 max-w-xs leading-relaxed">
+                Dynamically weighted across active exam gaps with automated cognitive fatigue balancing.
               </p>
             </div>
 
-            {/* Bottom Push Button: SYNC */}
-            <div className="flex justify-center pt-2">
-              <HardwareButton
-                label="SYNC DIAGNOSTIC TEST"
-                variant="dark"
-                onClick={handleSyncTimetable}
-                className="px-6 py-2 shadow-md border-white/30"
-              />
-            </div>
-
+            <button
+              onClick={handleSyncTimetable}
+              className="btn-apple-glass w-full py-2.5 text-xs flex items-center justify-center gap-2 shadow-lg"
+            >
+              <FileCheck className="w-3.5 h-3.5 text-white/90" />
+              <span>Sync Diagnostic Quiz</span>
+            </button>
           </div>
-
-          {/* ==============================================================
-              CENTER CONTROL STRIP (Faders: GAIN, MIX, LPASS / HPASS)
-              Sleek dark oceanic glass console over the seam
-              ============================================================== */}
-          <div className="md:absolute left-1/2 top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-20 p-4 rounded-2xl bg-[#06182c]/95 border-2 border-cyan-400/30 shadow-[0_12px_32px_rgba(2,10,24,0.85)] flex flex-col gap-4 my-4 md:my-0 mx-4 md:mx-0 backdrop-blur-xl">
-            
-            {/* Gain Fader */}
-            <FaderSlider
-              value={gainFader}
-              min={0}
-              max={100}
-              label="GAIN"
-              width={160}
-              variant="dark"
-              onChange={(val) => setGainFader(val)}
-            />
-
-            {/* Mix Fader */}
-            <FaderSlider
-              value={mixFader}
-              min={0}
-              max={100}
-              label="MIX"
-              width={160}
-              variant="dark"
-              onChange={(val) => setMixFader(val)}
-            />
-
-            {/* Filter Module (LPASS / HPASS) */}
-            <div className="pt-2 border-t border-cyan-500/20 flex items-center justify-between gap-2">
-              <div className="flex flex-col items-center">
-                <span className="text-[9px] font-mono text-cyan-300 font-bold uppercase">
-                  LPASS
-                </span>
-                <input
-                  type="range"
-                  min="0"
-                  max="50"
-                  value={filterLow}
-                  onChange={(e) => setFilterLow(Number(e.target.value))}
-                  className="w-16 h-1.5 bg-[#030d17] rounded-lg appearance-none cursor-pointer accent-cyan-400"
-                />
-                <span className="text-[8px] font-mono text-slate-400 mt-0.5">0 Hz</span>
-              </div>
-
-              <div className="flex flex-col items-center">
-                <span className="text-[9px] font-mono text-pink-400 font-bold uppercase">
-                  HPASS
-                </span>
-                <input
-                  type="range"
-                  min="50"
-                  max="100"
-                  value={filterHigh}
-                  onChange={(e) => setFilterHigh(Number(e.target.value))}
-                  className="w-16 h-1.5 bg-[#030d17] rounded-lg appearance-none cursor-pointer accent-pink-400"
-                />
-                <span className="text-[8px] font-mono text-slate-400 mt-0.5">20 kHz</span>
-              </div>
-            </div>
-
-          </div>
-
         </div>
 
-        {/* Console Bottom Telemetry Bar */}
-        <div className="bg-[#051322] border-t border-cyan-500/20 px-6 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-300">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-cyan-200">
-              <span className="led-indicator led-emerald" />
-              SYSTEM STATUS: AUTONOMOUS & OPTIMAL
+        {/* Command Deck Bottom Telemetry Bar */}
+        <div className="pt-4 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-[#A1A1A6]">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34D399] animate-pulse" />
+              Continuous Feedback Loop: Active & Optimal
             </span>
-            <span className="text-cyan-600">•</span>
-            <span className="text-amber-300 font-bold">XP MULTIPLIER: {gainFader}%</span>
+            <span className="text-white/20 hidden sm:inline">•</span>
+            <span className="text-white/70 hidden sm:inline">Mode: {deckMode}</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => { sound.playClick(); onOpenWorkloadModal(); }}
-              className="hover:text-pink-300 flex items-center gap-1.5 text-[11px] uppercase transition-colors text-pink-400"
+              className="hover:text-pink-300 flex items-center gap-1.5 text-xs transition-colors text-pink-400 cursor-pointer"
             >
               <HeartPulse className="w-3.5 h-3.5" />
               <span>Workload Check-in</span>
             </button>
-            <span className="text-cyan-600">•</span>
+            <span className="text-white/20">•</span>
             <button
               onClick={() => { sound.playClick(); onNavigate('adaptive_loop'); }}
-              className="hover:text-cyan-200 flex items-center gap-1.5 text-[11px] uppercase transition-colors text-cyan-400"
+              className="hover:text-cyan-300 flex items-center gap-1.5 text-xs transition-colors text-cyan-400 cursor-pointer"
             >
               <RotateCw className="w-3.5 h-3.5" />
               <span>Inspect Closed Loop</span>
@@ -507,12 +375,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {todayBlocks.map((block) => (
               <div
                 key={block.id}
-                className={`p-4 rounded-2xl border transition-all ${
+                className={`p-4 rounded-2xl transition-all ${
                   block.completed
-                    ? 'bg-white/[0.02] border-white/5 opacity-40'
+                    ? 'liquid-glass-block opacity-40 border-white/5'
                     : block.isAdaptive
-                    ? 'bg-white/[0.08] border-white/30 backdrop-blur-2xl shadow-[0_4px_20px_rgba(0,0,0,0.3)]'
-                    : 'bg-white/[0.03] border-white/10'
+                    ? 'liquid-glass-adaptive shadow-[0_6px_22px_rgba(168,85,247,0.2)]'
+                    : 'liquid-glass-block'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -591,12 +459,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <div className="space-y-2.5">
               {gaps.slice(0, 3).map((gap) => (
-                <div key={gap.id} className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1.5">
+                <div key={gap.id} className="p-3 rounded-2xl liquid-glass-block space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-medium text-[#F5F5F7] truncate pr-2">{gap.topic}</span>
                     <span className="font-mono text-[10px] font-bold text-pink-400">{gap.masteryScore}%</span>
                   </div>
-                  <div className="w-full bg-black/40 rounded-full h-1.5 overflow-hidden border border-white/10">
+                  <div className="w-full bg-white/[0.08] rounded-full h-1.5 overflow-hidden border border-white/15">
                     <div
                       className={`h-full rounded-full ${
                         gap.masteryScore < 45

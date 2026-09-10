@@ -124,14 +124,27 @@ class AIService {
         .map((s) => `- ${s.subject} (${s.moduleName}): ${s.topic} (${s.masteryPercentage}% mastery, status: ${s.status})`)
         .join('\n');
 
+      const mem = profile.memorySummary;
+      const memoryBlock = mem ? `
+PERSISTENT ACADEMIC MEMORY & COGNITIVE PREFERENCES:
+- Pedagogical / Explanation Preference: ${mem.learningStyle || 'Conceptual and First Principles'}
+- Current Academic Focus: ${mem.currentFocus || 'Core syllabus mastery'}
+- Target Academic Goal: ${mem.academicGoal || `${profile.targetCgpa} CGPA`}
+- Study Habits & Timing: ${mem.studyPreferences || 'Structured deep work sessions'}
+- Identified Difficult Topics: ${mem.difficultTopics && mem.difficultTopics.length > 0 ? mem.difficultTopics.join(', ') : 'None specified'}
+- Mastered Strengths: ${mem.strengths && mem.strengths.length > 0 ? mem.strengths.join(', ') : 'None specified'}
+${mem.notes ? `- Special Tutor Notes: ${mem.notes}` : ''}` : '';
+
       return `=== AUTHENTICATED STUDENT USER DATA ===
 STUDENT NAME: ${profile.name}
 DEGREE & PROGRAM: ${profile.degree} (Semester ${profile.semester})
-DEPARTMENT: ${profile.department}
+DEPARTMENT: ${profile.department || profile.degree}
+COLLEGE: ${profile.college || 'Engineering'}
 ACADEMIC STANDING: Current CGPA ${profile.cgpa}/10.0 | Target CGPA: ${profile.targetCgpa}/10.0
 ENGAGEMENT: Level ${profile.level}, ${profile.totalXp} XP, ${profile.streakDays}-Day Consistent Streak
 COGNITIVE WORKLOAD STATE: ${workloadState}
 TOTAL TIME STUDIED TODAY: ${Math.round(studySeconds / 60)} minutes
+${memoryBlock}
 
 OFFICIAL ACADEMIC EXAM MARKS:
 ${recentMarks || 'No exam records logged'}
