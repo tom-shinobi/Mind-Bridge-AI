@@ -9,7 +9,7 @@ interface RotaryKnobProps {
   label: string;
   subLabel?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  variant?: 'chalk' | 'vermilion' | 'dark';
+  variant?: 'chalk' | 'vermilion' | 'dark' | 'ocean' | 'sakura';
   onChange?: (val: number) => void;
   indicatorBead?: boolean;
 }
@@ -79,7 +79,12 @@ export const RotaryKnob: React.FC<RotaryKnobProps> = ({
     return { x, y, isActive, tickAngle };
   });
 
-  const isLight = variant === 'chalk';
+  const isLight = variant === 'chalk' || variant === 'ocean';
+  const isSakura = variant === 'sakura' || variant === 'vermilion';
+
+  // Active track and bead color
+  const activeColor = isSakura ? '#F472B6' : isLight ? '#0284C7' : '#38BDF8';
+  const beadBorder = isSakura ? '#F472B6' : isLight ? '#0284C7' : '#38BDF8';
 
   return (
     <div className="flex flex-col items-center select-none text-center">
@@ -100,7 +105,7 @@ export const RotaryKnob: React.FC<RotaryKnobProps> = ({
             cy={outerGaugePx / 2}
             r={outerGaugePx / 2 - 4}
             fill="none"
-            stroke={isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.18)'}
+            stroke={isLight ? 'rgba(2, 132, 199, 0.15)' : 'rgba(56, 189, 248, 0.2)'}
             strokeWidth="2.5"
             strokeDasharray="470"
             strokeDashoffset="120"
@@ -113,8 +118,8 @@ export const RotaryKnob: React.FC<RotaryKnobProps> = ({
             cy={outerGaugePx / 2}
             r={outerGaugePx / 2 - 4}
             fill="none"
-            stroke={isLight ? '#1A1A1E' : '#FFFFFF'}
-            strokeWidth="3"
+            stroke={activeColor}
+            strokeWidth="3.5"
             strokeDasharray="470"
             strokeDashoffset={470 - pct * 350}
             strokeLinecap="round"
@@ -132,7 +137,7 @@ export const RotaryKnob: React.FC<RotaryKnobProps> = ({
             style={{
               width: 3,
               height: 3,
-              backgroundColor: isLight ? '#1A1A1E' : '#FFFFFF',
+              backgroundColor: t.isActive ? activeColor : isLight ? '#0284C7' : '#FFFFFF',
               transform: `translate(${t.x}px, ${t.y}px)`
             }}
           />
@@ -145,8 +150,9 @@ export const RotaryKnob: React.FC<RotaryKnobProps> = ({
             style={{
               width: 10,
               height: 10,
-              backgroundColor: isLight ? '#383A40' : '#FFFFFF',
-              border: `2px solid ${isLight ? '#ECEAE6' : '#F0451E'}`,
+              backgroundColor: '#FFFFFF',
+              border: `2px solid ${beadBorder}`,
+              boxShadow: `0 0 8px ${beadBorder}`,
               transform: `rotate(${angle}deg) translate(0px, -${outerGaugePx / 2 - 4}px)`
             }}
           />
@@ -175,7 +181,8 @@ export const RotaryKnob: React.FC<RotaryKnobProps> = ({
               className="absolute knob-pointer-dot"
               style={{
                 top: 7,
-                backgroundColor: isLight ? '#FFFFFF' : '#FFFFFF'
+                backgroundColor: isSakura ? '#F472B6' : '#38BDF8',
+                boxShadow: `0 0 8px ${isSakura ? '#F472B6' : '#38BDF8'}`
               }}
             />
           </div>
@@ -188,7 +195,7 @@ export const RotaryKnob: React.FC<RotaryKnobProps> = ({
           {label}
         </h4>
         {subLabel && (
-          <p className="text-[10px] font-mono opacity-60 uppercase tracking-wider">
+          <p className={`text-[10px] font-mono uppercase tracking-wider ${isLight ? 'text-slate-600' : 'text-slate-300/80'}`}>
             {subLabel}
           </p>
         )}

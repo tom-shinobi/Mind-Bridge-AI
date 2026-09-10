@@ -9,8 +9,9 @@
 
   body {
     font-family: var(--font-body);
-    background-color: #0A0B0E;
-    color: #F1F5F9;
+    background: radial-gradient(circle at 20% 15%, #0e3256 0%, #081d33 45%, #051322 100%);
+    color: #E2E8F0;
+    min-height: 100vh;
     overflow-x: hidden;
   }
 
@@ -20,37 +21,78 @@
 }
 
 /* ==========================================================================
-   TEENAGE ENGINEERING / ANALOG HARDWARE SKEUOMORPHIC SYSTEM
+   MODERN SKEUOMORPHIC SEA-BLUE & ANIME DESIGN SYSTEM
    ========================================================================== */
 
-/* Outer Hardware Console Shell */
+/* Ambient Anime Mesh Glows */
+.glow-azure {
+  position: absolute;
+  width: 650px;
+  height: 650px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.26) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.glow-sakura {
+  position: absolute;
+  width: 580px;
+  height: 580px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(244, 114, 182, 0.22) 0%, transparent 70%);
+  filter: blur(90px);
+  pointer-events: none;
+}
+
+.glow-mint {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.2) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.glow-cyan {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.24) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* Outer Hardware Console Shell (Sea-Blue Console MK-V) */
 .hardware-chassis {
-  background: #0E0F12;
-  border: 4px solid #1A1B20;
+  background: linear-gradient(145deg, #0c2b4c 0%, #07192c 100%);
+  border: 3px solid rgba(56, 189, 248, 0.35);
   border-radius: 2.25rem;
   box-shadow:
-    0 25px 60px -10px rgba(0, 0, 0, 0.9),
-    0 10px 20px -5px rgba(0, 0, 0, 0.8),
-    inset 0 2px 4px rgba(255, 255, 255, 0.08),
+    0 25px 60px -10px rgba(2, 10, 22, 0.85),
+    0 10px 24px -5px rgba(6, 182, 212, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
     inset 0 -2px 6px rgba(0, 0, 0, 0.8);
   position: relative;
   overflow: hidden;
 }
 
-/* Hardware Split Panel: Left Industrial Chalk */
+/* Hardware Split Panel: Left Soft Sea-Mist Cream */
 .chassis-panel-left {
-  background-color: #ECEAE6;
-  background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 0);
+  background-color: #EDF5FB;
+  background-image: radial-gradient(rgba(2, 132, 199, 0.08) 1px, transparent 0);
   background-size: 16px 16px;
-  color: #18191C;
-  border-right: 2px solid rgba(0, 0, 0, 0.12);
+  color: #0B2545;
+  border-right: 2px solid rgba(56, 189, 248, 0.25);
   position: relative;
 }
 
-/* Hardware Split Panel: Right Vibrant Vermilion */
+/* Hardware Split Panel: Right Vibrant Anime Sea-Azure */
 .chassis-panel-right {
-  background-color: #F0451E;
-  background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 0);
+  background: linear-gradient(145deg, #0284C7 0%, #0369A1 100%);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 0);
   background-size: 16px 16px;
   color: #FFFFFF;
   position: relative;
@@ -61,9 +103,9 @@
   width: 14px;
   height: 14px;
   border-radius: 9999px;
-  background: radial-gradient(circle at 35% 35%, #D4D4D8 0%, #71717A 60%, #3F3F46 100%);
+  background: radial-gradient(circle at 35% 35%, #93c5fd 0%, #38bdf8 40%, #0369a1 100%);
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
     0 2px 4px rgba(0, 0, 0, 0.5);
   position: relative;
   display: inline-flex;
@@ -75,7 +117,7 @@
   content: '';
   width: 6px;
   height: 1.5px;
-  background: #27272A;
+  background: #061e38;
   border-radius: 1px;
 }
 
@@ -91,13 +133,13 @@
 
 .knob-body {
   border-radius: 9999px;
-  background: radial-gradient(circle at 45% 45%, #383A40 0%, #202227 50%, #151619 100%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: radial-gradient(circle at 45% 45%, #1e3a5f 0%, #0e243e 55%, #071526 100%);
+  border: 1.5px solid rgba(56, 189, 248, 0.35);
   box-shadow:
-    0 16px 28px -6px rgba(0, 0, 0, 0.65),
-    0 8px 14px -3px rgba(0, 0, 0, 0.5),
-    inset 0 2px 3px rgba(255, 255, 255, 0.25),
-    inset 0 -3px 4px rgba(0, 0, 0, 0.8);
+    0 16px 28px -6px rgba(1, 10, 20, 0.75),
+    0 8px 14px -3px rgba(6, 182, 212, 0.25),
+    inset 0 2px 3px rgba(255, 255, 255, 0.3),
+    inset 0 -3px 4px rgba(0, 0, 0, 0.9);
   position: relative;
   transition: transform 0.05s ease-out;
   cursor: grab;
@@ -106,26 +148,26 @@
 .knob-body:active {
   cursor: grabbing;
   box-shadow:
-    0 10px 18px -4px rgba(0, 0, 0, 0.65),
-    0 4px 8px -2px rgba(0, 0, 0, 0.5),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.8);
+    0 10px 18px -4px rgba(1, 10, 20, 0.75),
+    0 4px 8px -2px rgba(6, 182, 212, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.9);
 }
 
 .knob-inner-ridge {
   border-radius: 9999px;
-  background: radial-gradient(circle at 40% 40%, #2A2B30 0%, #18191C 100%);
+  background: radial-gradient(circle at 40% 40%, #152e4d 0%, #091a2e 100%);
   box-shadow:
     inset 0 2px 3px rgba(0, 0, 0, 0.9),
-    0 1px 1px rgba(255, 255, 255, 0.1);
+    0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
 .knob-pointer-dot {
   width: 5px;
   height: 5px;
   border-radius: 9999px;
-  background: #FFFFFF;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  background: #38BDF8;
+  box-shadow: 0 0 8px #38BDF8, 0 0 14px rgba(56, 189, 248, 0.8);
 }
 
 /* Recessed Linear Fader Track */
@@ -137,12 +179,12 @@
 }
 
 .fader-groove {
-  background: #121316;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #06182c;
+  border: 1px solid rgba(56, 189, 248, 0.2);
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.9),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.05),
-    0 1px 0 rgba(255, 255, 255, 0.1);
+    inset 0 2px 5px rgba(0, 0, 0, 0.9),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
 }
 
@@ -150,13 +192,13 @@
   width: 28px;
   height: 18px;
   border-radius: 4px;
-  background: linear-gradient(180deg, #3A3C42 0%, #202226 60%, #17181B 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 60%, #0369a1 100%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow:
-    0 4px 8px rgba(0, 0, 0, 0.6),
-    0 1px 2px rgba(0, 0, 0, 0.4),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.8);
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    0 1px 3px rgba(6, 182, 212, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.6);
   cursor: grab;
   position: relative;
   display: flex;
@@ -174,7 +216,8 @@
   height: 10px;
   background: #FFFFFF;
   border-radius: 1px;
-  opacity: 0.85;
+  opacity: 0.95;
+  box-shadow: 0 0 4px #FFFFFF;
 }
 
 /* Tactile Inset Button */
@@ -198,41 +241,42 @@
 
 /* Light chassis button variant */
 .btn-hw-light {
-  background: linear-gradient(180deg, #FFFFFF 0%, #E8E7E3 60%, #D8D6D1 100%);
-  color: #1A1A1E;
+  background: linear-gradient(180deg, #FFFFFF 0%, #E0F2FE 60%, #BAE6FD 100%);
+  color: #0369A1;
+  border-color: rgba(2, 132, 199, 0.3);
   box-shadow:
-    inset 0 1.5px 1px rgba(255, 255, 255, 0.9),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.2),
-    0 3px 0 #A8A6A0,
-    0 5px 10px rgba(0, 0, 0, 0.15);
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 2px rgba(2, 132, 199, 0.2),
+    0 3px 0 #7DD3FC,
+    0 5px 10px rgba(2, 132, 199, 0.2);
 }
 
 .btn-hw-light:hover {
-  background: linear-gradient(180deg, #FFFFFF 0%, #ECEBE7 60%, #DFDDD8 100%);
+  background: linear-gradient(180deg, #FFFFFF 0%, #E8F7FF 60%, #C8ECFD 100%);
 }
 
 .btn-hw-light:active, .btn-hw-light.active {
   transform: translateY(2px);
   box-shadow:
     inset 0 1px 1px rgba(0, 0, 0, 0.2),
-    inset 0 2px 4px rgba(0, 0, 0, 0.25),
-    0 1px 0 #A8A6A0;
+    inset 0 2px 4px rgba(2, 132, 199, 0.3),
+    0 1px 0 #7DD3FC;
 }
 
-/* Orange/Dark chassis button variant */
+/* Dark / Cyan chassis button variant */
 .btn-hw-dark {
-  background: linear-gradient(180deg, #2D2F35 0%, #1D1E22 60%, #141518 100%);
-  color: #FFFFFF;
-  border-color: rgba(255, 255, 255, 0.15);
+  background: linear-gradient(180deg, #1E3A5F 0%, #0F243E 60%, #071526 100%);
+  color: #38BDF8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
   box-shadow:
-    inset 0 1.5px 1px rgba(255, 255, 255, 0.25),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.3),
     inset 0 -1.5px 2px rgba(0, 0, 0, 0.6),
-    0 3px 0 #0A0A0C,
-    0 6px 12px rgba(0, 0, 0, 0.35);
+    0 3px 0 #04101D,
+    0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 .btn-hw-dark:hover {
-  background: linear-gradient(180deg, #373A41 0%, #25262B 60%, #191A1E 100%);
+  background: linear-gradient(180deg, #254670 0%, #132D4C 60%, #091A2E 100%);
 }
 
 .btn-hw-dark:active, .btn-hw-dark.active {
@@ -240,13 +284,13 @@
   box-shadow:
     inset 0 1px 1px rgba(0, 0, 0, 0.4),
     inset 0 2px 5px rgba(0, 0, 0, 0.7),
-    0 1px 0 #0A0A0C;
+    0 1px 0 #04101D;
 }
 
 /* Segmented Rocker Well */
 .segmented-well {
-  background: #121316;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #06182c;
+  border: 1px solid rgba(56, 189, 248, 0.2);
   box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.8),
     0 1px 0 rgba(255, 255, 255, 0.1);
@@ -256,19 +300,207 @@
   gap: 2px;
 }
 
-/* Liquid Glass Cards */
+/* Modern Oceanic Sea-Glass Card System */
+.sea-glass,
+.liquid-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(14, 44, 75, 0.75) 0%,
+    rgba(8, 28, 50, 0.88) 100%
+  );
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  box-shadow:
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.22),
+    inset 0 -1.5px 1.5px rgba(0, 0, 0, 0.4),
+    0 18px 40px -8px rgba(2, 12, 24, 0.75),
+    0 2px 10px rgba(6, 182, 212, 0.08);
+  border-radius: 1.25rem;
+}
+
+.sea-glass-card,
 .liquid-glass-card {
   background: linear-gradient(
-    145deg,
-    rgba(24, 25, 32, 0.8) 0%,
-    rgba(15, 16, 22, 0.9) 100%
+    135deg,
+    rgba(16, 48, 80, 0.75) 0%,
+    rgba(8, 28, 50, 0.88) 100%
   );
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(56, 189, 248, 0.24);
   box-shadow:
-    inset 0 1.5px 1px rgba(255, 255, 255, 0.15),
-    0 12px 32px rgba(0, 0, 0, 0.6);
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.24),
+    inset 0 -1.5px 1.5px rgba(0, 0, 0, 0.4),
+    0 18px 40px -8px rgba(2, 12, 24, 0.75),
+    0 2px 10px rgba(6, 182, 212, 0.1);
   border-radius: 1.25rem;
+}
+
+.sea-glass-pill,
+.liquid-glass-pill {
+  background: linear-gradient(180deg, rgba(16, 48, 80, 0.8) 0%, rgba(8, 28, 50, 0.9) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.25),
+    0 4px 12px rgba(2, 12, 24, 0.4);
+  border-radius: 9999px;
+}
+
+/* Modern Skeuomorphic Push Buttons */
+.btn-skeuo-sea,
+.btn-skeuo-primary {
+  background: linear-gradient(180deg, #38BDF8 0%, #0284C7 60%, #0369A1 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.65),
+    inset 0 -1.5px 2px rgba(0, 0, 0, 0.35),
+    0 4px 0 #075985,
+    0 8px 18px rgba(2, 132, 199, 0.45);
+  border-radius: 0.75rem;
+  font-weight: 700;
+  transition: all 0.08s ease-out;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-skeuo-sea:hover,
+.btn-skeuo-primary:hover {
+  background: linear-gradient(180deg, #60A5FA 0%, #0EA5E9 60%, #0284C7 100%);
+}
+
+.btn-skeuo-sea:active,
+.btn-skeuo-primary:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1.5px 2px rgba(0, 0, 0, 0.4),
+    0 1px 0 #075985,
+    0 3px 6px rgba(2, 132, 199, 0.3);
+}
+
+.btn-skeuo-sakura {
+  background: linear-gradient(180deg, #F472B6 0%, #DB2777 60%, #BE185D 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.65),
+    inset 0 -1.5px 2px rgba(0, 0, 0, 0.35),
+    0 4px 0 #9D174D,
+    0 8px 18px rgba(219, 39, 119, 0.45);
+  border-radius: 0.75rem;
+  font-weight: 700;
+  transition: all 0.08s ease-out;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-skeuo-sakura:hover {
+  background: linear-gradient(180deg, #FB7185 0%, #EC4899 60%, #DB2777 100%);
+}
+
+.btn-skeuo-sakura:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1.5px 2px rgba(0, 0, 0, 0.4),
+    0 1px 0 #9D174D,
+    0 3px 6px rgba(219, 39, 119, 0.3);
+}
+
+.btn-skeuo-mint {
+  background: linear-gradient(180deg, #34D399 0%, #059669 60%, #047857 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.65),
+    inset 0 -1.5px 2px rgba(0, 0, 0, 0.35),
+    0 4px 0 #065F46,
+    0 8px 18px rgba(5, 150, 105, 0.45);
+  border-radius: 0.75rem;
+  font-weight: 700;
+  transition: all 0.08s ease-out;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-skeuo-mint:hover {
+  background: linear-gradient(180deg, #6EE7B7 0%, #10B981 60%, #059669 100%);
+}
+
+.btn-skeuo-mint:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1.5px 2px rgba(0, 0, 0, 0.4),
+    0 1px 0 #065F46,
+    0 3px 6px rgba(5, 150, 105, 0.3);
+}
+
+.btn-skeuo-orange {
+  background: linear-gradient(180deg, #FB923C 0%, #EA580C 60%, #C2410C 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.65),
+    inset 0 -1.5px 2px rgba(0, 0, 0, 0.35),
+    0 4px 0 #9A3412,
+    0 8px 18px rgba(234, 88, 12, 0.45);
+  border-radius: 0.75rem;
+  font-weight: 700;
+  transition: all 0.08s ease-out;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-skeuo-orange:hover {
+  background: linear-gradient(180deg, #FDBA74 0%, #F97316 60%, #EA580C 100%);
+}
+
+.btn-skeuo-orange:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1.5px 2px rgba(0, 0, 0, 0.4),
+    0 1px 0 #9A3412,
+    0 3px 6px rgba(234, 88, 12, 0.3);
+}
+
+.btn-skeuo-glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #E0F2FE;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.25),
+    0 3px 0 rgba(7, 25, 45, 0.9),
+    0 6px 14px rgba(2, 12, 24, 0.4);
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.08s ease-out;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-skeuo-glass:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.06) 100%);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #FFFFFF;
+}
+
+.btn-skeuo-glass:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.4),
+    0 1px 0 rgba(7, 25, 45, 0.9);
+}
+
+/* Skeuomorphic LCD Display Panel */
+.skeuo-lcd {
+  background: #051322;
+  border: 1.5px solid rgba(56, 189, 248, 0.35);
+  border-radius: 0.75rem;
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.15);
+  color: #38BDF8;
+  font-family: var(--font-mono);
 }
 
 /* Hardware Engraved Label */
@@ -281,7 +513,7 @@
 }
 
 .hw-label-light {
-  color: #1A1A1E;
+  color: #0B2545;
 }
 
 .hw-label-dark {
@@ -312,22 +544,32 @@
 
 .led-emerald {
   background: radial-gradient(circle at 35% 35%, #86efac 0%, #22c55e 60%, #15803d 100%);
-  box-shadow: 0 0 8px #22c55e, 0 0 16px rgba(34, 197, 94, 0.5);
+  box-shadow: 0 0 8px #22c55e, 0 0 16px rgba(34, 197, 94, 0.6);
+}
+
+.led-cyan {
+  background: radial-gradient(circle at 35% 35%, #a5f3fc 0%, #06b6d4 60%, #0e7490 100%);
+  box-shadow: 0 0 8px #06b6d4, 0 0 16px rgba(6, 182, 212, 0.6);
+}
+
+.led-sakura {
+  background: radial-gradient(circle at 35% 35%, #fbcfe8 0%, #f472b6 60%, #be185d 100%);
+  box-shadow: 0 0 8px #f472b6, 0 0 16px rgba(244, 114, 182, 0.6);
 }
 
 .led-amber {
   background: radial-gradient(circle at 35% 35%, #fed7aa 0%, #f97316 60%, #c2410c 100%);
-  box-shadow: 0 0 8px #f97316, 0 0 16px rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 8px #f97316, 0 0 16px rgba(249, 115, 22, 0.6);
 }
 
 .led-rose {
   background: radial-gradient(circle at 35% 35%, #fca5a5 0%, #ef4444 60%, #b91c1c 100%);
-  box-shadow: 0 0 8px #ef4444, 0 0 16px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 8px #ef4444, 0 0 16px rgba(239, 68, 68, 0.6);
 }
 
 .led-violet {
   background: radial-gradient(circle at 35% 35%, #d8b4fe 0%, #a855f7 60%, #7e22ce 100%);
-  box-shadow: 0 0 8px #a855f7, 0 0 16px rgba(168, 85, 247, 0.5);
+  box-shadow: 0 0 8px #a855f7, 0 0 16px rgba(168, 85, 247, 0.6);
 }
 
 /* Markdown & LaTeX Math Content Styling */

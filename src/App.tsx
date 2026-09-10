@@ -128,13 +128,14 @@ export function App() {
   const activeGapsCount = gaps.filter((g) => g.status !== 'resolved').length;
 
   return (
-    <div className="min-h-screen bg-[#08090E] text-slate-100 flex flex-col relative selection:bg-purple-500/30 selection:text-purple-200">
+    <div className="min-h-screen bg-[#071628] text-slate-100 flex flex-col relative selection:bg-cyan-500/30 selection:text-cyan-100">
       
-      {/* Dynamic Ambient Mesh Glows (Liquid Glass Underlay) */}
+      {/* Dynamic Ambient Oceanic & Anime Mesh Glows */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="glow-purple top-[-100px] left-[20%] opacity-20" />
-        <div className="glow-orange top-[40%] right-[-100px] opacity-15" />
-        <div className="glow-pink bottom-[-100px] left-[-50px] opacity-15" />
+        <div className="glow-azure -top-[120px] left-[15%] opacity-40" />
+        <div className="glow-sakura top-[35%] -right-[120px] opacity-30" />
+        <div className="glow-mint -bottom-[100px] left-[10%] opacity-25" />
+        <div className="glow-cyan top-[60%] left-[45%] opacity-25" />
       </div>
 
       {/* Top Navbar */}
