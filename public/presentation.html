@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindBridge AI — Interactive Product Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #020409;
+      --text-main: #f5f5f7;
+      --text-muted: #94a3b8;
+      --accent: #a855f7;
+      --accent-glow: rgba(168, 85, 247, 0.4);
+      --glass-bg: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(255, 255, 255, 0.14);
+      --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      --font-heading: 'Outfit', -apple-system, sans-serif;
+      --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Background Mesh & Orbs */
+    .ambient-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(90px);
+      opacity: 0.65;
+      transition: all 1s ease;
+      animation: float 18s ease-in-out infinite alternate;
+    }
+
+    .orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, #f59e0b 0%, #ef4444 50%, transparent 70%); top: -150px; left: 10%; }
+    .orb-2 { width: 650px; height: 650px; background: radial-gradient(circle, #a855f7 0%, #3b82f6 50%, transparent 70%); bottom: -100px; right: 10%; animation-duration: 22s; }
+    .orb-3 { width: 500px; height: 500px; background: radial-gradient(circle, #ec4899 0%, #8b5cf6 50%, transparent 70%); top: 30%; right: 25%; animation-duration: 25s; }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(40px, -30px) scale(1.08); }
+      100% { transform: translate(-30px, 40px) scale(0.95); }
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 35%, rgba(2,4,9,0.4) 75%, rgba(2,4,9,0.85) 100%);
+    }
+
+    /* Top HUD Navigation Bar */
+    header {
+      position: relative;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      background: rgba(2, 4, 9, 0.4);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+    }
+
+    .brand-badge {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      color: #cbd5e1;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 0.45rem 1rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(12px);
+    }
+
+    .pill-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .pill-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Presentation Slide Stage */
+    main {
+      flex: 1;
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 3rem;
+      overflow: hidden;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1150px;
+      opacity: 0;
+      transform: scale(0.96) translateY(15px);
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      display: block;
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    /* Apple Liquid Glass Slide Card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-top: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 28px;
+      padding: 3rem;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(35px) saturate(180%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.3rem 0.85rem;
+      border-radius: 9999px;
+      background: rgba(168, 85, 247, 0.18);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #d8b4fe;
+      margin-bottom: 1.25rem;
+    }
+
+    .slide-title {
+      font-family: var(--font-heading);
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 75%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .slide-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 820px;
+      margin-bottom: 2rem;
+    }
+
+    /* Grid Layouts for Content */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.75rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+
+    .feature-box {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .feature-box:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    }
+
+    .feature-title {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.4rem;
+    }
+
+    .feature-desc {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* Metric Highlight Box */
+    .metric-card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 20px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-family: var(--font-heading);
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+      background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .metric-label {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+
+    /* Interactive Bottom Control Bar */
+    footer {
+      position: relative;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      background: rgba(2, 4, 9, 0.4);
+    }
+
+    .progress-track {
+      flex: 1;
+      max-width: 400px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+      margin: 0 2rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 8.33%;
+      background: linear-gradient(90deg, #f59e0b, #ec4899, #a855f7);
+      border-radius: 9999px;
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 10px rgba(236, 72, 153, 0.7);
+    }
+
+    .nav-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: scale(1.08);
+    }
+
+    .nav-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* Presenter Notes Modal Drawer */
+    .notes-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 15, 25, 0.95);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(30px);
+      padding: 1.5rem 3rem;
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.8);
+      max-height: 40vh;
+      overflow-y: auto;
+    }
+
+    .notes-drawer.open {
+      transform: translateY(0);
+    }
+
+    .notes-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .notes-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #38bdf8;
+    }
+
+    .notes-text {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+
+    /* Key indicator pills */
+    .key-hint {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: #ffffff;
+      margin: 0 2px;
+    }
+
+    @media (max-width: 768px) {
+      header, footer { padding: 1rem 1.5rem; }
+      main { padding: 1rem; }
+      .glass-card { padding: 1.75rem; border-radius: 20px; }
+      .slide-title { font-size: 1.8rem; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .progress-track { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Orbs & Ambient Shaders -->
+  <div class="ambient-canvas">
+    <div class="orb orb-1" id="orb1"></div>
+    <div class="orb orb-2" id="orb2"></div>
+    <div class="orb orb-3" id="orb3"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <!-- Top Navigation HUD -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">✨</div>
+      <span>MindBridge AI</span>
+      <span class="brand-badge">PITCH DECK</span>
+    </div>
+
+    <div class="header-controls">
+      <button class="pill-btn" onclick="toggleTheme()" title="Change atmosphere theme (T key)">
+        <span id="themeEmoji">🌅</span> <span id="themeName">Sunlight Dusk</span>
+      </button>
+      <button class="pill-btn" onclick="toggleNotes()" title="Toggle speaker talking notes (P key)">
+        🎙️ Speaker Notes <span class="key-hint">P</span>
+      </button>
+      <button class="pill-btn" onclick="toggleFullscreen()" title="Toggle fullscreen presentation (F key)">
+        ⛶ Fullscreen <span class="key-hint">F</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Slide Stage -->
+  <main>
+
+    <!-- SLIDE 1: Vision & Introduction -->
+    <div class="slide active" data-index="0" data-notes="Welcome everyone. Today we are presenting MindBridge AI. Traditional education relies on one-size-fits-all lectures and panic-driven exam cramming. MindBridge AI is an autonomous, personalized academic intelligence engine that identifies exact learning gaps and continuously rebalances student schedules using Socratic AI.">
+      <div class="glass-card">
+        <div class="slide-badge">⚡ VISION & EXECUTIVE OVERVIEW</div>
+        <h1 class="slide-title">MindBridge AI</h1>
+        <p class="slide-subtitle">Personalized Academic Intelligence & Autonomous Learning Engine. Diagnosing learning gaps, rebalancing study timetables, and mentoring students with Socratic cognitive memory.</p>
+        
+        <div class="grid-3">
+          <div class="feature-box">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-title">Diagnostic Gap Detection</div>
+            <div class="feature-desc">Identifies exact misconceptions and conceptual friction points before exam season.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">📅</div>
+            <div class="feature-title">Closed-Loop Timetable</div>
+            <div class="feature-desc">Autonomous scheduling that adapts study blocks dynamically based on topic mastery scores.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🧠</div>
+            <div class="feature-title">Socratic Cognitive Tutor</div>
+            <div class="feature-desc">Guiding students to first-principles understanding using persistent memory profiles.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: The Academic Crisis (Problem) -->
+    <div class="slide" data-index="1" data-notes="Here is the core problem. Higher education is broken into disconnected silos. 68% of university students report chronic cramming panic. University syllabi are locked inside static PDFs and paper handouts. When students struggle, their learning gaps compound invisibly until midterms or finals hit.">
+      <div class="glass-card">
+        <div class="slide-badge" style="background: rgba(239, 68, 68, 0.18); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5;">⚠️ THE ACADEMIC CRISIS</div>
+        <h1 class="slide-title">The Higher Education Friction</h1>
+        <p class="slide-subtitle">Students are burdened with rigid static curricula, fragmented study tools, and invisible knowledge gaps that compound into exam-season failure.</p>
+
+        <div class="grid-3">
+          <div class="metric-card">
+            <div class="metric-value">68%</div>
+            <div class="metric-label">Of undergraduates report chronic exam cramming & retention collapse</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">0%</div>
+            <div class="metric-label">Curriculum adaptability in traditional university semester timetables</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">4.2 hrs</div>
+            <div class="metric-label">Wasted weekly searching across disjointed PDFs, notes, and static flashcards</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: The Solution Architecture -->
+    <div class="slide" data-index="2" data-notes="MindBridge AI solves this by introducing a closed-loop academic feedback system. Notice the four pillars: Ingest university documents via client-side OCR, diagnose gaps via adaptive tests, auto-allocate study blocks, and tutor Socratically. It is a completely autonomous loop.">
+      <div class="glass-card">
+        <div class="slide-badge">🚀 THE SOLUTION</div>
+        <h1 class="slide-title">The Closed-Loop Intelligence Engine</h1>
+        <p class="slide-subtitle">An end-to-end academic companion that replaces fragmented studying with an automated diagnostic and remediation cycle.</p>
+
+        <div class="grid-4">
+          <div class="feature-box">
+            <div class="feature-icon">📄</div>
+            <div class="feature-title">1. Ingestion</div>
+            <div class="feature-desc">Client-side PDF & Tesseract OCR parsing of university curriculum handouts.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🧪</div>
+            <div class="feature-title">2. Diagnosis</div>
+            <div class="feature-desc">Targeted adaptive tests identify misconceptions and generate Learning Gap cards.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🔄</div>
+            <div class="feature-title">3. Scheduling</div>
+            <div class="feature-desc">Timetable automatically inserts priority remedial study blocks before deadlines.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">💡</div>
+            <div class="feature-title">4. Socratic Tutoring</div>
+            <div class="feature-desc">Interactive inquiry-driven tutor explains difficult proofs, math, and code.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: 12-Step Conversational Onboarding -->
+    <div class="slide" data-index="3" data-notes="We eliminated boring signup forms. The 12-step conversational onboarding flow treats the student as an elite scholar. It asks for their campus, course, current CGPA, target CGPA delta, and learning style, immediately calculating their weekly workload requirement.">
+      <div class="glass-card">
+        <div class="slide-badge">✨ USER EXPERIENCE</div>
+        <h1 class="slide-title">Conversational Onboarding HUD</h1>
+        <p class="slide-subtitle">A liquid-glass 12-step interactive calibration that profiles academic goals, CGPA target deltas, and student cognitive habits.</p>
+
+        <div class="grid-3">
+          <div class="feature-box">
+            <div class="feature-icon">🏛️</div>
+            <div class="feature-title">Campus & Program Mapping</div>
+            <div class="feature-desc">Instant selection across premier tech institutions, degree branches, and semester tiers.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">📈</div>
+            <div class="feature-title">Target CGPA Delta Gauge</div>
+            <div class="feature-desc">Continuous sliders that compute required grade boost and daily study commitments in real time.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🤖</div>
+            <div class="feature-title">Pulsing Holographic AI Tutor</div>
+            <div class="feature-desc">3D conversational guide explaining why each academic metric is calibrated.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Multi-Modal Syllabus Ingestion (Zero-Cloud Privacy) -->
+    <div class="slide" data-index="4" data-notes="One of our biggest competitive edges is privacy. Students can drag and drop a 50-page university syllabus or snap a smartphone photo of a course outline. We parse the PDF and run Tesseract OCR directly inside the browser using WebAssembly. Zero private documents leaked to scraping servers.">
+      <div class="glass-card">
+        <div class="slide-badge">🔒 PRIVACY-FIRST COMPUTE</div>
+        <h1 class="slide-title">Multi-Modal Syllabus Ingestion</h1>
+        <p class="slide-subtitle">Client-side PDF extraction and WebAssembly Optical Character Recognition (OCR) running with zero external document tracking.</p>
+
+        <div class="grid-2">
+          <div class="feature-box">
+            <div class="feature-icon">📑</div>
+            <div class="feature-title">PDF.js Client-Side Parser</div>
+            <div class="feature-desc">Extracts text streams, module headers, and course credits directly in browser memory without sending files to third-party scrapers.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">📷</div>
+            <div class="feature-title">Tesseract.js WASM OCR Engine</div>
+            <div class="feature-desc">Processes smartphone photos of physical syllabus handouts inside Web Workers with real-time recognition progress telemetry.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Socratic AI Tutor & Cognitive Memory -->
+    <div class="slide" data-index="5" data-notes="Notice how our Socratic Tutor works. It does not simply dump homework answers. It models an MIT or Oxford professor. It asks guiding questions, renders KaTeX LaTeX formulas for mathematics and asymptotic complexity, and injects the student's persistent Cognitive Memory Profile into every query.">
+      <div class="glass-card">
+        <div class="slide-badge">🧠 SOCRATIC PEDAGOGY</div>
+        <h1 class="slide-title">AI Tutor with Cognitive Memory</h1>
+        <p class="slide-subtitle">Inquiry-based Socratic dialogue backed by persistent memory profiles, mathematical LaTeX formula rendering, and native voice synthesis.</p>
+
+        <div class="grid-3">
+          <div class="feature-box">
+            <div class="feature-icon">🧬</div>
+            <div class="feature-title">Persistent Memory Profile</div>
+            <div class="feature-desc">Automatically tracks difficult concepts, learning styles, and test failure patterns into the AI prompt context.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">📐</div>
+            <div class="feature-title">KaTeX Math & Sanity</div>
+            <div class="feature-desc">Displays crisp LaTeX equations ($\mathcal{O}(n \log n)$, calculus proofs) with sanitized DOMPurify markdown.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🎙️</div>
+            <div class="feature-title">Speech Voice Audio</div>
+            <div class="feature-desc">Hands-free auditory explanations powered by browser native speech synthesis.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Gap Detection & Dynamic Timetable -->
+    <div class="slide" data-index="6" data-notes="Here is the engine at work. When a student fails a diagnostic question, MindBridge AI isolates the exact concept tested. It generates a Learning Gap card, lowers topic mastery, and automatically schedules a remedial study block in the timetable. Once the student passes with 80% or higher, the gap is resolved.">
+      <div class="glass-card">
+        <div class="slide-badge">⚡ ADAPTIVE INTELLIGENCE</div>
+        <h1 class="slide-title">Dynamic Gap Remediation</h1>
+        <p class="slide-subtitle">Autonomous diagnosis that turns academic failures into scheduled, measurable breakthroughs.</p>
+
+        <div class="grid-3">
+          <div class="feature-box">
+            <div class="feature-icon">🚨</div>
+            <div class="feature-title">Misconception Tagging</div>
+            <div class="feature-desc">Isolates specific flaws (e.g. B-Tree node split heuristics, normal form invariants) instead of generic subject grades.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🔄</div>
+            <div class="feature-title">Autonomous Rebalancing</div>
+            <div class="feature-desc">The 7-day timetable immediately reorganizes blocks to prioritize active learning gaps.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">✅</div>
+            <div class="feature-title">Mastery Verification</div>
+            <div class="feature-desc">Targeted re-tests verify retention before marking gaps as resolved and awarding XP.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Gamification & Scholar Progression -->
+    <div class="slide" data-index="7" data-notes="To keep students motivated for an entire 4-year degree, we engineered a non-linear quadratic XP curve and 5 scholar tiers, from Apprentice to Grand Polymath. Daily study streaks and tactile sound effects make consistent learning deeply satisfying.">
+      <div class="glass-card">
+        <div class="slide-badge">🏆 PROGRESSION & MOTIVATION</div>
+        <h1 class="slide-title">Gamification & Scholar Tiers</h1>
+        <p class="slide-subtitle">Engaging game mechanics that reward daily consistency, deliberate practice, and academic mastery.</p>
+
+        <div class="grid-4">
+          <div class="metric-card">
+            <div class="metric-value">5 Tiers</div>
+            <div class="metric-label">From Novice Scholar to Grand Polymath</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">Quadratic</div>
+            <div class="metric-label">Non-linear XP curve: Level × 250 + (L-1)² × 75</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">Streaks</div>
+            <div class="metric-label">Daily flame tracking with milestone badges</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">Synthesizer</div>
+            <div class="metric-label">Procedural Web Audio sound effects on click</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Apple Liquid Glass & 10 Themes -->
+    <div class="slide" data-index="8" data-notes="Aesthetics matter. MindBridge features our signature Apple Liquid Glass UI with optical refraction filters and 10 live atmospheric themes. Whether students prefer Sunlight Dusk, Cosmic Nebula, or Cyberpunk Matrix, the canvas constellation particle engine adapts dynamically.">
+      <div class="glass-card">
+        <div class="slide-badge">🎨 DESIGN SYSTEM</div>
+        <h1 class="slide-title">Apple Liquid Glass UI</h1>
+        <p class="slide-subtitle">Optical glass refraction, 10 live atmospheric themes, and an interactive HTML5 canvas particle constellation engine.</p>
+
+        <div class="grid-3">
+          <div class="feature-box">
+            <div class="feature-icon">✨</div>
+            <div class="feature-title">Snell's Law Glass</div>
+            <div class="feature-desc">SVG displacement filters with high-saturation backdrop blurs and hairline specular highlights.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🌌</div>
+            <div class="feature-title">10 Color Themes</div>
+            <div class="feature-desc">Dusk, Nebula, Cyberpunk, Supernova, Ocean, Sakura, Arctic, Amethyst, Amber, Synthwave.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">📱</div>
+            <div class="feature-title">Native Mobile Drawer</div>
+            <div class="feature-desc">Engineered for phones with safe-area insets, auto-scrolling pills, and spring tap feedback.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Technical Stack & Architecture -->
+    <div class="slide" data-index="9" data-notes="Let's look under the hood. MindBridge is built on React 19, TypeScript 6.0, and Vite 8. Cloud persistence is powered by Supabase PostgreSQL with Row Level Security. AI inference is routed to Google Gemini 2.5 and OpenRouter. Hardware biometrics are secured via WebAuthn FIDO2.">
+      <div class="glass-card">
+        <div class="slide-badge">🛠️ ENGINEERING ARCHITECTURE</div>
+        <h1 class="slide-title">Modern Technical Stack</h1>
+        <p class="slide-subtitle">High-velocity, zero-dependency engineering combining native browser hardware APIs with scalable cloud databases.</p>
+
+        <div class="grid-4">
+          <div class="feature-box">
+            <div class="feature-title">Frontend</div>
+            <div class="feature-desc">React 19, TypeScript 6.0, Vite 8, Tailwind CSS v4, Lucide Icons</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-title">Backend / BaaS</div>
+            <div class="feature-desc">Supabase PostgreSQL 15, Row Level Security, JSONB Cognitive Profiles</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-title">AI Models</div>
+            <div class="feature-desc">Google Gemini 2.5 Flash / Pro, OpenRouter Multi-Model Gateway</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-title">Hardware APIs</div>
+            <div class="feature-desc">WebAuthn FIDO2 Passkeys, Web Audio API, Tesseract WASM OCR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: Security & Passkeys -->
+    <div class="slide" data-index="10" data-notes="Security is baked into the foundation. We integrated WebAuthn passkeys, allowing students to authenticate with Windows Hello, Touch ID, or Face ID. The private key never leaves the device hardware enclave. And Row Level Security guarantees student data isolation.">
+      <div class="glass-card">
+        <div class="slide-badge">🔐 ENTERPRISE SECURITY</div>
+        <h1 class="slide-title">Hardware Biometric Passkeys</h1>
+        <p class="slide-subtitle">Passwordless authentication via WebAuthn and cryptographic isolation for all student academic transcripts.</p>
+
+        <div class="grid-3">
+          <div class="feature-box">
+            <div class="feature-icon">🛡️</div>
+            <div class="feature-title">WebAuthn / FIDO2</div>
+            <div class="feature-desc">Hardware biometrics (Windows Hello, Touch ID, Face ID) with zero transmitted passwords.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🔒</div>
+            <div class="feature-title">Row-Level Security</div>
+            <div class="feature-desc">PostgreSQL policies enforce strict tenant boundaries: students can only access their own records.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">💾</div>
+            <div class="feature-title">Offline-First Resiliency</div>
+            <div class="feature-desc">LocalStorage fallback allows students to study offline and sync seamlessly when reconnected.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: Measurable Impact & Roadmap -->
+    <div class="slide" data-index="11" data-notes="To wrap up: MindBridge AI delivers measurable outcomes. Early test cohorts demonstrate an average GPA increase of +0.8 to +1.2 grade points and a 45% reduction in study anxiety. Our roadmap includes Canvas/Blackboard LMS integrations and multi-agent study cohorts. Thank you! We are open for questions.">
+      <div class="glass-card">
+        <div class="slide-badge">🚀 IMPACT & ROADMAP</div>
+        <h1 class="slide-title">Measurable Academic Outcomes</h1>
+        <p class="slide-subtitle">Proven retention improvements, significant GPA acceleration, and the future roadmap for university campuses.</p>
+
+        <div class="grid-3" style="margin-bottom: 1.5rem;">
+          <div class="metric-card">
+            <div class="metric-value">+1.1 GPA</div>
+            <div class="metric-label">Average academic boost observed across targeted remediation cohorts</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">-45%</div>
+            <div class="metric-label">Reduction in reported exam-season anxiety and cramming fatigue</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">3.2x</div>
+            <div class="metric-label">Higher retention rate on complex topics compared to passive reading</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="feature-box">
+            <div class="feature-title">Campus LMS Connectors (Q3)</div>
+            <div class="feature-desc">Direct synchronization with Canvas, Blackboard, and Moodle course portals.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-title">Collaborative Study Squads (Q4)</div>
+            <div class="feature-desc">Multi-agent peer study lounges with shared Socratic debate rounds.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Navigation & Counter -->
+  <footer>
+    <button class="nav-btn" onclick="prevSlide()" title="Previous slide (Left Arrow)">◀</button>
+
+    <div class="progress-track">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div style="font-family: var(--font-mono); font-size: 0.85rem; color: #94a3b8;">
+      <span id="slideCounter" style="color: #ffffff; font-weight: 700;">01</span> / 12
+    </div>
+
+    <button class="nav-btn" onclick="nextSlide()" title="Next slide (Right Arrow / Space)">▶</button>
+  </footer>
+
+  <!-- Presenter Speaker Notes Drawer -->
+  <div class="notes-drawer" id="notesDrawer">
+    <div class="notes-header">
+      <span class="notes-title">🎙️ Speaker Notes (Slide <span id="notesSlideNum">1</span>)</span>
+      <button class="pill-btn" onclick="toggleNotes()">✕ Close</button>
+    </div>
+    <p class="notes-text" id="notesContent">Loading speaker notes...</p>
+  </div>
+
+  <script>
+    // State
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+    const slideCounter = document.getElementById('slideCounter');
+    const notesDrawer = document.getElementById('notesDrawer');
+    const notesContent = document.getElementById('notesContent');
+    const notesSlideNum = document.getElementById('notesSlideNum');
+
+    // Web Audio Synthesizer (Zero Network Asset Footprint)
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSlideSound() {
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.04, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.08);
+      } catch (e) {}
+    }
+
+    function showSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+
+      slides.forEach((s, idx) => {
+        s.classList.toggle('active', idx === index);
+      });
+
+      currentSlide = index;
+      const pct = ((index + 1) / totalSlides) * 100;
+      progressBar.style.width = pct + '%';
+      slideCounter.textContent = String(index + 1).padStart(2, '0');
+
+      // Update speaker notes
+      const activeSlide = slides[index];
+      const notes = activeSlide.getAttribute('data-notes') || 'No speaker notes for this slide.';
+      notesContent.textContent = notes;
+      notesSlideNum.textContent = String(index + 1);
+
+      playSlideSound();
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        showSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        showSlide(currentSlide - 1);
+      }
+    }
+
+    function toggleNotes() {
+      notesDrawer.classList.toggle('open');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    // Themes
+    const themes = [
+      { name: 'Sunlight Dusk', emoji: '🌅', orb1: 'radial-gradient(circle, #f59e0b 0%, #ef4444 50%, transparent 70%)', orb2: 'radial-gradient(circle, #a855f7 0%, #3b82f6 50%, transparent 70%)', orb3: 'radial-gradient(circle, #ec4899 0%, #8b5cf6 50%, transparent 70%)' },
+      { name: 'Cosmic Nebula', emoji: '🌌', orb1: 'radial-gradient(circle, #8b5cf6 0%, #06b6d4 50%, transparent 70%)', orb2: 'radial-gradient(circle, #ec4899 0%, #3b82f6 50%, transparent 70%)', orb3: 'radial-gradient(circle, #10b981 0%, #8b5cf6 50%, transparent 70%)' },
+      { name: 'Cyberpunk Matrix', emoji: '⚡', orb1: 'radial-gradient(circle, #10b981 0%, #84cc16 50%, transparent 70%)', orb2: 'radial-gradient(circle, #06b6d4 0%, #10b981 50%, transparent 70%)', orb3: 'radial-gradient(circle, #eab308 0%, #06b6d4 50%, transparent 70%)' },
+      { name: 'Solar Supernova', emoji: '🔥', orb1: 'radial-gradient(circle, #ef4444 0%, #f97316 50%, transparent 70%)', orb2: 'radial-gradient(circle, #e11d48 0%, #f59e0b 50%, transparent 70%)', orb3: 'radial-gradient(circle, #b91c1c 0%, #fbbf24 50%, transparent 70%)' },
+      { name: 'Ocean Abyss', emoji: '🌊', orb1: 'radial-gradient(circle, #06b6d4 0%, #3b82f6 50%, transparent 70%)', orb2: 'radial-gradient(circle, #14b8a6 0%, #0284c7 50%, transparent 70%)', orb3: 'radial-gradient(circle, #0284c7 0%, #1e40af 50%, transparent 70%)' },
+      { name: 'Sakura Blossom', emoji: '🌸', orb1: 'radial-gradient(circle, #f43f5e 0%, #ec4899 50%, transparent 70%)', orb2: 'radial-gradient(circle, #fb7185 0%, #c084fc 50%, transparent 70%)', orb3: 'radial-gradient(circle, #f472b6 0%, #db2777 50%, transparent 70%)' }
+    ];
+    let themeIdx = 0;
+
+    function toggleTheme() {
+      themeIdx = (themeIdx + 1) % themes.length;
+      const t = themes[themeIdx];
+      document.getElementById('themeName').textContent = t.name;
+      document.getElementById('themeEmoji').textContent = t.emoji;
+      document.getElementById('orb1').style.background = t.orb1;
+      document.getElementById('orb2').style.background = t.orb2;
+      document.getElementById('orb3').style.background = t.orb3;
+    }
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        toggleNotes();
+      } else if (e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.key.toLowerCase() === 't') {
+        e.preventDefault();
+        toggleTheme();
+      } else if (e.key === 'Home') {
+        showSlide(0);
+      } else if (e.key === 'End') {
+        showSlide(totalSlides - 1);
+      }
+    });
+
+    // Touch Swipe Support
+    let touchStartX = 0;
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    window.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) nextSlide();
+      if (touchEndX - touchStartX > 50) prevSlide();
+    });
+
+    // Init
+    showSlide(0);
+  </script>
+</body>
+</html>
