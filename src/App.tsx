@@ -39,6 +39,8 @@ import { PersonalizedTests } from './pages/PersonalizedTests';
 import { AdaptiveLoop } from './pages/AdaptiveLoop';
 import { ProgressGamification } from './pages/ProgressGamification';
 import { SettingsProfile } from './pages/SettingsProfile';
+import { CommunityHub } from './pages/CommunityHub';
+import { AcademicCalendar } from './pages/AcademicCalendar';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
@@ -735,6 +737,22 @@ export function App() {
               onToggleBlockComplete={handleToggleBlockComplete}
               onOpenWorkloadModal={() => setIsWorkloadModalOpen(true)}
               onNavigate={handleNavigate}
+            />
+          )}
+
+          {activeTab === 'calendar' && (
+            <AcademicCalendar
+              profile={profile}
+              onNavigate={handleNavigate}
+            />
+          )}
+
+          {activeTab === 'community' && (
+            <CommunityHub
+              profile={profile}
+              gaps={gaps}
+              onNavigate={handleNavigate}
+              onUpdateProfile={handleUpdateProfile}
             />
           )}
 

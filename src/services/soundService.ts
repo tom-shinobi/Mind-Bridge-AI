@@ -103,6 +103,11 @@ class SoundService {
     });
   }
 
+  // Level up achievement chime alias
+  public playLevelUp() {
+    this.playFanfare();
+  }
+
   // Adaptive engine recalibration ping
   public playAdaptivePing() {
     const ctx = this.getContext();

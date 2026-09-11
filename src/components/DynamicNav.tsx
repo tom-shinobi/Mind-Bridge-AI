@@ -10,7 +10,9 @@ import {
   RotateCw,
   Trophy,
   Settings,
-  HeartPulse
+  HeartPulse,
+  Users,
+  CalendarDays
 } from 'lucide-react';
 import { sound } from '../services/soundService';
 
@@ -66,6 +68,16 @@ export const DynamicNav: React.FC<DynamicNavProps> = ({
       id: 'timetable',
       label: 'Timetable',
       icon: CalendarClock
+    },
+    {
+      id: 'calendar',
+      label: 'Calendar',
+      icon: CalendarDays
+    },
+    {
+      id: 'community',
+      label: 'Community',
+      icon: Users
     },
     {
       id: 'history',

@@ -22,7 +22,9 @@ import {
   LayoutGrid,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  Users,
+  CalendarDays
 } from 'lucide-react';
 import type { StudentProfile, LearningGap, AISettings } from '../types';
 import { THEME_CONFIGS } from '../types';
@@ -133,6 +135,22 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       description: 'Smart Daily Study Planner',
       icon: CalendarClock,
       gradient: 'from-amber-500/30 to-orange-500/20'
+    },
+    {
+      id: 'calendar',
+      label: 'Academic Calendar',
+      shortLabel: 'Calendar',
+      description: 'Exams, Deadlines & AI Sync',
+      icon: CalendarDays,
+      gradient: 'from-blue-500/30 to-indigo-500/20'
+    },
+    {
+      id: 'community',
+      label: 'Community Hub',
+      shortLabel: 'Community',
+      description: 'Discord Squads, X Feed & DMs',
+      icon: Users,
+      gradient: 'from-fuchsia-500/30 to-purple-500/20'
     },
     {
       id: 'history',

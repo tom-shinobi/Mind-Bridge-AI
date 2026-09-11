@@ -76,6 +76,12 @@ export interface StudentProfile {
   syllabusUploaded?: boolean;
   memorySummary?: MemorySummary;
   biometricEnabled?: boolean;
+  faceUnlockEnabled?: boolean;
+  faceBiometricDescriptor?: string;
+  isPrivateAccount?: boolean;
+  followersCount?: number;
+  followingCount?: number;
+  bio?: string;
 }
 
 export interface AcademicRecord {
@@ -344,3 +350,181 @@ export const THEME_CONFIGS: ThemeInfo[] = [
     accentColor: '#d946ef'
   }
 ];
+
+// ============================================================================
+// COMMUNITY, SOCIAL PULSE & REAL-TIME DISCORD CHAT INFRASTRUCTURE
+// ============================================================================
+
+export type PostMediaType = 'image' | 'code' | 'none';
+
+export interface PostComment {
+  id: string;
+  postId: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar?: string;
+  authorCollege?: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface Post {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar?: string;
+  authorCollege?: string;
+  authorCourse?: string;
+  authorLevel?: number;
+  content: string;
+  mediaType: PostMediaType;
+  mediaUrl?: string; // image url or base64 data
+  codeSnippet?: string;
+  codeLanguage?: string;
+  visibility: 'public' | 'private';
+  likesCount: number;
+  likedBy: string[];
+  commentsCount: number;
+  comments: PostComment[];
+  repostsCount: number;
+  repostedBy: string[];
+  bookmarkedBy: string[];
+  tags: string[];
+  createdAt: string;
+  isFlagged?: boolean;
+  flagReason?: string;
+}
+
+export type ChannelCategory = 'academic' | 'doubts' | 'collab' | 'general' | 'voice';
+
+export interface CommunityChannel {
+  id: string;
+  serverId: string;
+  name: string;
+  topic: string;
+  category: ChannelCategory;
+  isPrivate?: boolean;
+  unreadCount?: number;
+}
+
+export interface CommunityServer {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  channels: CommunityChannel[];
+  memberCount: number;
+  category: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  serverId: string;
+  channelId: string;
+  senderId: string;
+  senderName: string;
+  senderAvatar?: string;
+  senderRole?: 'Professor' | 'Polymath' | 'Scholar' | 'Apprentice' | 'Admin';
+  content: string;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'code' | 'none';
+  codeSnippet?: string;
+  codeLanguage?: string;
+  createdAt: string;
+  reactions: Record<string, string[]>; // emoji -> array of userIds
+}
+
+export interface DirectMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  recipientId: string;
+  senderName: string;
+  senderAvatar?: string;
+  content: string;
+  mediaUrl?: string;
+  createdAt: string;
+  read: boolean;
+}
+
+export interface DMConversation {
+  id: string;
+  participantIds: string[];
+  peerProfile: {
+    id: string;
+    name: string;
+    email: string;
+    college?: string;
+    course?: string;
+    avatarUrl?: string;
+    online?: boolean;
+    level?: number;
+  };
+  lastMessage?: DirectMessage;
+  unreadCount: number;
+}
+
+export interface FriendSuggestion {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  college?: string;
+  course?: string;
+  semester?: number;
+  level: number;
+  cgpa?: number;
+  matchScore: number; // 0-100%
+  matchReasons: string[];
+  mutualSubjects: string[];
+  commonLearningGaps: string[];
+  isFollowing?: boolean;
+  isPrivate?: boolean;
+}
+
+// ============================================================================
+// ACADEMIC CALENDAR, EVENTS & TASKS (AI-ASSISTANT SYNCED)
+// ============================================================================
+
+export type EventType = 'exam' | 'deadline' | 'lecture' | 'study_squad' | 'milestone';
+
+export interface CalendarEvent {
+  id: string;
+  userId: string;
+  title: string;
+  description?: string;
+  subject?: string;
+  eventType: EventType;
+  startDate: string; // ISO String or YYYY-MM-DDTHH:mm
+  endDate: string;   // ISO String or YYYY-MM-DDTHH:mm
+  allDay?: boolean;
+  location?: string;
+  color: string;
+  syncedWithAI: boolean;
+}
+
+export interface CalendarTask {
+  id: string;
+  userId: string;
+  title: string;
+  subject?: string;
+  priority: 'urgent' | 'high' | 'medium' | 'low';
+  dueDate: string; // ISO String or YYYY-MM-DD
+  completed: boolean;
+  estimatedMinutes: number;
+  relatedGapId?: string;
+}
+
+// ============================================================================
+// ADMIN SECURITY & CONTENT MODERATION (2FA VERIFIED)
+// ============================================================================
+
+export interface AdminSession {
+  isAuthenticated: boolean;
+  role: 'superadmin' | 'moderator';
+  twoFactorVerified: boolean;
+  adminEmail?: string;
+  token?: string;
+  sessionExpiresAt?: string;
+}
+

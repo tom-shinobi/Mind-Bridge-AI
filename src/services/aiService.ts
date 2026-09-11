@@ -1,5 +1,6 @@
 import type { Test, TutorMessage } from '../types';
 import { storageService } from './storageService';
+import { calendarService } from './calendarService';
 
 export interface TutorResponse {
   message: string;
@@ -156,6 +157,8 @@ ${todaySchedule || 'No study blocks scheduled today'}
 
 FLAGGED SYLLABUS TOPICS REQUIRING ATTENTION:
 ${weakTopics || 'All syllabus topics above 50%'}
+
+${calendarService.getCalendarAIContext()}
 ----------------------------------------`;
     } catch (e) {
       console.warn('Error reading student context for AI:', e);
@@ -570,6 +573,30 @@ Your highest priority is **B-Trees & B+ Tree Indexing** in DBMS (38% mastery, 35
           correctAnswer: "B-Trees & B+ Tree Indexing (35% impact)",
           explanation: "B-Trees in DBMS represent a Critical severity gap with 35% weightage on your upcoming end-semester examinations."
         },
+        masteryDelta: 5
+      };
+    }
+
+    // Student asks about calendar events, exams, or deadlines
+    if (lowerUser.includes('exam') || lowerUser.includes('deadline') || lowerUser.includes('calendar') || lowerUser.includes('event')) {
+      const calEvents = calendarService.getEvents();
+      const calTasks = calendarService.getTasks().filter((t) => !t.completed);
+      const eventList = calEvents.slice(0, 4).map((e) => `• **${e.title}** (${e.subject || 'General'}): ${new Date(e.startDate).toLocaleDateString()} [${e.eventType.toUpperCase()}]`).join('\n');
+      const taskList = calTasks.slice(0, 3).map((t) => `• **[${t.priority.toUpperCase()}]** ${t.title} (Due: ${t.dueDate})`).join('\n');
+
+      const msg = `Here is your synchronized academic calendar overview, **${profile.name}**:
+
+### 📅 UPCOMING EXAMS & DEADLINES:
+${eventList || 'No upcoming exam events.'}
+
+### 📝 CRITICAL REVISION TASKS:
+${taskList || 'All study tasks completed!'}
+
+I have automatically weighted your Smart Timetable sessions so that your high-severity learning gaps in these subjects are targeted first before exam day. Which subject would you like to review now?`;
+      this.speak(msg);
+      return {
+        message: msg,
+        conceptCheck: null,
         masteryDelta: 5
       };
     }
