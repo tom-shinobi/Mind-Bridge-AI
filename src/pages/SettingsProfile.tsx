@@ -19,7 +19,8 @@ import {
   Loader2,
   Lock,
   ScanFace,
-  Trash2
+  Trash2,
+  Presentation
 } from 'lucide-react';
 import type { StudentProfile, AISettings, MemorySummary, AtmosphereTheme } from '../types';
 import { THEME_CONFIGS } from '../types';
@@ -555,7 +556,17 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href="/presentation.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-500/30 hover:border-cyan-400 bg-cyan-500/10 text-cyan-300 hover:text-white text-xs transition-all cursor-pointer"
+              title="Launch interactive 12-slide product pitch presentation"
+            >
+              <Presentation className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Pitch Deck</span>
+            </a>
             <button
               type="button"
               onClick={() => {
