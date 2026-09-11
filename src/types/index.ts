@@ -221,7 +221,17 @@ export interface AdaptiveAuditEntry {
   impactDescription: string;
 }
 
-export type AtmosphereTheme = 'dusk' | 'nebula';
+export type AtmosphereTheme =
+  | 'dusk'
+  | 'nebula'
+  | 'cyberpunk'
+  | 'supernova'
+  | 'ocean_abyss'
+  | 'cherry_blossom'
+  | 'aurora_borealis'
+  | 'royal_amethyst'
+  | 'electric_amber'
+  | 'midnight_synthwave';
 
 export interface AISettings {
   provider: 'openrouter' | 'local_intelligent';
@@ -231,3 +241,106 @@ export interface AISettings {
   soundFxEnabled: boolean;
   theme?: AtmosphereTheme;
 }
+
+export interface ThemeInfo {
+  id: AtmosphereTheme;
+  name: string;
+  shortName: string;
+  emoji: string;
+  description: string;
+  swatchGradient: string;
+  accentColor: string;
+}
+
+export const THEME_CONFIGS: ThemeInfo[] = [
+  {
+    id: 'dusk',
+    name: 'Sunlight Dusk',
+    shortName: 'Dusk',
+    emoji: '🌅',
+    description: 'Golden hour solar amber merging into cosmic twilight',
+    swatchGradient: 'from-amber-400 via-orange-500 to-rose-500',
+    accentColor: '#f59e0b'
+  },
+  {
+    id: 'nebula',
+    name: 'Cosmic Nebula',
+    shortName: 'Nebula',
+    emoji: '🌌',
+    description: 'Deep interstellar neon violet, electric cyan and starlight',
+    swatchGradient: 'from-cyan-400 via-purple-500 to-pink-500',
+    accentColor: '#a855f7'
+  },
+  {
+    id: 'cyberpunk',
+    name: 'Cyberpunk Matrix',
+    shortName: 'Cyber',
+    emoji: '⚡',
+    description: 'High-velocity electric emerald, toxic lime and cyber cyan',
+    swatchGradient: 'from-emerald-400 via-lime-400 to-cyan-400',
+    accentColor: '#10b981'
+  },
+  {
+    id: 'supernova',
+    name: 'Solar Supernova',
+    shortName: 'Nova',
+    emoji: '🔥',
+    description: 'Blazing stellar crimson, molten lava orange and flare gold',
+    swatchGradient: 'from-red-500 via-orange-500 to-amber-400',
+    accentColor: '#ef4444'
+  },
+  {
+    id: 'ocean_abyss',
+    name: 'Ocean Abyss',
+    shortName: 'Ocean',
+    emoji: '🌊',
+    description: 'Bioluminescent deep aqua, marine turquoise and sapphire',
+    swatchGradient: 'from-cyan-400 via-teal-400 to-blue-500',
+    accentColor: '#06b6d4'
+  },
+  {
+    id: 'cherry_blossom',
+    name: 'Sakura Blossom',
+    shortName: 'Sakura',
+    emoji: '🌸',
+    description: 'Tokyo spring twilight, radiant rose quartz and neon lilac',
+    swatchGradient: 'from-pink-400 via-rose-400 to-purple-400',
+    accentColor: '#ec4899'
+  },
+  {
+    id: 'aurora_borealis',
+    name: 'Arctic Aurora',
+    shortName: 'Arctic',
+    emoji: '❄️',
+    description: 'Polar dancing waves, glacial teal and emerald frost',
+    swatchGradient: 'from-teal-300 via-emerald-400 to-cyan-400',
+    accentColor: '#34d399'
+  },
+  {
+    id: 'royal_amethyst',
+    name: 'Royal Amethyst',
+    shortName: 'Amethyst',
+    emoji: '👑',
+    description: 'Imperial velvet plum, electric lavender and crystalline purple',
+    swatchGradient: 'from-purple-400 via-violet-500 to-indigo-500',
+    accentColor: '#8b5cf6'
+  },
+  {
+    id: 'electric_amber',
+    name: 'Electric Amber',
+    shortName: 'Amber',
+    emoji: '🍯',
+    description: 'Warm morning honey, sunburst yellow and molten copper',
+    swatchGradient: 'from-amber-300 via-yellow-400 to-orange-500',
+    accentColor: '#f59e0b'
+  },
+  {
+    id: 'midnight_synthwave',
+    name: 'Retro Synthwave',
+    shortName: 'Synth',
+    emoji: '🌆',
+    description: '80s laser grid, hot fuchsia, electric blue and retro sunset',
+    swatchGradient: 'from-fuchsia-500 via-purple-500 to-blue-500',
+    accentColor: '#d946ef'
+  }
+];

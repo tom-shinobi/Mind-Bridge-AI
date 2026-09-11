@@ -17,19 +17,24 @@ import {
 import { sound } from '../../services/soundService';
 import { authService } from '../../services/authService';
 import { isSupabaseConfigured, getSupabaseConfig, saveSupabaseConfig } from '../../services/supabaseClient';
-import type { AuthUser } from '../../types';
-import { ParticleBackground } from '../ParticleBackground';
+import type { AuthUser, AtmosphereTheme } from '../../types';
+import { THEME_CONFIGS } from '../../types';
 
 interface AuthPortalProps {
   onSuccess: (user: AuthUser) => void;
   onContinueDemo: () => void;
+  theme?: AtmosphereTheme;
+  onSelectTheme?: (theme: AtmosphereTheme) => void;
 }
 
 export const AuthPortal: React.FC<AuthPortalProps> = ({
   onSuccess,
-  onContinueDemo
+  onContinueDemo,
+  theme = 'dusk',
+  onSelectTheme
 }) => {
   const [tab, setTab] = useState<'signin' | 'signup'>('signin');
+  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -212,19 +217,11 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
     window.location.reload();
   };
 
-  return (
-    <div className="min-h-[100dvh] bg-[#020409] text-[#F5F5F7] flex flex-col relative selection:bg-white/20 selection:text-white font-body p-4 sm:p-6 pt-[max(1.5rem,env(safe-area-inset-top,0px))] pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] justify-center items-center">
-      
-      {/* Background Dynamic Particles & Ambient Fluid Ribbons */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <ParticleBackground />
-        <div className="chromatic-ribbon-purple -top-[140px] left-[15%] opacity-25" />
-        <div className="chromatic-ribbon-cyan bottom-[10%] right-[10%] opacity-20" />
-        <div className="chromatic-ribbon-magenta top-[40%] right-[25%]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(2,4,9,0.85)_100%)] pointer-events-none" />
-      </div>
+  const activeThemeConfig = THEME_CONFIGS.find((c) => c.id === theme) || THEME_CONFIGS[0];
 
-      <div className="relative z-10 max-w-md w-full space-y-6">
+  return (
+    <div className="min-h-[100dvh] w-full flex flex-col relative z-10 selection:bg-white/20 selection:text-white font-body p-4 sm:p-6 pt-[max(1.5rem,env(safe-area-inset-top,0px))] pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] justify-center items-center">
+      <div className="relative z-10 max-w-md w-full space-y-5">
         
         {/* Brand Header */}
         <div className="text-center space-y-2">
@@ -239,20 +236,76 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           </p>
         </div>
 
-        {/* Supabase Status Pill */}
-        <div className="flex justify-center">
+        {/* Top Control Pills: Supabase Status + Theme Selector */}
+        <div className="flex flex-wrap items-center justify-center gap-2 relative">
           <button
             type="button"
             onClick={() => setIsConfigModalOpen(true)}
-            className={`px-3 py-1 rounded-full text-[10px] font-mono flex items-center gap-1.5 border transition-all ${
+            className={`px-3 py-1 rounded-full text-[10px] font-mono flex items-center gap-1.5 border transition-all cursor-pointer touch-press ${
               supabaseReady
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
                 : 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
             }`}
           >
             <Database className="w-3 h-3" />
-            <span>{supabaseReady ? 'Supabase Database Connected' : 'Configure Supabase Keys'}</span>
+            <span>{supabaseReady ? 'Database Connected' : 'Configure Supabase'}</span>
           </button>
+
+          {/* Theme Selector Popover */}
+          {onSelectTheme && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setIsThemeMenuOpen(!isThemeMenuOpen);
+                }}
+                className="px-3 py-1 rounded-full text-[10px] font-medium bg-white/[0.08] hover:bg-white/[0.16] border border-white/25 text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer touch-press shadow-sm"
+                title="Change Atmosphere Theme (10 live options)"
+              >
+                <span>{activeThemeConfig.emoji}</span>
+                <span>{activeThemeConfig.name}</span>
+                <span className="text-[9px] opacity-60">▾</span>
+              </button>
+
+              {isThemeMenuOpen && (
+                <div className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-72 max-h-80 overflow-y-auto custom-scrollbar p-2 rounded-2xl apple-liquid-glass border border-white/25 shadow-2xl z-50 animate-fade-in space-y-1">
+                  <div className="px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-400 border-b border-white/10 flex items-center justify-between">
+                    <span>10 Atmosphere Themes</span>
+                    <span className="text-cyan-300">Live Shaders</span>
+                  </div>
+                  {THEME_CONFIGS.map((cfg) => {
+                    const isSelected = cfg.id === theme;
+                    return (
+                      <button
+                        key={cfg.id}
+                        type="button"
+                        onClick={() => {
+                          sound.playClick();
+                          onSelectTheme(cfg.id);
+                          setIsThemeMenuOpen(false);
+                        }}
+                        className={`w-full p-2 rounded-xl text-left flex items-center gap-2.5 transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-white/20 border border-white/30 text-white shadow-sm'
+                            : 'hover:bg-white/10 text-slate-300 border border-transparent'
+                        }`}
+                      >
+                        <span className="text-base flex-shrink-0">{cfg.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-medium flex items-center justify-between">
+                            <span className="truncate">{cfg.name}</span>
+                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                          </div>
+                          <div className={`h-1 w-full rounded-full bg-gradient-to-r ${cfg.swatchGradient} mt-1 opacity-80`} />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Main Auth Card */}

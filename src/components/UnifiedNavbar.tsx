@@ -25,6 +25,7 @@ import {
   X
 } from 'lucide-react';
 import type { StudentProfile, LearningGap, AISettings } from '../types';
+import { THEME_CONFIGS } from '../types';
 import { sound } from '../services/soundService';
 
 export interface NavItem {
@@ -66,8 +67,12 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
 }) => {
   const activeGapsCount = gaps.filter((g) => g.status !== 'resolved').length;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const currentTheme = aiSettings.theme || 'dusk';
+  const activeThemeConfig = THEME_CONFIGS.find((c) => c.id === currentTheme) || THEME_CONFIGS[0];
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const activeItemRef = useRef<HTMLButtonElement | null>(null);
@@ -337,20 +342,59 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               <span>Rebalance</span>
             </button>
 
-            {/* Atmosphere Theme Switcher (Dusk vs Nebula) - Touch Friendly on Phone */}
-            <button
-              type="button"
-              onClick={() => {
-                const nextTheme = (aiSettings.theme === 'nebula') ? 'dusk' : 'nebula';
-                sound.playClick();
-                onUpdateSettings({ ...aiSettings, theme: nextTheme });
-              }}
-              className="px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 hover:border-white/30 transition-all cursor-pointer flex items-center gap-1.5 text-slate-200 touch-press"
-              title={aiSettings.theme === 'nebula' ? "Switch to Sunlight Dusk Galaxy (🌅)" : "Switch to Cosmic Nebula (🌌)"}
-            >
-              <span className="text-xs sm:text-sm leading-none">{aiSettings.theme === 'nebula' ? '🌌' : '🌅'}</span>
-              <span className="hidden sm:inline">{aiSettings.theme === 'nebula' ? 'Nebula' : 'Dusk'}</span>
-            </button>
+            {/* Atmosphere Theme Switcher (10 Live Themes) */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setIsThemeMenuOpen(!isThemeMenuOpen);
+                }}
+                className="px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-white/[0.06] hover:bg-white/[0.14] border border-white/15 hover:border-white/30 transition-all cursor-pointer flex items-center gap-1.5 text-slate-200 touch-press"
+                title={`Theme: ${activeThemeConfig.name} (Click to change)`}
+              >
+                <span className="text-xs sm:text-sm leading-none">{activeThemeConfig.emoji}</span>
+                <span className="hidden sm:inline">{activeThemeConfig.shortName}</span>
+                <span className="text-[9px] opacity-60">▾</span>
+              </button>
+
+              {isThemeMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-64 max-h-80 overflow-y-auto custom-scrollbar p-2 rounded-2xl apple-liquid-glass border border-white/25 shadow-2xl z-50 animate-fade-in space-y-1">
+                  <div className="px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-400 border-b border-white/10 flex items-center justify-between">
+                    <span>Atmosphere Theme</span>
+                    <span className="text-cyan-300">10 Themes</span>
+                  </div>
+                  {THEME_CONFIGS.map((cfg) => {
+                    const isSelected = cfg.id === currentTheme;
+                    return (
+                      <button
+                        key={cfg.id}
+                        type="button"
+                        onClick={() => {
+                          sound.playClick();
+                          onUpdateSettings({ ...aiSettings, theme: cfg.id });
+                          setIsThemeMenuOpen(false);
+                        }}
+                        className={`w-full p-2 rounded-xl text-left flex items-center gap-2.5 transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-white/20 border border-white/30 text-white shadow-sm'
+                            : 'hover:bg-white/10 text-slate-300 border border-transparent'
+                        }`}
+                      >
+                        <span className="text-base flex-shrink-0">{cfg.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-medium flex items-center justify-between">
+                            <span className="truncate">{cfg.name}</span>
+                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                          </div>
+                          <div className={`h-1 w-full rounded-full bg-gradient-to-r ${cfg.swatchGradient} mt-1 opacity-80`} />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* Sound FX Toggle (Desktop & Tablet) */}
             <button
@@ -624,8 +668,39 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               })}
             </div>
 
+            {/* Mobile 10 Atmosphere Themes Quick Strip */}
+            <div className="mb-4 pt-3 border-t border-white/10">
+              <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-2 px-1">
+                <span className="uppercase tracking-wider">Atmosphere Theme</span>
+                <span className="text-cyan-300 font-sans font-medium">{activeThemeConfig.name}</span>
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1">
+                {THEME_CONFIGS.map((cfg) => {
+                  const isSelected = cfg.id === currentTheme;
+                  return (
+                    <button
+                      key={cfg.id}
+                      type="button"
+                      onClick={() => {
+                        sound.playClick();
+                        onUpdateSettings({ ...aiSettings, theme: cfg.id });
+                      }}
+                      className={`flex-shrink-0 px-2.5 py-1.5 rounded-xl border flex items-center gap-1.5 text-xs font-medium transition-all cursor-pointer touch-press ${
+                        isSelected
+                          ? 'bg-white/20 border-white/40 text-white shadow-[0_0_12px_rgba(255,255,255,0.25)]'
+                          : 'bg-white/[0.05] border-white/10 text-slate-300 hover:border-white/25'
+                      }`}
+                    >
+                      <span className="text-sm">{cfg.emoji}</span>
+                      <span>{cfg.shortName}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Quick Actions Footer */}
-            <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -634,7 +709,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
                     setIsDrawerOpen(false);
                     onOpenWorkloadModal();
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-pink-500/15 hover:bg-pink-500/25 border border-pink-500/30 text-pink-200 font-medium flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-pink-500/15 hover:bg-pink-500/25 border border-pink-500/30 text-pink-200 font-medium flex items-center gap-1.5 transition-all cursor-pointer touch-press"
                 >
                   <HeartPulse className="w-3.5 h-3.5 text-pink-400 animate-pulse" />
                   <span>Calibrate Workload</span>
@@ -643,7 +718,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
                 <button
                   type="button"
                   onClick={toggleSound}
-                  className="px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-slate-300 font-medium flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-slate-300 font-medium flex items-center gap-1.5 transition-all cursor-pointer touch-press"
                 >
                   {aiSettings.soundFxEnabled ? (
                     <>
@@ -656,19 +731,6 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
                       <span>Sound Off</span>
                     </>
                   )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextTheme = (aiSettings.theme === 'nebula') ? 'dusk' : 'nebula';
-                    sound.playClick();
-                    onUpdateSettings({ ...aiSettings, theme: nextTheme });
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-slate-200 font-medium flex items-center gap-1.5 transition-all cursor-pointer"
-                >
-                  <span>{aiSettings.theme === 'nebula' ? '🌌' : '🌅'}</span>
-                  <span>{aiSettings.theme === 'nebula' ? 'Cosmic Nebula' : 'Dusk Sun'}</span>
                 </button>
               </div>
 

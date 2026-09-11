@@ -10,6 +10,7 @@ import type {
   Achievement,
   AdaptiveAuditEntry,
   AISettings,
+  AtmosphereTheme,
   AuthUser,
   OnboardingAnswers,
   MemorySummary
@@ -463,60 +464,146 @@ export function App() {
     );
   }
 
+  const currentTheme: AtmosphereTheme = aiSettings.theme || 'dusk';
+
+  // Shared Dynamic Atmospheric Background Component for Auth, Onboarding, Upload & Workspace
+  const renderAtmosphereBackground = () => {
+    const renderThemeOrbs = () => {
+      switch (currentTheme) {
+        case 'nebula':
+          return (
+            <>
+              <div className="dynamic-chromatic-mesh absolute inset-0 opacity-80 pointer-events-none" />
+              <div className="aurora-orb-violet -top-[140px] left-[5%] opacity-75" />
+              <div className="aurora-orb-cyan top-[20%] -right-[120px] opacity-75" />
+              <div className="aurora-orb-magenta -bottom-[120px] left-[15%] opacity-70" />
+              <div className="aurora-orb-emerald top-[48%] left-[28%] opacity-65" />
+              <div className="aurora-orb-amber -top-[80px] right-[18%] opacity-65" />
+            </>
+          );
+        case 'cyberpunk':
+          return (
+            <>
+              <div className="cyberpunk-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
+              <div className="cyberpunk-orb-emerald -top-[130px] left-[8%] opacity-80" />
+              <div className="cyberpunk-orb-lime top-[22%] -right-[100px] opacity-75" />
+              <div className="cyberpunk-orb-cyan -bottom-[120px] left-[15%] opacity-70" />
+              <div className="cyberpunk-orb-acid top-[48%] left-[26%] opacity-65" />
+            </>
+          );
+        case 'supernova':
+          return (
+            <>
+              <div className="supernova-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
+              <div className="supernova-orb-crimson -top-[130px] left-[10%] opacity-85" />
+              <div className="supernova-orb-ruby top-[20%] -right-[100px] opacity-80" />
+              <div className="supernova-orb-orange -bottom-[120px] left-[15%] opacity-75" />
+              <div className="supernova-orb-gold top-[46%] left-[25%] opacity-70" />
+            </>
+          );
+        case 'ocean_abyss':
+          return (
+            <>
+              <div className="ocean-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
+              <div className="ocean-orb-aqua -top-[130px] left-[8%] opacity-80" />
+              <div className="ocean-orb-sapphire top-[22%] -right-[100px] opacity-75" />
+              <div className="ocean-orb-teal -bottom-[120px] left-[15%] opacity-70" />
+              <div className="ocean-orb-cyan top-[48%] left-[26%] opacity-65" />
+            </>
+          );
+        case 'cherry_blossom':
+          return (
+            <>
+              <div className="sakura-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
+              <div className="sakura-orb-rose -top-[130px] left-[10%] opacity-85" />
+              <div className="sakura-orb-pink top-[20%] -right-[100px] opacity-80" />
+              <div className="sakura-orb-peach -bottom-[120px] left-[15%] opacity-75" />
+              <div className="sakura-orb-lilac top-[46%] left-[25%] opacity-70" />
+            </>
+          );
+        case 'aurora_borealis':
+          return (
+            <>
+              <div className="arctic-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
+              <div className="arctic-orb-mint -top-[130px] left-[8%] opacity-80" />
+              <div className="arctic-orb-teal top-[22%] -right-[100px] opacity-75" />
+              <div className="arctic-orb-cyan -bottom-[120px] left-[15%] opacity-70" />
+              <div className="arctic-orb-jade top-[48%] left-[26%] opacity-65" />
+            </>
+          );
+        case 'royal_amethyst':
+          return (
+            <>
+              <div className="amethyst-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
+              <div className="amethyst-orb-velvet -top-[130px] left-[10%] opacity-85" />
+              <div className="amethyst-orb-lavender top-[20%] -right-[100px] opacity-80" />
+              <div className="amethyst-orb-plum -bottom-[120px] left-[15%] opacity-75" />
+              <div className="amethyst-orb-indigo top-[46%] left-[25%] opacity-70" />
+            </>
+          );
+        case 'electric_amber':
+          return (
+            <>
+              <div className="amber-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
+              <div className="amber-orb-honey -top-[130px] left-[10%] opacity-85" />
+              <div className="amber-orb-gold top-[20%] -right-[100px] opacity-80" />
+              <div className="amber-orb-sunburst -bottom-[120px] left-[15%] opacity-75" />
+              <div className="amber-orb-copper top-[46%] left-[25%] opacity-70" />
+            </>
+          );
+        case 'midnight_synthwave':
+          return (
+            <>
+              <div className="synthwave-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
+              <div className="synthwave-orb-fuchsia -top-[130px] left-[10%] opacity-85" />
+              <div className="synthwave-orb-blue top-[20%] -right-[100px] opacity-80" />
+              <div className="synthwave-orb-violet -bottom-[120px] left-[15%] opacity-75" />
+              <div className="synthwave-orb-coral top-[46%] left-[25%] opacity-70" />
+            </>
+          );
+        case 'dusk':
+        default:
+          return (
+            <>
+              {/* Dusk Flowing Chromatic Mesh: Sunset Sky merging into Cosmic Twilight */}
+              <div className="dusk-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
+              <div className="dusk-sun-orb -top-[120px] left-[10%] opacity-80" />
+              <div className="dusk-horizon-rose top-[18%] -right-[100px] opacity-75" />
+              <div className="dusk-nebula-violet -bottom-[120px] left-[15%] opacity-70" />
+              <div className="dusk-solar-gold top-[45%] left-[25%] opacity-65" />
+              <div className="dusk-cosmic-indigo -top-[80px] right-[20%] opacity-65" />
+            </>
+          );
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-700">
+        {renderThemeOrbs()}
+
+        {/* Atmospheric Contrast Vignette (Preserves Deep Contrast for Razor-Sharp Text while letting bright colors glow) */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(2,4,9,0.30)_75%,rgba(2,4,9,0.72)_100%)] pointer-events-none" />
+
+        {/* Luminous Interactive Dynamic Particles with Matching Theme Palette Floating On Top */}
+        <ParticleBackground theme={currentTheme} />
+      </div>
+    );
+  };
+
   // 2. Unauthenticated and Not in Demo Mode -> Render Real Auth Portal
   if (!isDemoMode && !authUser) {
     return (
-      <AuthPortal
-        onSuccess={handleAuthSuccess}
-        onContinueDemo={handleContinueDemo}
-      />
+      <div className="min-h-screen bg-[#020409] text-[#F5F5F7] relative flex flex-col font-body selection:bg-purple-500/30 selection:text-white">
+        {renderAtmosphereBackground()}
+        <AuthPortal
+          theme={currentTheme}
+          onSelectTheme={(newTheme) => handleUpdateAISettings({ ...aiSettings, theme: newTheme })}
+          onSuccess={handleAuthSuccess}
+          onContinueDemo={handleContinueDemo}
+        />
+      </div>
     );
   }
-
-  const currentTheme = aiSettings.theme || 'dusk';
-
-  // Shared Dynamic Atmospheric Background Component for Onboarding, Upload & Workspace
-  const renderAtmosphereBackground = () => (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-700">
-      {currentTheme === 'dusk' ? (
-        <>
-          {/* Dusk Flowing Chromatic Mesh: Sunset Sky merging into Cosmic Twilight */}
-          <div className="dusk-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
-
-          {/* Glowing Dusk Sun Orb: Solar Tangerine & Warm Amber */}
-          <div className="dusk-sun-orb -top-[120px] left-[10%] opacity-80" />
-
-          {/* Dusk Horizon Rose & Magenta Aura */}
-          <div className="dusk-horizon-rose top-[18%] -right-[100px] opacity-75" />
-
-          {/* Twilight Galaxy Nebula Violet */}
-          <div className="dusk-nebula-violet -bottom-[120px] left-[15%] opacity-70" />
-
-          {/* Solar Gold Corona Ray */}
-          <div className="dusk-solar-gold top-[45%] left-[25%] opacity-65" />
-
-          {/* Deep Cosmic Starlight Indigo */}
-          <div className="dusk-cosmic-indigo -top-[80px] right-[20%] opacity-65" />
-        </>
-      ) : (
-        <>
-          {/* Cosmic Aurora Mesh */}
-          <div className="dynamic-chromatic-mesh absolute inset-0 opacity-80 pointer-events-none" />
-          <div className="aurora-orb-violet -top-[140px] left-[5%] opacity-75" />
-          <div className="aurora-orb-cyan top-[20%] -right-[120px] opacity-75" />
-          <div className="aurora-orb-magenta -bottom-[120px] left-[15%] opacity-70" />
-          <div className="aurora-orb-emerald top-[48%] left-[28%] opacity-65" />
-          <div className="aurora-orb-amber -top-[80px] right-[18%] opacity-65" />
-        </>
-      )}
-
-      {/* Atmospheric Contrast Vignette (Preserves Deep Contrast for Razor-Sharp Text) */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_25%,rgba(2,4,9,0.38)_65%,rgba(2,4,9,0.82)_100%)] pointer-events-none" />
-
-      {/* Luminous Interactive Dynamic Particles with Matching Theme Palette Floating On Top */}
-      <ParticleBackground theme={currentTheme} />
-    </div>
-  );
 
   // 3. Authenticated New User -> Render Conversational Onboarding Flow
   if (authUser && !profile.onboardingCompleted) {

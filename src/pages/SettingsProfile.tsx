@@ -22,6 +22,7 @@ import {
   Trash2
 } from 'lucide-react';
 import type { StudentProfile, AISettings, MemorySummary, AtmosphereTheme } from '../types';
+import { THEME_CONFIGS } from '../types';
 import { sound } from '../services/soundService';
 import { authService } from '../services/authService';
 import { supabaseDataService } from '../services/supabaseDataService';
@@ -459,54 +460,42 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
               </select>
             </div>
 
-            {/* Atmosphere Theme Selector */}
+            {/* Atmosphere Theme Selector (10 Themes) */}
             <div>
               <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1.5 flex items-center justify-between">
-                <span>Atmosphere & Background Theme</span>
-                <span className="text-amber-400 text-[10px]">Real-time Dynamic Shader</span>
+                <span>Atmosphere & Background Theme (10 Live Options)</span>
+                <span className="text-amber-400 text-[10px]">Real-time Dynamic Shader & Particles</span>
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => handleSelectTheme('dusk')}
-                  className={`p-3 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
-                    theme === 'dusk'
-                      ? 'bg-gradient-to-r from-orange-500/20 via-pink-500/15 to-purple-500/20 border-orange-400/60 shadow-[0_0_15px_rgba(251,146,60,0.25)] text-white'
-                      : 'bg-white/[0.04] border-white/10 hover:border-white/20 text-slate-300'
-                  }`}
-                >
-                  <span className="text-xl">🌅</span>
-                  <div>
-                    <div className="text-xs font-semibold flex items-center gap-1.5">
-                      <span>Sunlight Dusk</span>
-                      {theme === 'dusk' && <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />}
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">
-                      Solar amber dusk sun setting over cosmic twilight nebula
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleSelectTheme('nebula')}
-                  className={`p-3 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
-                    theme === 'nebula'
-                      ? 'bg-gradient-to-r from-purple-500/20 via-cyan-500/15 to-blue-500/20 border-cyan-400/60 shadow-[0_0_15px_rgba(56,189,248,0.25)] text-white'
-                      : 'bg-white/[0.04] border-white/10 hover:border-white/20 text-slate-300'
-                  }`}
-                >
-                  <span className="text-xl">🌌</span>
-                  <div>
-                    <div className="text-xs font-semibold flex items-center gap-1.5">
-                      <span>Cosmic Nebula</span>
-                      {theme === 'nebula' && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />}
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">
-                      Deep obsidian space with electric violet, neon cyan & starlight
-                    </p>
-                  </div>
-                </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[420px] overflow-y-auto custom-scrollbar p-1">
+                {THEME_CONFIGS.map((cfg) => {
+                  const isSelected = theme === cfg.id;
+                  return (
+                    <button
+                      key={cfg.id}
+                      type="button"
+                      onClick={() => handleSelectTheme(cfg.id)}
+                      className={`p-3 rounded-xl border text-left flex items-start gap-3 transition-all cursor-pointer touch-press ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-white/[0.18] to-white/[0.08] border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.2),inset_0_1px_1px_rgba(255,255,255,0.7)] text-white'
+                          : 'bg-white/[0.03] border-white/10 hover:border-white/25 text-slate-300 hover:bg-white/[0.07]'
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-black/40 border border-white/20 flex items-center justify-center text-xl flex-shrink-0 shadow-inner">
+                        {cfg.emoji}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-semibold flex items-center justify-between">
+                          <span className="truncate">{cfg.name}</span>
+                          {isSelected && <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />}
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-0.5 leading-snug line-clamp-2">
+                          {cfg.description}
+                        </p>
+                        <div className={`h-1.5 w-full rounded-full bg-gradient-to-r ${cfg.swatchGradient} mt-2 opacity-85 shadow-sm`} />
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

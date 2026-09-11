@@ -28,13 +28,13 @@ import {
 import { sound } from '../../services/soundService';
 import { supabaseDataService } from '../../services/supabaseDataService';
 import { storageService } from '../../services/storageService';
-import type { OnboardingAnswers, MemorySummary } from '../../types';
+import type { OnboardingAnswers, MemorySummary, AtmosphereTheme } from '../../types';
 
 interface OnboardingFlowProps {
   userId: string;
   initialAnswers?: Partial<OnboardingAnswers>;
   initialStep?: number;
-  theme?: 'nebula' | 'dusk';
+  theme?: AtmosphereTheme;
   onComplete: (answers: OnboardingAnswers, memorySummary: MemorySummary) => void;
 }
 
