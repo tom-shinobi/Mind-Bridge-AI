@@ -473,19 +473,60 @@ export function App() {
     );
   }
 
+  const currentTheme = aiSettings.theme || 'dusk';
+
+  // Shared Dynamic Atmospheric Background Component for Onboarding, Upload & Workspace
+  const renderAtmosphereBackground = () => (
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-700">
+      {currentTheme === 'dusk' ? (
+        <>
+          {/* Dusk Flowing Chromatic Mesh: Sunset Sky merging into Cosmic Twilight */}
+          <div className="dusk-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
+
+          {/* Glowing Dusk Sun Orb: Solar Tangerine & Warm Amber */}
+          <div className="dusk-sun-orb -top-[120px] left-[10%] opacity-80" />
+
+          {/* Dusk Horizon Rose & Magenta Aura */}
+          <div className="dusk-horizon-rose top-[18%] -right-[100px] opacity-75" />
+
+          {/* Twilight Galaxy Nebula Violet */}
+          <div className="dusk-nebula-violet -bottom-[120px] left-[15%] opacity-70" />
+
+          {/* Solar Gold Corona Ray */}
+          <div className="dusk-solar-gold top-[45%] left-[25%] opacity-65" />
+
+          {/* Deep Cosmic Starlight Indigo */}
+          <div className="dusk-cosmic-indigo -top-[80px] right-[20%] opacity-65" />
+        </>
+      ) : (
+        <>
+          {/* Cosmic Aurora Mesh */}
+          <div className="dynamic-chromatic-mesh absolute inset-0 opacity-80 pointer-events-none" />
+          <div className="aurora-orb-violet -top-[140px] left-[5%] opacity-75" />
+          <div className="aurora-orb-cyan top-[20%] -right-[120px] opacity-75" />
+          <div className="aurora-orb-magenta -bottom-[120px] left-[15%] opacity-70" />
+          <div className="aurora-orb-emerald top-[48%] left-[28%] opacity-65" />
+          <div className="aurora-orb-amber -top-[80px] right-[18%] opacity-65" />
+        </>
+      )}
+
+      {/* Atmospheric Contrast Vignette (Preserves Deep Contrast for Razor-Sharp Text) */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_25%,rgba(2,4,9,0.38)_65%,rgba(2,4,9,0.82)_100%)] pointer-events-none" />
+
+      {/* Luminous Interactive Dynamic Particles with Matching Theme Palette Floating On Top */}
+      <ParticleBackground theme={currentTheme} />
+    </div>
+  );
+
   // 3. Authenticated New User -> Render Conversational Onboarding Flow
   if (authUser && !profile.onboardingCompleted) {
     return (
-      <div className="min-h-screen bg-[#020409] text-[#F5F5F7] relative flex flex-col font-body">
-        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          <ParticleBackground />
-          <div className="chromatic-ribbon-purple -top-[140px] left-[10%] opacity-25" />
-          <div className="chromatic-ribbon-cyan -bottom-[120px] left-[15%] opacity-20" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_20%,rgba(2,4,9,0.85)_100%)] pointer-events-none" />
-        </div>
-        <div className="relative z-10 flex-1 flex flex-col">
+      <div className="min-h-screen bg-[#020409] text-[#F5F5F7] relative flex flex-col font-body selection:bg-purple-500/30 selection:text-white">
+        {renderAtmosphereBackground()}
+        <div className="relative z-10 flex-1 flex flex-col w-full">
           <OnboardingFlow
             userId={authUser.id}
+            theme={currentTheme}
             initialAnswers={{
               name: profile.name && profile.name !== 'Scholar' ? profile.name : (authUser.name && authUser.name !== authUser.email ? authUser.name : ''),
               college: profile.college,
@@ -506,13 +547,8 @@ export function App() {
   // 4. Authenticated User without Syllabus -> Render Document Upload & Extraction View
   if (authUser && needsSyllabusUpload) {
     return (
-      <div className="min-h-screen bg-[#020409] text-[#F5F5F7] relative flex flex-col font-body">
-        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          <ParticleBackground />
-          <div className="chromatic-ribbon-magenta top-[20%] -right-[100px] opacity-25" />
-          <div className="chromatic-ribbon-cyan -bottom-[120px] left-[15%] opacity-20" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_20%,rgba(2,4,9,0.85)_100%)] pointer-events-none" />
-        </div>
+      <div className="min-h-screen bg-[#020409] text-[#F5F5F7] relative flex flex-col font-body selection:bg-purple-500/30 selection:text-white">
+        {renderAtmosphereBackground()}
         <div className="relative z-10 flex-1 flex flex-col p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
           <SyllabusUploadView
             userId={authUser.id}
@@ -541,52 +577,12 @@ export function App() {
     );
   }
 
-  const currentTheme = aiSettings.theme || 'dusk';
-
   // 5. Main Dashboard & Workspace (Preserves all 10 pages and current layout)
   return (
     <div className="min-h-screen bg-[#020409] text-[#F5F5F7] flex flex-col relative selection:bg-white/20 selection:text-white font-body">
       
       {/* Dynamic Moving Particles & Glowing Chromatic Canvas (Sunlight Dusk vs Cosmic Nebula) */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-700">
-        {currentTheme === 'dusk' ? (
-          <>
-            {/* Dusk Flowing Chromatic Mesh: Sunset Sky merging into Cosmic Twilight */}
-            <div className="dusk-chromatic-mesh absolute inset-0 opacity-85 pointer-events-none" />
-
-            {/* Glowing Dusk Sun Orb: Solar Tangerine & Warm Amber */}
-            <div className="dusk-sun-orb -top-[120px] left-[10%] opacity-80" />
-
-            {/* Dusk Horizon Rose & Magenta Aura */}
-            <div className="dusk-horizon-rose top-[18%] -right-[100px] opacity-75" />
-
-            {/* Twilight Galaxy Nebula Violet */}
-            <div className="dusk-nebula-violet -bottom-[120px] left-[15%] opacity-70" />
-
-            {/* Solar Gold Corona Ray */}
-            <div className="dusk-solar-gold top-[45%] left-[25%] opacity-65" />
-
-            {/* Deep Cosmic Starlight Indigo */}
-            <div className="dusk-cosmic-indigo -top-[80px] right-[20%] opacity-65" />
-          </>
-        ) : (
-          <>
-            {/* Cosmic Aurora Mesh */}
-            <div className="dynamic-chromatic-mesh absolute inset-0 opacity-80 pointer-events-none" />
-            <div className="aurora-orb-violet -top-[140px] left-[5%] opacity-75" />
-            <div className="aurora-orb-cyan top-[20%] -right-[120px] opacity-75" />
-            <div className="aurora-orb-magenta -bottom-[120px] left-[15%] opacity-70" />
-            <div className="aurora-orb-emerald top-[48%] left-[28%] opacity-65" />
-            <div className="aurora-orb-amber -top-[80px] right-[18%] opacity-65" />
-          </>
-        )}
-
-        {/* Atmospheric Contrast Vignette (Preserves Deep Contrast for Razor-Sharp Text) */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_25%,rgba(2,4,9,0.38)_65%,rgba(2,4,9,0.82)_100%)] pointer-events-none" />
-
-        {/* Luminous Interactive Dynamic Particles with Matching Theme Palette Floating On Top */}
-        <ParticleBackground theme={currentTheme} />
-      </div>
+      {renderAtmosphereBackground()}
 
       {/* Real Snell's Law SVG Displacement Map Filter */}
       <svg className="hidden">
