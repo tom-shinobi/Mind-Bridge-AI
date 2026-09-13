@@ -228,6 +228,7 @@ export interface AdaptiveAuditEntry {
 }
 
 export type AtmosphereTheme =
+  | 'surrealist_editorial'
   | 'dusk'
   | 'nebula'
   | 'cyberpunk'
@@ -259,6 +260,15 @@ export interface ThemeInfo {
 }
 
 export const THEME_CONFIGS: ThemeInfo[] = [
+  {
+    id: 'surrealist_editorial',
+    name: 'Surrealist Editorial',
+    shortName: 'Surrealism',
+    emoji: '👁️',
+    description: 'Curiosity vortex, radiant sunbeam portal, woodblock typography and tactile zine accents',
+    swatchGradient: 'from-lime-300 via-amber-300 to-rose-400',
+    accentColor: '#E2F952'
+  },
   {
     id: 'dusk',
     name: 'Sunlight Dusk',

@@ -5,6 +5,10 @@
     --font-heading: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
     --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
     --font-mono: "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+    --font-editorial: "Playfair Display", "Newsreader", Georgia, serif;
+    --font-woodblock: "Anton", "Oswald", -apple-system, sans-serif;
+    --font-handwritten: "Caveat", cursive, sans-serif;
+    --font-editorial-mono: "Space Mono", "JetBrains Mono", monospace;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
@@ -1899,5 +1903,304 @@
   transform: scale(0.96);
   opacity: 0.9;
 }
+
+/* ==========================================================================
+   SURREALISM & HIGH EDITORIAL DESIGN SYSTEM (GOLF LE FLEUR & CURIOSITY VORTEX)
+   ========================================================================== */
+
+/* Typography Classes */
+.font-editorial {
+  font-family: var(--font-editorial);
+  font-feature-settings: "kern", "liga", "clig", "calt";
+}
+
+.font-woodblock {
+  font-family: var(--font-woodblock);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.font-handwritten {
+  font-family: var(--font-handwritten);
+}
+
+.font-editorial-mono {
+  font-family: var(--font-editorial-mono);
+  letter-spacing: -0.02em;
+}
+
+/* Editorial Paper Grain Texture (Authentic Risograph Noise) */
+.editorial-paper-grain {
+  background-color: #0c0d12;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 0);
+  background-size: 24px 24px;
+  position: relative;
+}
+
+.editorial-paper-grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Tyler The Creator Neon Highlighter Tape & Marks */
+.highlighter-tape-lime {
+  background: #E2F952;
+  color: #0c0d12;
+  font-weight: 700;
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 0.25rem;
+  transform: rotate(-1.2deg);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
+}
+
+.highlighter-tape-pink {
+  background: #FF85A1;
+  color: #0c0d12;
+  font-weight: 700;
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 0.25rem;
+  transform: rotate(1.1deg);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
+}
+
+.highlighter-tape-gold {
+  background: #FFE600;
+  color: #0c0d12;
+  font-weight: 700;
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 0.25rem;
+  transform: rotate(-0.8deg);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
+}
+
+/* Hand-Drawn Marker Highlight Circles */
+.highlighter-circle-marker {
+  position: relative;
+  display: inline-block;
+}
+
+.highlighter-circle-marker::after {
+  content: "";
+  position: absolute;
+  inset: -6px -10px;
+  border: 2.5px solid #E2F952;
+  border-radius: 50% 48% 52% 49% / 46% 54% 46% 54%;
+  pointer-events: none;
+  opacity: 0.9;
+  transform: rotate(-2deg);
+}
+
+/* Tactile Masking Tape Corners on Cards */
+.masking-tape-corner-tr {
+  position: absolute;
+  top: -8px;
+  right: 14px;
+  width: 52px;
+  height: 18px;
+  background: rgba(230, 222, 196, 0.65);
+  backdrop-filter: blur(2px);
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transform: rotate(12deg);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.masking-tape-corner-tl {
+  position: absolute;
+  top: -8px;
+  left: 14px;
+  width: 52px;
+  height: 18px;
+  background: rgba(230, 222, 196, 0.65);
+  backdrop-filter: blur(2px);
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transform: rotate(-14deg);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Editorial Archival Passport / Boarding Pass Stamp */
+.editorial-stamp-badge {
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 9999px;
+  padding: 0.3rem 0.85rem;
+  font-family: var(--font-editorial-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+}
+
+.editorial-stamp-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-family: var(--font-editorial-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  user-select: none;
+}
+
+/* Tactile Editorial Buttons (Brutalist Press States) */
+.editorial-btn-lime {
+  background: #E2F952;
+  color: #0c0d12;
+  border: 2px solid #E2F952;
+  font-family: var(--font-woodblock);
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.9);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.editorial-btn-lime:hover {
+  background: #ebfa6a;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.9);
+}
+
+.editorial-btn-lime:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.9);
+}
+
+.editorial-btn-dark {
+  background: #15171e;
+  color: #F7F4EB;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  font-family: var(--font-woodblock);
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  box-shadow: 3px 3px 0px rgba(226, 249, 82, 0.45);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.editorial-btn-dark:hover {
+  border-color: #E2F952;
+  color: #E2F952;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px rgba(226, 249, 82, 0.7);
+}
+
+.editorial-btn-dark:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px rgba(226, 249, 82, 0.2);
+}
+
+/* Surrealist Curiosity Vortex Light Portal Keyframes & Classes */
+@keyframes volumetricRays {
+  0% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    opacity: 0.85;
+  }
+}
+
+@keyframes portalBreathe {
+  0% {
+    transform: scale(0.96);
+    filter: drop-shadow(0 0 35px rgba(255, 245, 180, 0.8)) drop-shadow(0 0 90px rgba(226, 249, 82, 0.5));
+  }
+  50% {
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 55px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 130px rgba(226, 249, 82, 0.75));
+  }
+  100% {
+    transform: scale(0.96);
+    filter: drop-shadow(0 0 35px rgba(255, 245, 180, 0.8)) drop-shadow(0 0 90px rgba(226, 249, 82, 0.5));
+  }
+}
+
+@keyframes chromaticPulse {
+  0% {
+    filter: contrast(110%) brightness(105%) hue-rotate(0deg);
+  }
+  50% {
+    filter: contrast(125%) brightness(115%) hue-rotate(8deg);
+  }
+  100% {
+    filter: contrast(110%) brightness(105%) hue-rotate(0deg);
+  }
+}
+
+.surreal-rays-flow {
+  animation: volumetricRays 48s linear infinite;
+}
+
+.surreal-portal-pulse {
+  animation: portalBreathe 6s ease-in-out infinite;
+}
+
+.surreal-chromatic-effect {
+  animation: chromaticPulse 12s ease-in-out infinite;
+}
+
+/* Surrealist Editorial Orb Mesh for App Background */
+.surreal-chromatic-mesh {
+  background: 
+    radial-gradient(ellipse at 50% 25%, rgba(255, 248, 220, 0.22) 0%, rgba(226, 249, 82, 0.12) 30%, transparent 65%),
+    radial-gradient(ellipse at 15% 75%, rgba(255, 133, 161, 0.16) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 80%, rgba(74, 222, 128, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 50%, rgba(20, 30, 20, 0.4) 0%, transparent 80%);
+}
+
+.surreal-orb-sunburst {
+  position: absolute;
+  width: 750px;
+  height: 750px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 230, 0.85) 0%, rgba(226, 249, 82, 0.45) 45%, transparent 70%);
+  filter: blur(85px);
+  pointer-events: none;
+  animation: auroraFlow1 18s ease-in-out infinite alternate;
+}
+
+.surreal-orb-foliage {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 45% 45%, rgba(34, 197, 94, 0.4) 0%, rgba(16, 185, 129, 0.2) 50%, transparent 70%);
+  filter: blur(95px);
+  pointer-events: none;
+  animation: auroraFlow2 22s ease-in-out infinite alternate;
+}
+
+.surreal-orb-rose {
+  position: absolute;
+  width: 650px;
+  height: 650px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 117, 143, 0.45) 0%, rgba(244, 63, 94, 0.2) 45%, transparent 70%);
+  filter: blur(90px);
+  pointer-events: none;
+  animation: auroraFlow3 20s ease-in-out infinite alternate;
+}
+
 
 

@@ -466,12 +466,21 @@ export function App() {
     );
   }
 
-  const currentTheme: AtmosphereTheme = aiSettings.theme || 'dusk';
+  const currentTheme: AtmosphereTheme = aiSettings.theme || 'surrealist_editorial';
 
   // Shared Dynamic Atmospheric Background Component for Auth, Onboarding, Upload & Workspace
   const renderAtmosphereBackground = () => {
     const renderThemeOrbs = () => {
       switch (currentTheme) {
+        case 'surrealist_editorial':
+          return (
+            <>
+              <div className="surreal-chromatic-mesh absolute inset-0 opacity-90 pointer-events-none" />
+              <div className="surreal-orb-sunburst -top-[120px] left-[15%] opacity-85" />
+              <div className="surreal-orb-foliage top-[25%] -right-[80px] opacity-80" />
+              <div className="surreal-orb-rose -bottom-[100px] left-[10%] opacity-75" />
+            </>
+          );
         case 'nebula':
           return (
             <>
@@ -585,6 +594,11 @@ export function App() {
 
         {/* Atmospheric Contrast Vignette (Preserves Deep Contrast for Razor-Sharp Text while letting bright colors glow) */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(2,4,9,0.30)_75%,rgba(2,4,9,0.72)_100%)] pointer-events-none" />
+
+        {/* Authentic Vintage Paper Grain Texture for Surrealist Editorial Theme */}
+        {currentTheme === 'surrealist_editorial' && (
+          <div className="editorial-paper-grain absolute inset-0 pointer-events-none z-10 opacity-60" />
+        )}
 
         {/* Luminous Interactive Dynamic Particles with Matching Theme Palette Floating On Top */}
         <ParticleBackground theme={currentTheme} />

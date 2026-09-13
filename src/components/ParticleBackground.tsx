@@ -20,6 +20,13 @@ interface ParticleProps {
 }
 
 const THEME_PARTICLE_COLORS: Record<AtmosphereTheme, string[]> = {
+  surrealist_editorial: [
+    '226, 249, 82',  // Neon Acid Lime (#E2F952)
+    '255, 255, 230', // Cream Paper White
+    '34, 197, 94',   // Lush Botanical Green
+    '255, 133, 161', // Velvet Peach Rose
+    '254, 240, 138'  // Warm Sunlight Gold
+  ],
   dusk: [
     '251, 191, 36',  // Amber Gold
     '251, 146, 60',  // Solar Tangerine

@@ -402,40 +402,41 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
-      {/* Top Banner & Hub Controls */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-6 sm:p-8 shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Top Banner & Hub Controls (Tyler The Creator Zine & Editorial Gazette Style) */}
+      <div className="relative overflow-hidden rounded-3xl bg-[#080B11] border-2 border-[#E2F952]/30 p-6 sm:p-8 shadow-2xl">
+        <div className="masking-tape-corner-tr z-20" />
+        <div className="masking-tape-corner-tl z-20" />
+        <div className="editorial-paper-grain absolute inset-0 pointer-events-none z-0 opacity-40" />
 
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-mono mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Real-Time Academic Social Hub</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#E2F952] text-black font-woodblock tracking-widest text-[10px] uppercase mb-3 shadow-[2px_2px_0px_#000000]">
+              <Sparkles className="w-3.5 h-3.5 text-black" />
+              <span>COMMUNITY GAZETTE // VOL. IV ARCHIVE</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Campus Community & Social Pulse
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-woodblock text-white uppercase tracking-wider">
+              CAMPUS SOCIAL PULSE & STUDY SQUADS<span className="text-[#E2F952]">*</span>
             </h1>
-            <p className="text-sm text-slate-300 mt-1 max-w-2xl">
+            <p className="text-sm font-editorial-mono text-zinc-400 mt-1 max-w-2xl">
               Collaborate in Discord-style academic squads, share breakthrough derivations on Campus Pulse, direct message study partners, and match with peers sharing identical learning gaps.
             </p>
           </div>
 
           {/* Account Visibility Badge & Toggle */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-800/80 p-3 rounded-2xl border border-slate-700/80 backdrop-blur-md">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-black/60 p-3.5 rounded-2xl border border-white/15 backdrop-blur-md">
             <div className="flex items-center gap-2.5">
               <div
                 className={`p-2 rounded-xl ${
-                  isPrivateAccount ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-300'
+                  isPrivateAccount ? 'bg-amber-500/20 text-amber-300' : 'bg-[#E2F952]/20 text-[#E2F952]'
                 }`}
               >
                 {isPrivateAccount ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
               </div>
               <div>
-                <p className="text-xs font-semibold text-white">
+                <p className="text-xs font-woodblock uppercase tracking-wider text-white">
                   Account: {isPrivateAccount ? 'Private' : 'Public'}
                 </p>
-                <p className="text-[10px] text-slate-400">
+                <p className="text-[10px] font-editorial-mono text-slate-400">
                   {isPrivateAccount ? 'Followers & study buddies only' : 'Visible to all universities'}
                 </p>
               </div>
@@ -443,10 +444,10 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
 
             <button
               onClick={handleTogglePrivacy}
-              className={`text-xs px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${
+              className={`text-xs px-3.5 py-1.5 rounded-xl font-woodblock tracking-wider uppercase transition-all cursor-pointer ${
                 isPrivateAccount
                   ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
-                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30'
+                  : 'bg-[#E2F952] text-black border border-black shadow-[2px_2px_0px_#000000] hover:bg-[#d5ed40]'
               }`}
             >
               Switch to {isPrivateAccount ? 'Public' : 'Private'}
@@ -454,22 +455,24 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
           </div>
         </div>
 
-        {/* 4 Feature Tab Switcher */}
-        <div className="mt-8 flex flex-wrap gap-2 border-b border-slate-800 pb-2">
+        {/* 4 Feature Tab Switcher with Tyler Highlighter Styling */}
+        <div className="relative z-10 mt-8 flex flex-wrap gap-2.5 border-b border-white/10 pb-3">
           <button
             onClick={() => {
               sound.playClick();
               setActiveTab('pulse');
             }}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-woodblock tracking-wider uppercase transition-all cursor-pointer ${
               activeTab === 'pulse'
-                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                ? 'bg-[#E2F952] text-black shadow-[3px_3px_0px_#000000] border border-black scale-[1.02]'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
             }`}
           >
             <Flame className="w-4 h-4" />
             <span>Campus Pulse (X Feed)</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 ml-1">
+            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ml-1 ${
+              activeTab === 'pulse' ? 'bg-black text-[#E2F952]' : 'bg-white/20 text-white'
+            }`}>
               {posts.length}
             </span>
           </button>
@@ -479,16 +482,18 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
               sound.playClick();
               setActiveTab('squads');
             }}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-woodblock tracking-wider uppercase transition-all cursor-pointer ${
               activeTab === 'squads'
-                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                ? 'bg-[#E2F952] text-black shadow-[3px_3px_0px_#000000] border border-black scale-[1.02]'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
             }`}
           >
             <MessageSquare className="w-4 h-4" />
             <span>Study Squads (Discord)</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 ml-1">
-              {servers.length} Servers
+            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ml-1 ${
+              activeTab === 'squads' ? 'bg-black text-[#E2F952]' : 'bg-white/20 text-white'
+            }`}>
+              {servers.length}
             </span>
           </button>
 
@@ -497,15 +502,17 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
               sound.playClick();
               setActiveTab('dms');
             }}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-woodblock tracking-wider uppercase transition-all cursor-pointer ${
               activeTab === 'dms'
-                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                ? 'bg-[#E2F952] text-black shadow-[3px_3px_0px_#000000] border border-black scale-[1.02]'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
             }`}
           >
             <Send className="w-4 h-4" />
             <span>Direct Messages</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 ml-1">
+            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ml-1 ${
+              activeTab === 'dms' ? 'bg-black text-[#E2F952]' : 'bg-white/20 text-white'
+            }`}>
               {conversations.length}
             </span>
           </button>
@@ -515,16 +522,18 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
               sound.playClick();
               setActiveTab('matchmaker');
             }}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-woodblock tracking-wider uppercase transition-all cursor-pointer ${
               activeTab === 'matchmaker'
-                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                ? 'bg-[#E2F952] text-black shadow-[3px_3px_0px_#000000] border border-black scale-[1.02]'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
             }`}
           >
             <Users className="w-4 h-4" />
-            <span>Study Buddy Matchmaker</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 ml-1">
-              {suggestions.length} Matches
+            <span>Matchmaker</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ml-1 ${
+              activeTab === 'matchmaker' ? 'bg-black text-[#E2F952]' : 'bg-white/20 text-white'
+            }`}>
+              {suggestions.length}
             </span>
           </button>
         </div>

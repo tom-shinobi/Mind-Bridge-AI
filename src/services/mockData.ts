@@ -547,6 +547,6 @@ export const initialAISettings: AISettings = {
   model: 'gemini-2.5-flash',
   speechEnabled: true,
   soundFxEnabled: true,
-  theme: 'dusk'
+  theme: 'surrealist_editorial'
 };
 

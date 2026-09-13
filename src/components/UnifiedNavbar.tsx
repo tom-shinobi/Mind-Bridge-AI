@@ -247,14 +247,25 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34D399]" />
             </div>
 
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm sm:text-base font-semibold tracking-tight text-white font-heading">
-                MindBridge
-              </span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/10 text-white/90 font-mono font-medium border border-white/20">
-                AI
-              </span>
-            </div>
+            {currentTheme === 'surrealist_editorial' ? (
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-base sm:text-lg font-woodblock tracking-wider uppercase text-[#F7F4EB]">
+                  mindbridge<span className="text-[#E2F952]">*</span>
+                </span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#E2F952] text-black font-woodblock font-bold tracking-widest uppercase shadow-[1px_1px_0px_#000000]">
+                  VOL. IV
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm sm:text-base font-semibold tracking-tight text-white font-heading">
+                  MindBridge
+                </span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/10 text-white/90 font-mono font-medium border border-white/20">
+                  AI
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Desktop Navigation Strip with Auto-Centering & Scroll Chevrons */}
@@ -286,13 +297,23 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
                     type="button"
                     onClick={() => handleSelectTab(item.id)}
                     className={`px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all duration-200 flex-shrink-0 cursor-pointer ${
-                      isActive
-                        ? 'bg-gradient-to-r from-white/[0.24] via-white/[0.16] to-white/[0.08] text-white border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_4px_16px_rgba(0,0,0,0.35)] font-semibold scale-[1.02]'
-                        : 'text-slate-400 hover:text-white hover:bg-white/[0.08] border border-transparent'
+                      currentTheme === 'surrealist_editorial'
+                        ? isActive
+                          ? 'bg-[#E2F952] text-black font-woodblock tracking-wider uppercase shadow-[2px_2px_0px_#000000] border border-black scale-[1.02]'
+                          : 'text-[#F7F4EB]/75 hover:text-white hover:bg-white/[0.08] font-woodblock tracking-wider uppercase text-[11px] border border-transparent'
+                        : isActive
+                          ? 'bg-gradient-to-r from-white/[0.24] via-white/[0.16] to-white/[0.08] text-white border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_4px_16px_rgba(0,0,0,0.35)] font-semibold scale-[1.02]'
+                          : 'text-slate-400 hover:text-white hover:bg-white/[0.08] border border-transparent'
                     }`}
                     title={item.description}
                   >
-                    <Icon className={`w-3.5 h-3.5 transition-transform ${isActive ? 'text-white scale-110' : 'text-slate-400'}`} />
+                    <Icon
+                      className={`w-3.5 h-3.5 transition-transform ${
+                        currentTheme === 'surrealist_editorial'
+                          ? isActive ? 'text-black scale-110' : 'text-[#E2F952]/80'
+                          : isActive ? 'text-white scale-110' : 'text-slate-400'
+                      }`}
+                    />
                     <span className="tracking-tight text-[11px] whitespace-nowrap">
                       {item.shortLabel || item.label}
                     </span>
@@ -304,7 +325,11 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
                     )}
 
                     {isActive && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#38BDF8] animate-pulse flex-shrink-0" />
+                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                        currentTheme === 'surrealist_editorial'
+                          ? 'bg-black shadow-[0_0_4px_#000000]'
+                          : 'bg-cyan-400 shadow-[0_0_8px_#38BDF8] animate-pulse'
+                      }`} />
                     )}
                   </button>
                 );

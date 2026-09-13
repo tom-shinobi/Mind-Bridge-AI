@@ -24,6 +24,7 @@ import type {
 import { RotaryKnob } from '../components/hardware/RotaryKnob';
 import { StudyTimerWidget } from '../components/StudyTimerWidget';
 import { RefractiveLens } from '../components/RefractiveLens';
+import { SurrealPortalHero } from '../components/SurrealPortalHero';
 import { sound } from '../services/soundService';
 
 interface DashboardProps {
@@ -67,12 +68,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="space-y-10 animate-fade-in pb-20 max-w-6xl mx-auto">
-      
+      {/* 1. Surrealist Light Vortex & Tyler Zine Flagship Portal Hero */}
+      <SurrealPortalHero
+        onCtaClick={() => {
+          sound.playClick();
+          onNavigate('tutor', { topic: criticalGap?.topic });
+        }}
+        ctaText="CHASE YOUR CURIOSITY // LAUNCH AI TUTOR"
+      />
+
       {/* ==========================================================================
           APPLE WEBSITE KEYNOTE HERO PRESENTATION (Matching iPhone Duo Reference)
           Clean Apple typography, crisp pill action buttons, and 3D Refractive Liquid Glass
           ========================================================================== */}
-      <div className="py-8 sm:py-12 flex flex-col items-center text-center space-y-4 max-w-4xl mx-auto">
+      <div className="py-6 sm:py-10 flex flex-col items-center text-center space-y-4 max-w-4xl mx-auto">
         
         <span className="text-[11px] uppercase font-mono font-medium tracking-widest text-[#A1A1A6] px-3 py-1 rounded-full bg-white/[0.06] border border-white/15 backdrop-blur-md shadow-sm">
           MindBridge Pro // Generation 6
@@ -129,23 +138,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
           APPLE LIQUID GLASS ADAPTIVE COMMAND DECK
           Sleek frosted glass deck with bilateral symmetry and dual rotary controllers
           ========================================================================== */}
-      <div className="apple-liquid-glass p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl space-y-6 relative overflow-hidden backdrop-blur-3xl">
+      <div className="relative apple-liquid-glass p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl space-y-6 overflow-hidden backdrop-blur-3xl">
+        <div className="masking-tape-corner-tr z-20" />
+        <div className="editorial-paper-grain absolute inset-0 pointer-events-none z-0 opacity-35" />
         
         {/* Command Deck Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_#38BDF8] animate-pulse" />
+            <div className="w-3 h-3 rounded-full bg-[#E2F952] shadow-[0_0_10px_#E2F952] animate-pulse" />
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold tracking-wider font-mono text-white uppercase">
-                  Adaptive Intelligence Deck
-                </h2>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 font-mono">
-                  AUTONOMOUS
+                <span className="text-[10px] px-2 py-0.5 rounded bg-[#E2F952] text-black font-woodblock tracking-widest uppercase shadow-[1px_1px_0px_#000000]">
+                  FIG. 01
                 </span>
+                <h2 className="text-sm sm:text-base font-woodblock tracking-wider text-[#F7F4EB] uppercase">
+                  ADAPTIVE COGNITIVE CALIBRATION DECK
+                </h2>
               </div>
-              <p className="text-xs text-[#A1A1A6] font-mono">
-                Dual-Channel Real-Time Academic Calibration Engine
+              <p className="text-xs text-[#A1A1A6] font-editorial-mono">
+                Dual-Channel Real-Time Socratic Learning Engine // Expedition 004
               </p>
             </div>
           </div>
@@ -203,9 +214,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <button
               onClick={handleSyncGaps}
-              className="btn-apple-primary w-full py-2.5 text-xs flex items-center justify-center gap-2 shadow-lg"
+              className="editorial-btn-lime w-full py-2.5 text-xs font-woodblock tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 text-white" />
+              <Sparkles className="w-3.5 h-3.5 text-black" />
               <span>Launch Socratic Session</span>
             </button>
           </div>
@@ -241,9 +252,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <button
               onClick={handleSyncTimetable}
-              className="btn-apple-glass w-full py-2.5 text-xs flex items-center justify-center gap-2 shadow-lg"
+              className="editorial-btn-dark w-full py-2.5 text-xs font-woodblock tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer"
             >
-              <FileCheck className="w-3.5 h-3.5 text-white/90" />
+              <FileCheck className="w-3.5 h-3.5 text-[#E2F952]" />
               <span>Sync Diagnostic Quiz</span>
             </button>
           </div>

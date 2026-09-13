@@ -23,6 +23,7 @@ import type { AuthUser, AtmosphereTheme } from '../../types';
 import { THEME_CONFIGS } from '../../types';
 import { FaceIdScannerModal } from './FaceIdScannerModal';
 import { AdminAuthModal } from './AdminAuthModal';
+import { SurrealPortalHero } from '../SurrealPortalHero';
 
 interface AuthPortalProps {
   onSuccess: (user: AuthUser) => void;
@@ -253,19 +254,29 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
   const activeThemeConfig = THEME_CONFIGS.find((c) => c.id === theme) || THEME_CONFIGS[0];
 
   return (
-    <div className="min-h-[100dvh] w-full flex flex-col relative z-10 selection:bg-white/20 selection:text-white font-body p-4 sm:p-6 pt-[max(1.5rem,env(safe-area-inset-top,0px))] pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] justify-center items-center">
-      <div className="relative z-10 max-w-md w-full space-y-5">
-        
-        {/* Brand Header */}
+    <div className="min-h-[100dvh] w-full flex flex-col relative z-10 selection:bg-[#E2F952] selection:text-black font-body p-3 sm:p-6 lg:p-8 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(2.5rem,env(safe-area-inset-bottom,0px))] items-center justify-start">
+      {/* 1. Flagship Surrealist Curiosity Portal (Recreated from Reference Images) */}
+      <SurrealPortalHero
+        onCtaClick={() => {
+          sound.playClick();
+          const el = document.getElementById('auth-portal-form');
+          el?.scrollIntoView({ behavior: 'smooth' });
+        }}
+        ctaText={tab === 'signin' ? 'ENTER THE ARCHIVE // SIGN IN' : 'CLAIM SCHOLAR VISA // REGISTER'}
+      />
+
+      <div id="auth-portal-form" className="relative z-10 max-w-md w-full space-y-5 my-4">
+        {/* Brand Sub-Header with Tyler-style woodblock typography */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/[0.08] border border-white/30 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_8px_25px_rgba(0,0,0,0.5)] mb-1">
-            <Sparkles className="w-6 h-6 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-black/60 border border-[#E2F952]/40 rounded-full font-editorial-mono text-[10px] text-[#E2F952] uppercase tracking-widest backdrop-blur-md">
+            <Sparkles className="w-3 h-3 text-[#E2F952] animate-pulse" />
+            <span>PORTAL CHECKPOINT // FLIGHT 2026</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
-            MindBridge <span className="text-[12px] px-2 py-0.5 rounded-full bg-white/10 text-white/90 font-mono font-medium border border-white/20">AI</span>
-          </h1>
-          <p className="text-xs text-[#A1A1A6]">
-            Personalized Academic Intelligence & Socratic Learning
+          <h2 className="text-2xl sm:text-3xl font-woodblock tracking-wider uppercase text-white">
+            CALL ME WHEN YOU GET CURIOUS<span className="text-[#E2F952]">*</span>
+          </h2>
+          <p className="text-xs text-[#A1A1A6] font-editorial-mono">
+            Autonomous Socratic Academic Matrix & Multi-Agent Network
           </p>
         </div>
 
@@ -305,7 +316,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                 <div className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-72 max-h-80 overflow-y-auto custom-scrollbar p-2 rounded-2xl apple-liquid-glass border border-white/25 shadow-2xl z-50 animate-fade-in space-y-1">
                   <div className="px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-400 border-b border-white/10 flex items-center justify-between">
                     <span>10 Atmosphere Themes</span>
-                    <span className="text-cyan-300">Live Shaders</span>
+                    <span className="text-[#E2F952] font-semibold">Flagship Live</span>
                   </div>
                   {THEME_CONFIGS.map((cfg) => {
                     const isSelected = cfg.id === theme;
@@ -320,7 +331,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                         }}
                         className={`w-full p-2 rounded-xl text-left flex items-center gap-2.5 transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-white/20 border border-white/30 text-white shadow-sm'
+                            ? 'bg-white/20 border border-[#E2F952]/40 text-white shadow-sm'
                             : 'hover:bg-white/10 text-slate-300 border border-transparent'
                         }`}
                       >
@@ -328,7 +339,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-medium flex items-center justify-between">
                             <span className="truncate">{cfg.name}</span>
-                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#E2F952] shadow-[0_0_6px_#E2F952]" />}
                           </div>
                           <div className={`h-1 w-full rounded-full bg-gradient-to-r ${cfg.swatchGradient} mt-1 opacity-80`} />
                         </div>
@@ -341,17 +352,19 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           )}
         </div>
 
-        {/* Main Auth Card */}
-        <div className="apple-liquid-glass p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl space-y-5">
+        {/* Main Auth Card with Masking Tape Corner & Editorial Grain */}
+        <div className="relative apple-liquid-glass p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl space-y-5 overflow-hidden">
+          <div className="masking-tape-corner-tr z-20" />
+          <div className="editorial-paper-grain absolute inset-0 pointer-events-none z-0 opacity-40" />
           
           {/* Sign In vs Sign Up Tabs */}
-          <div className="flex p-1 rounded-2xl bg-black/50 border border-white/10 text-xs font-medium">
+          <div className="relative z-10 flex p-1 rounded-2xl bg-black/60 border border-white/10 text-xs font-medium font-editorial-mono uppercase tracking-wider">
             <button
               type="button"
               onClick={() => { sound.playClick(); setTab('signin'); setErrorMsg(null); }}
-              className={`flex-1 py-2 rounded-xl transition-all ${
+              className={`flex-1 py-2 rounded-xl transition-all cursor-pointer ${
                 tab === 'signin'
-                  ? 'bg-white/[0.12] text-white shadow-md font-semibold'
+                  ? 'bg-[#E2F952] text-black font-bold shadow-[2px_2px_0px_#000000]'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -360,9 +373,9 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
             <button
               type="button"
               onClick={() => { sound.playClick(); setTab('signup'); setErrorMsg(null); }}
-              className={`flex-1 py-2 rounded-xl transition-all ${
+              className={`flex-1 py-2 rounded-xl transition-all cursor-pointer ${
                 tab === 'signup'
-                  ? 'bg-white/[0.12] text-white shadow-md font-semibold'
+                  ? 'bg-[#E2F952] text-black font-bold shadow-[2px_2px_0px_#000000]'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -550,11 +563,11 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
             <button
               type="submit"
               disabled={isLoading || !supabaseReady}
-              className="w-full btn-apple-primary py-2.5 px-4 text-xs font-semibold flex items-center justify-center gap-2 shadow-xl mt-2 disabled:opacity-50 touch-press active:scale-95"
+              className="w-full editorial-btn-lime py-3 px-4 text-xs font-woodblock tracking-widest uppercase flex items-center justify-center gap-2 mt-3 disabled:opacity-50 cursor-pointer"
             >
-              {isLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : null}
-              <span>{tab === 'signin' ? 'Sign In' : 'Create Student Account'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              {isLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin text-black" /> : null}
+              <span>{tab === 'signin' ? 'AUTHORIZE & ENTER PORTAL' : 'MINT SCHOLAR PASSPORT'}</span>
+              <ArrowRight className="w-3.5 h-3.5 text-black" />
             </button>
           </form>
 
