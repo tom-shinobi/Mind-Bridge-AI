@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import type { StudentProfile, Achievement, SyllabusTopic } from '../types';
 import { sound } from '../services/soundService';
+import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
 
 interface ProgressGamificationProps {
   profile: StudentProfile;
@@ -301,64 +302,63 @@ export const ProgressGamification: React.FC<ProgressGamificationProps> = ({
   return (
     <div className="space-y-8 animate-fade-in pb-16 max-w-6xl mx-auto">
       
-      {/* Top Banner & Level Progress */}
-      <div className="apple-liquid-glass p-6 sm:p-8 relative overflow-hidden border border-white/20 shadow-2xl">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-mono mb-2">
-              <Trophy className="w-3.5 h-3.5" />
-              <span>ACADEMIC MERIT & RETENTION ENGINE</span>
+      {/* Editorial Zine Header */}
+      <PageHeaderZine
+        editionTag="ARCHIVE OF MERIT // ACADEMY 007"
+        badgeText="MERIT & RETENTION"
+        title="ACADEMIC MASTERY ARCADE"
+        subtitle="Mind Bridge AI rewards genuine mastery: crushing identified micro-gaps, maintaining rigorous study consistency, and unlocking cognitive collectibles."
+        sticker="smiley"
+        sprayColor="orange"
+      />
+
+      {/* Level Progression Zine Card */}
+      <div className="zine-card p-6 rounded-3xl relative overflow-hidden space-y-4">
+        <div className="masking-tape-corner-tr z-10" />
+        <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-20" />
+        <div className="airbrush-spray-lime absolute -top-12 -right-12 pointer-events-none opacity-40" />
+
+        <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-lime-400 text-black border border-lime-300 flex flex-col items-center justify-center font-black font-mono shadow-[0_0_20px_rgba(163,230,53,0.4)]">
+              <span className="text-[9px] uppercase tracking-wider font-extrabold text-black/70">LVL</span>
+              <span className="text-xl leading-none">{profile.level}</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-heading">
-              Progress & Academic Achievements
-            </h2>
-            <p className="text-xs sm:text-sm text-[#A1A1A6] mt-1 max-w-2xl leading-relaxed">
-              Mind Bridge AI rewards meaningful academic mastery—crushing learning gaps, maintaining study consistency, and playing academic memory games.
-            </p>
+            <div>
+              <h4 className="text-base font-bold text-white tracking-tight">
+                Level {profile.level} — Algorithm Adept
+              </h4>
+              <p className="text-xs text-lime-400 font-mono flex items-center gap-1.5 mt-0.5">
+                <Zap className="w-3.5 h-3.5 text-lime-400" />
+                <span>{profile.totalXp.toLocaleString()} Total Academic XP</span>
+                {sessionXpEarned > 0 && (
+                  <span className="text-emerald-400 font-bold">(+{sessionXpEarned} XP this session)</span>
+                )}
+              </p>
+            </div>
           </div>
 
-          <button
-            onClick={triggerConfetti}
-            className="btn-apple-glass py-2.5 px-5 text-xs font-semibold flex items-center gap-2 text-white shadow-xl cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4 text-pink-400" />
-            <span>Celebrate Progress</span>
-          </button>
+          <div className="flex items-center gap-4">
+            <div className="text-right font-mono text-xs text-slate-300">
+              <span className="text-lime-400 font-bold">{currentLevelXp}</span> / 1000 XP (
+              <strong className="text-pink-400 font-semibold">{xpForNextLevel} XP</strong> to Next Level)
+            </div>
+            <button
+              onClick={triggerConfetti}
+              className="editorial-btn-lime py-2 px-4 text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4 text-black" />
+              <span>Celebrate</span>
+            </button>
+          </div>
         </div>
 
-        {/* Level Progression Bar */}
-        <div className="mt-6 p-5 rounded-2xl liquid-glass-block space-y-3 border border-white/10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-pink-500 to-orange-400 flex items-center justify-center font-extrabold text-base text-white shadow-[0_0_20px_rgba(168,85,247,0.5)]">
-                {profile.level}
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-white leading-tight">
-                  Level {profile.level} — Algorithm Adept
-                </h4>
-                <p className="text-xs text-purple-300 font-mono flex items-center gap-1.5 mt-0.5">
-                  <Zap className="w-3.5 h-3.5 text-amber-300" />
-                  <span>{profile.totalXp.toLocaleString()} Total Academic XP</span>
-                  {sessionXpEarned > 0 && (
-                    <span className="text-emerald-300 font-bold">(+{sessionXpEarned} XP this session)</span>
-                  )}
-                </p>
-              </div>
-            </div>
-
-            <div className="text-right font-mono text-xs text-[#A1A1A6]">
-              <span className="text-white font-bold">{currentLevelXp}</span> / 1000 XP (
-              <strong className="text-pink-400 font-semibold">{xpForNextLevel} XP</strong> to Level {profile.level + 1})
-            </div>
-          </div>
-
-          <div className="w-full bg-white/[0.08] rounded-full h-2.5 overflow-hidden p-0.5 border border-white/15">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 transition-all duration-700 shadow-[0_0_12px_rgba(236,72,153,0.6)]"
-              style={{ width: `${levelProgressPct}%` }}
-            />
-          </div>
+        {/* Progress Bar */}
+        <div className="w-full bg-black/60 rounded-full h-3 overflow-hidden p-0.5 border border-white/15 relative z-10">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-lime-400 via-emerald-400 to-cyan-400 transition-all duration-700 shadow-[0_0_15px_rgba(163,230,53,0.7)]"
+            style={{ width: `${levelProgressPct}%` }}
+          />
         </div>
       </div>
 
@@ -366,36 +366,38 @@ export const ProgressGamification: React.FC<ProgressGamificationProps> = ({
           ACADEMIC BRAIN ARCADE & MINI-GAMES SECTION
           Interactive educational games to reinforce memory and earn real XP
           ========================================================================== */}
-      <div className="apple-liquid-glass p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl space-y-6">
+      <div className="zine-card p-6 sm:p-8 rounded-3xl relative overflow-hidden space-y-6">
+        <div className="masking-tape-corner-tr z-10" />
+        <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-20" />
         
         {/* Arcade Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/[0.08] relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-              <Gamepad2 className="w-5 h-5" />
+            <div className="w-12 h-12 rounded-2xl bg-lime-400 text-black border border-lime-300 flex items-center justify-center shadow-[0_0_15px_rgba(163,230,53,0.4)]">
+              <Gamepad2 className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-white tracking-tight font-heading">
-                  Brain Arcade // Academic Games
+                <h3 className="text-lg font-bold text-white tracking-tight font-heading font-mono uppercase">
+                  Brain Arcade // Cognitive Lab
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 text-[10px] font-mono font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-lime-400/20 text-lime-300 border border-lime-400/30 text-[10px] font-mono font-black">
                   PLAY & EARN XP
                 </span>
               </div>
-              <p className="text-xs text-[#A1A1A6] leading-relaxed">
-                Sharpen conceptual recall with interactive card matching and rapid-fire trivia.
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Sharpen conceptual recall with interactive memory matching and rapid-fire algorithmic blitz.
               </p>
             </div>
           </div>
 
           {/* Game Switcher Tabs */}
-          <div className="flex items-center p-1 rounded-full bg-white/[0.06] border border-white/10 backdrop-blur-md">
+          <div className="flex items-center gap-2 p-1 rounded-xl bg-black/60 border border-white/10">
             <button
               onClick={() => { sound.playClick(); setActiveGame('MEMORY'); }}
-              className={`px-4 py-1.5 rounded-full text-xs font-mono font-semibold transition-all cursor-pointer ${
+              className={`px-4 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                 activeGame === 'MEMORY'
-                  ? 'bg-purple-500/30 text-purple-200 border border-purple-400/40 shadow-sm'
+                  ? 'bg-lime-400 text-black shadow-[0_0_15px_rgba(163,230,53,0.4)]'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -403,9 +405,9 @@ export const ProgressGamification: React.FC<ProgressGamificationProps> = ({
             </button>
             <button
               onClick={() => { sound.playClick(); setActiveGame('BLITZ'); }}
-              className={`px-4 py-1.5 rounded-full text-xs font-mono font-semibold transition-all cursor-pointer ${
+              className={`px-4 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                 activeGame === 'BLITZ'
-                  ? 'bg-pink-500/30 text-pink-200 border border-pink-400/40 shadow-sm'
+                  ? 'bg-lime-400 text-black shadow-[0_0_15px_rgba(163,230,53,0.4)]'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -639,18 +641,21 @@ export const ProgressGamification: React.FC<ProgressGamificationProps> = ({
             return (
               <div
                 key={ach.id}
-                className={`p-5 space-y-3 transition-all ${
+                className={`zine-card p-5 space-y-3 relative overflow-hidden transition-all rounded-2xl ${
                   isUnlocked
-                    ? 'liquid-glass-adaptive shadow-[0_6px_25px_rgba(168,85,247,0.2)]'
-                    : 'liquid-glass-block opacity-50 border-white/5'
+                    ? 'border-lime-400/50 bg-lime-950/20 shadow-[0_0_20px_rgba(163,230,53,0.15)]'
+                    : 'bg-black/50 border-white/10 opacity-60'
                 }`}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="masking-tape-corner-tr z-10" />
+                <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-20" />
+
+                <div className="flex items-start justify-between gap-3 relative z-10">
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
                         isUnlocked
-                          ? 'bg-gradient-to-br from-purple-600 to-pink-500 border-purple-400 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]'
+                          ? 'bg-lime-400 border-lime-300 text-black shadow-[0_0_12px_rgba(163,230,53,0.4)]'
                           : 'bg-black/40 border-white/10 text-slate-500'
                       }`}
                     >
@@ -659,33 +664,35 @@ export const ProgressGamification: React.FC<ProgressGamificationProps> = ({
 
                     <div>
                       <h4 className="text-xs font-bold text-white leading-snug">{ach.title}</h4>
-                      <span className="text-[10px] font-mono text-purple-300 uppercase block">
+                      <span className="text-[10px] font-mono text-lime-400 font-bold uppercase block">
                         +{ach.xpReward} XP Reward
                       </span>
                     </div>
                   </div>
 
                   {isUnlocked ? (
-                    <span className="led-indicator led-emerald" />
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-black uppercase bg-lime-400 text-black">
+                      UNLOCKED
+                    </span>
                   ) : (
-                    <Lock className="w-4 h-4 text-slate-600" />
+                    <Lock className="w-4 h-4 text-slate-500" />
                   )}
                 </div>
 
-                <p className="text-xs text-slate-400 leading-relaxed">{ach.description}</p>
+                <p className="text-xs text-slate-300 leading-relaxed relative z-10">{ach.description}</p>
 
                 {/* Progress bar */}
-                <div className="space-y-1 pt-1 border-t border-white/[0.04]">
+                <div className="space-y-1 pt-2 border-t border-white/[0.08] relative z-10">
                   <div className="flex justify-between text-[10px] font-mono text-slate-400">
-                    <span>{isUnlocked ? 'Unlocked' : 'Criteria Progress'}</span>
-                    <span>
+                    <span className="uppercase">{isUnlocked ? 'Completed' : 'Criteria Progress'}</span>
+                    <span className="font-bold text-white">
                       {ach.progress} / {ach.target}
                     </span>
                   </div>
-                  <div className="w-full bg-slate-800 rounded-full h-1 overflow-hidden">
+                  <div className="w-full bg-black/60 rounded-full h-2 overflow-hidden border border-white/10 p-0.5">
                     <div
                       className={`h-full rounded-full ${
-                        isUnlocked ? 'bg-emerald-400' : 'bg-purple-500'
+                        isUnlocked ? 'bg-lime-400 shadow-[0_0_8px_rgba(163,230,53,0.5)]' : 'bg-purple-500'
                       }`}
                       style={{ width: `${Math.min(100, (ach.progress / ach.target) * 100)}%` }}
                     />
@@ -698,28 +705,31 @@ export const ProgressGamification: React.FC<ProgressGamificationProps> = ({
       </div>
 
       {/* Curriculum Mastery Distribution */}
-      <div className="apple-liquid-glass p-6 sm:p-8 space-y-4 border border-white/20 shadow-2xl">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono flex items-center gap-2">
-          <Clock className="w-4 h-4 text-purple-400" />
+      <div className="zine-card p-6 sm:p-8 space-y-4 relative overflow-hidden rounded-3xl">
+        <div className="masking-tape-corner-tr z-10" />
+        <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-20" />
+        
+        <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono flex items-center gap-2 relative z-10">
+          <Clock className="w-4 h-4 text-lime-400" />
           <span>Curriculum Mastery & Time Invested</span>
         </h3>
 
-        <div className="space-y-3">
+        <div className="space-y-3 relative z-10">
           {syllabus.map((item) => (
-            <div key={item.id} className="space-y-1.5">
+            <div key={item.id} className="space-y-1.5 p-3 rounded-xl bg-black/50 border border-white/10">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-200">{item.topic}</span>
-                <span className="font-mono text-purple-300 font-bold">
+                <span className="font-bold text-slate-200 font-mono">{item.topic}</span>
+                <span className="font-mono text-lime-400 font-bold">
                   {item.masteryPercentage}% Mastery • {item.completedHours}h logged
                 </span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div className="w-full bg-black/60 rounded-full h-2 overflow-hidden border border-white/15 p-0.5">
                 <div
                   className={`h-full rounded-full ${
                     item.masteryPercentage >= 80
-                      ? 'bg-emerald-500'
+                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]'
                       : item.masteryPercentage >= 60
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+                      ? 'bg-lime-400 shadow-[0_0_8px_rgba(163,230,53,0.5)]'
                       : 'bg-orange-500'
                   }`}
                   style={{ width: `${item.masteryPercentage}%` }}

@@ -25,6 +25,8 @@ import { RotaryKnob } from '../components/hardware/RotaryKnob';
 import { StudyTimerWidget } from '../components/StudyTimerWidget';
 import { RefractiveLens } from '../components/RefractiveLens';
 import { SurrealPortalHero } from '../components/SurrealPortalHero';
+import { FloatingCloudVanHero } from '../components/editorial/FloatingCloudVanHero';
+import { SmileyBalloonSticker, PixelCursorSticker, ClayFlowerSticker } from '../components/editorial/AcidZineStickerPack';
 import { sound } from '../services/soundService';
 
 interface DashboardProps {
@@ -68,20 +70,38 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="space-y-10 animate-fade-in pb-20 max-w-6xl mx-auto">
-      {/* 1. Surrealist Light Vortex & Tyler Zine Flagship Portal Hero */}
-      <SurrealPortalHero
+      {/* 1. Cosmic Cloud Camper Van Hero (Image 1 Reference) */}
+      <FloatingCloudVanHero
         onCtaClick={() => {
           sound.playClick();
           onNavigate('tutor', { topic: criticalGap?.topic });
         }}
-        ctaText="CHASE YOUR CURIOSITY // LAUNCH AI TUTOR"
+        ctaText="LAUNCH EXPEDITION // EXPLORE COGNITION"
+      />
+
+      {/* 2. Surrealist Light Vortex & Tyler Zine Flagship Portal Hero */}
+      <SurrealPortalHero
+        onCtaClick={() => {
+          sound.playClick();
+          onNavigate('tests', { topic: criticalGap?.topic });
+        }}
+        ctaText="CHASE YOUR CURIOSITY // TAKE DIAGNOSTIC"
       />
 
       {/* ==========================================================================
-          APPLE WEBSITE KEYNOTE HERO PRESENTATION (Matching iPhone Duo Reference)
-          Clean Apple typography, crisp pill action buttons, and 3D Refractive Liquid Glass
+          APPLE WEBSITE KEYNOTE HERO PRESENTATION WITH ACID ZINE STICKERS
           ========================================================================== */}
-      <div className="py-6 sm:py-10 flex flex-col items-center text-center space-y-4 max-w-4xl mx-auto">
+      <div className="relative py-6 sm:py-10 flex flex-col items-center text-center space-y-4 max-w-4xl mx-auto">
+        {/* Floating 3D Stickers */}
+        <div className="absolute top-2 left-4 hidden md:block">
+          <SmileyBalloonSticker size={58} />
+        </div>
+        <div className="absolute bottom-8 right-6 hidden md:block">
+          <PixelCursorSticker size={38} />
+        </div>
+        <div className="absolute top-8 right-8 hidden lg:block">
+          <ClayFlowerSticker size={46} />
+        </div>
         
         <span className="text-[11px] uppercase font-mono font-medium tracking-widest text-[#A1A1A6] px-3 py-1 rounded-full bg-white/[0.06] border border-white/15 backdrop-blur-md shadow-sm">
           MindBridge Pro // Generation 6

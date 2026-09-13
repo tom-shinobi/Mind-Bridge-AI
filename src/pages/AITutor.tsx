@@ -26,6 +26,7 @@ import { storageService } from '../services/storageService';
 import { sound } from '../services/soundService';
 import { RotaryKnob } from '../components/hardware/RotaryKnob';
 import { FormattedContent } from '../components/FormattedContent';
+import { HorizonChairHero } from '../components/editorial/HorizonChairHero';
 
 interface AITutorProps {
   initialTopic?: string;
@@ -758,10 +759,21 @@ export const AITutor: React.FC<AITutorProps> = ({
 
   // 2. Standard Embedded Viewport
   return (
-    <div className="space-y-4 animate-fade-in pb-12 flex flex-col">
-      
-      {/* Top Header Card */}
-      <div className="apple-liquid-glass p-5 relative overflow-hidden">
+    <div className="space-y-6 animate-fade-in pb-12 flex flex-col">
+      {/* 1. Metaphysical Horizon & Solitary Chair Hero (Image 3 Reference) */}
+      <HorizonChairHero
+        onReflectClick={() => {
+          sound.playClick();
+          const el = document.getElementById('socratic-chat-dock');
+          el?.scrollIntoView({ behavior: 'smooth' });
+        }}
+        actionText="ENGAGE DEEP SOCRATIC DIALOGUE"
+      />
+
+      {/* Top Header Card with Notebook Grid & Masking Tape */}
+      <div id="socratic-chat-dock" className="relative z-10 apple-liquid-glass p-5 overflow-hidden border-2 border-white/20 shadow-2xl">
+        <div className="masking-tape-corner-tr z-20" />
+        <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-20" />
         <div className="flex flex-wrap items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">

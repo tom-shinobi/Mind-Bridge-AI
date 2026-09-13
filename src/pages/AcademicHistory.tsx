@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  GraduationCap,
   Plus,
   CheckCircle2,
   FileSpreadsheet,
@@ -8,6 +7,7 @@ import {
 } from 'lucide-react';
 import type { AcademicRecord, StudentProfile } from '../types';
 import { sound } from '../services/soundService';
+import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
 
 interface AcademicHistoryProps {
   records: AcademicRecord[];
@@ -74,82 +74,84 @@ export const AcademicHistory: React.FC<AcademicHistoryProps> = ({
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       
-      {/* Top Banner */}
-      <div className="liquid-glass-card p-6 relative overflow-hidden">
-        <div className="glow-purple -top-24 -right-24 opacity-25" />
-        
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-mono mb-2">
-              <GraduationCap className="w-3.5 h-3.5" />
-              <span>ACADEMIC FOUNDATION VAULT</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Student Academic History
-            </h2>
-            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-              Every course, exam grade, and topic evaluation is ingested into Mind Bridge AI to pinpoint knowledge gaps and dynamically shape your personalized syllabus.
-            </p>
+      {/* Editorial Zine Header */}
+      <PageHeaderZine
+        editionTag="SCHOLAR ARCHIVE // DOSSIER 008"
+        badgeText="HISTORICAL DOSSIER"
+        title="TRANSCRIPT & PERFORMANCE VAULT"
+        subtitle="Every university course, midterm evaluation, and rubric grade is ingested into Mind Bridge AI to systematically isolate retention decay and calibrate syllabus priority."
+        sticker="cursor"
+        sprayColor="cyan"
+      />
+
+      {/* Action Toolbar & Stats Bar */}
+      <div className="space-y-4">
+        <div className="zine-card p-4 rounded-2xl relative overflow-hidden flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-20" />
+          
+          <div className="flex items-center gap-2 relative z-10">
+            <FileSpreadsheet className="w-4 h-4 text-lime-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono">
+              Academic Performance Log
+            </span>
           </div>
 
-          <button
-            onClick={() => {
-              sound.playClick();
-              setIsModalOpen(true);
-            }}
-            className="btn-apple-primary py-2.5 px-4 text-xs font-semibold flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4 text-white" />
-            <span>Add Academic Record</span>
-          </button>
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-lime-400 font-mono font-bold uppercase">Semester:</span>
+              <select
+                value={filterSemester}
+                onChange={(e) => setFilterSemester(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                className="liquid-glass-input text-xs px-3.5 py-1.5 rounded-xl font-mono text-white bg-black/70 border-white/20"
+              >
+                <option value="all">All Semesters</option>
+                <option value={6}>Semester 6 (Current)</option>
+                <option value={5}>Semester 5</option>
+              </select>
+            </div>
+
+            <button
+              onClick={() => {
+                sound.playClick();
+                setIsModalOpen(true);
+              }}
+              className="editorial-btn-lime py-2 px-4 text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4 text-black" />
+              <span>Add Record</span>
+            </button>
+          </div>
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/[0.08]">
-          <div className="liquid-glass-block p-4 space-y-1">
-            <span className="text-[10px] uppercase font-mono text-slate-400 block">Current CGPA</span>
-            <span className="text-xl sm:text-2xl font-bold text-white font-heading">{profile.cgpa} / 10.0</span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="zine-card p-4 rounded-2xl relative overflow-hidden">
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
+            <span className="text-[10px] uppercase font-mono text-slate-400 block font-bold">Current CGPA</span>
+            <span className="text-xl sm:text-2xl font-black text-white font-mono mt-1 block">{profile.cgpa} / 10.0</span>
           </div>
-          <div className="liquid-glass-block p-4 space-y-1">
-            <span className="text-[10px] uppercase font-mono text-slate-400 block">Target CGPA</span>
-            <span className="text-xl sm:text-2xl font-bold text-purple-300 font-heading">{profile.targetCgpa} / 10.0</span>
+          <div className="zine-card p-4 rounded-2xl relative overflow-hidden">
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
+            <span className="text-[10px] uppercase font-mono text-slate-400 block font-bold">Target CGPA</span>
+            <span className="text-xl sm:text-2xl font-black text-lime-400 font-mono mt-1 block">{profile.targetCgpa} / 10.0</span>
           </div>
-          <div className="liquid-glass-block p-4 space-y-1">
-            <span className="text-[10px] uppercase font-mono text-slate-400 block">Avg Exam Score</span>
-            <span className="text-xl sm:text-2xl font-bold text-emerald-400 font-heading">{avgScore}%</span>
+          <div className="zine-card p-4 rounded-2xl relative overflow-hidden">
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
+            <span className="text-[10px] uppercase font-mono text-slate-400 block font-bold">Avg Exam Score</span>
+            <span className="text-xl sm:text-2xl font-black text-emerald-400 font-mono mt-1 block">{avgScore}%</span>
           </div>
-          <div className="liquid-glass-block p-4 space-y-1">
-            <span className="text-[10px] uppercase font-mono text-slate-400 block">Total Ingested Tests</span>
-            <span className="text-xl sm:text-2xl font-bold text-orange-400 font-heading">{records.length} Records</span>
+          <div className="zine-card p-4 rounded-2xl relative overflow-hidden">
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
+            <span className="text-[10px] uppercase font-mono text-slate-400 block font-bold">Ingested Records</span>
+            <span className="text-xl sm:text-2xl font-black text-pink-400 font-mono mt-1 block">{records.length} Files</span>
           </div>
-        </div>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <FileSpreadsheet className="w-4 h-4 text-purple-400" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono">
-            Academic Performance Log
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-300 font-mono">Semester:</span>
-          <select
-            value={filterSemester}
-            onChange={(e) => setFilterSemester(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-            className="liquid-glass-input text-xs px-3.5 py-1.5 rounded-xl"
-          >
-            <option value="all">All Semesters</option>
-            <option value={6}>Semester 6 (Current)</option>
-            <option value={5}>Semester 5</option>
-          </select>
         </div>
       </div>
 
       {/* Records Table */}
-      <div className="apple-liquid-glass overflow-hidden border border-white/20">
+      <div className="zine-card overflow-hidden rounded-3xl relative border-white/10">
+        <div className="masking-tape-corner-tr z-10" />
+        <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-20" />
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-white/[0.04] text-slate-300 font-mono uppercase text-[10px] border-b border-white/[0.08]">

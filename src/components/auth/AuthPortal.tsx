@@ -24,6 +24,7 @@ import { THEME_CONFIGS } from '../../types';
 import { FaceIdScannerModal } from './FaceIdScannerModal';
 import { AdminAuthModal } from './AdminAuthModal';
 import { SurrealPortalHero } from '../SurrealPortalHero';
+import { SmileyBalloonSticker, PixelCursorSticker } from '../editorial/AcidZineStickerPack';
 
 interface AuthPortalProps {
   onSuccess: (user: AuthUser) => void;
@@ -266,6 +267,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       />
 
       <div id="auth-portal-form" className="relative z-10 max-w-md w-full space-y-5 my-4">
+        {/* Floating Prima Chat Acid Stickers */}
+        <div className="hidden sm:block absolute -top-10 -right-12 z-30 pointer-events-none">
+          <SmileyBalloonSticker size={68} />
+        </div>
+        <div className="hidden sm:block absolute top-1/2 -left-12 z-30 pointer-events-none">
+          <PixelCursorSticker />
+        </div>
+
         {/* Brand Sub-Header with Tyler-style woodblock typography */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-black/60 border border-[#E2F952]/40 rounded-full font-editorial-mono text-[10px] text-[#E2F952] uppercase tracking-widest backdrop-blur-md">

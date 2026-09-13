@@ -6,7 +6,6 @@ import {
   Square,
   Plus,
   Trash2,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
@@ -18,6 +17,7 @@ import {
 import { calendarService } from '../services/calendarService';
 import { sound } from '../services/soundService';
 import type { CalendarEvent, CalendarTask, EventType, StudentProfile } from '../types';
+import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
 
 interface AcademicCalendarProps {
   profile: StudentProfile;
@@ -194,32 +194,32 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
-      {/* Top Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-6 sm:p-8 shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Editorial Zine Header */}
+      <PageHeaderZine
+        editionTag="CHRONO ARCHIVE // ALMANAC 006"
+        badgeText="ACADEMIC HORIZON"
+        title="CALENDAR & TASK MANIFEST"
+        subtitle="Track university exams, deadlines, and study squads with continuous autonomous Socratic AI Tutor schedule synchronization and deadline radar."
+        sticker="flower"
+        sprayColor="magenta"
+      />
 
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-mono mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>AI-Assisted Academic Schedule</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Academic Calendar & Tasks
-            </h1>
-            <p className="text-sm text-slate-300 mt-1 max-w-2xl">
-              Track university exams, deadlines, and study squads with automatic Socratic AI Tutor schedule synchronization.
-            </p>
+      {/* Action Toolbar & Stats Bar */}
+      <div className="space-y-4">
+        <div className="zine-card p-4 rounded-2xl relative overflow-hidden flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-20" />
+          
+          <div className="flex items-center gap-2 relative z-10 font-mono text-xs">
+            <span className="w-2.5 h-2.5 rounded-full bg-lime-400 animate-ping" />
+            <span className="text-lime-400 font-bold uppercase">Socratic AI Engine Online</span>
           </div>
 
-          {/* Sync with AI Assistant Button */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex items-center gap-3 relative z-10">
             <button
               onClick={handleSyncWithAI}
-              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs sm:text-sm shadow-xl shadow-indigo-500/25 flex items-center justify-center gap-2 cursor-pointer transition-all"
+              className="editorial-btn-lime py-2 px-4 text-xs flex items-center gap-2 font-mono uppercase tracking-wider"
             >
-              <Bot className="w-4 h-4" />
+              <Bot className="w-4 h-4 text-black" />
               <span>Sync with Socratic AI</span>
             </button>
 
@@ -228,9 +228,9 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                 sound.playClick();
                 setIsAddEventOpen(true);
               }}
-              className="px-4 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 flex items-center justify-center gap-2 cursor-pointer transition-all"
+              className="btn-apple-glass py-2 px-4 text-xs flex items-center gap-2 font-mono text-white"
             >
-              <Plus className="w-4 h-4 text-purple-400" />
+              <Plus className="w-4 h-4 text-lime-400" />
               <span>Add Event</span>
             </button>
           </div>
@@ -238,35 +238,39 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
 
         {/* Live AI Sync Notification Alert */}
         {syncNotice && (
-          <div className="mt-6 p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-3 animate-fade-in">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <div className="p-4 rounded-2xl zine-card border-lime-400/40 bg-lime-950/20 text-lime-300 text-xs flex items-center gap-3 animate-fade-in font-mono">
+            <CheckCircle2 className="w-5 h-5 text-lime-400 shrink-0" />
             <span className="leading-relaxed">{syncNotice}</span>
           </div>
         )}
 
         {/* Stats Metrics Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800">
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800">
-            <span className="text-[11px] text-slate-400 uppercase font-mono">Upcoming Exams</span>
-            <p className="text-xl font-bold text-red-400 mt-1">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="zine-card p-3.5 rounded-2xl relative overflow-hidden">
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
+            <span className="text-[10px] text-slate-400 uppercase font-mono font-bold">Upcoming Exams</span>
+            <p className="text-2xl font-black font-mono text-rose-400 mt-1">
               {events.filter((e) => e.eventType === 'exam').length}
             </p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800">
-            <span className="text-[11px] text-slate-400 uppercase font-mono">Assignments & Deadlines</span>
-            <p className="text-xl font-bold text-amber-400 mt-1">
+          <div className="zine-card p-3.5 rounded-2xl relative overflow-hidden">
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
+            <span className="text-[10px] text-slate-400 uppercase font-mono font-bold">Assignments & Deadlines</span>
+            <p className="text-2xl font-black font-mono text-amber-400 mt-1">
               {events.filter((e) => e.eventType === 'deadline').length}
             </p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800">
-            <span className="text-[11px] text-slate-400 uppercase font-mono">Study Squad Sessions</span>
-            <p className="text-xl font-bold text-purple-400 mt-1">
+          <div className="zine-card p-3.5 rounded-2xl relative overflow-hidden">
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
+            <span className="text-[10px] text-slate-400 uppercase font-mono font-bold">Squad Sessions</span>
+            <p className="text-2xl font-black font-mono text-purple-400 mt-1">
               {events.filter((e) => e.eventType === 'study_squad').length}
             </p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800">
-            <span className="text-[11px] text-slate-400 uppercase font-mono">Pending Tasks</span>
-            <p className="text-xl font-bold text-emerald-400 mt-1">
+          <div className="zine-card p-3.5 rounded-2xl relative overflow-hidden">
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
+            <span className="text-[10px] text-slate-400 uppercase font-mono font-bold">Pending Tasks</span>
+            <p className="text-2xl font-black font-mono text-lime-400 mt-1">
               {pendingTasks.length} left
             </p>
           </div>
@@ -277,7 +281,9 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Calendar Grid View (7 Cols) */}
         <div className="lg:col-span-7 space-y-6">
-          <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl backdrop-blur-md space-y-5">
+          <div className="zine-card p-6 rounded-3xl relative overflow-hidden space-y-5">
+            <div className="masking-tape-corner-tr z-10" />
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-20" />
             {/* Month Header Navigation */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -423,10 +429,12 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
           </div>
 
           {/* Selected Date Agenda Details */}
-          <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Clock className="w-4 h-4 text-indigo-400" />
+          <div className="zine-card p-6 rounded-3xl relative overflow-hidden space-y-4">
+            <div className="masking-tape-corner-tr z-10" />
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-20" />
+            <div className="flex items-center justify-between relative z-10">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono uppercase">
+                <Clock className="w-4 h-4 text-lime-400" />
                 Schedule for {new Date(selectedDateStr).toLocaleDateString(undefined, {
                   weekday: 'long',
                   year: 'numeric',
@@ -505,18 +513,20 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
 
         {/* Tasks Checklist Column (5 Cols) */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl backdrop-blur-md space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="zine-card p-6 rounded-3xl relative overflow-hidden space-y-4">
+            <div className="masking-tape-corner-tr z-10" />
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-20" />
+            <div className="flex items-center justify-between relative z-10">
               <div className="flex items-center gap-2">
-                <ListTodo className="w-5 h-5 text-indigo-400" />
-                <h3 className="text-sm font-bold text-white">Revision & Study Tasks</h3>
+                <ListTodo className="w-5 h-5 text-lime-400" />
+                <h3 className="text-sm font-bold text-white font-mono uppercase">Revision & Study Tasks</h3>
               </div>
               <button
                 onClick={() => {
                   sound.playClick();
                   setIsAddTaskOpen(!isAddTaskOpen);
                 }}
-                className="text-xs px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                className="text-xs px-3 py-1.5 editorial-btn-lime flex items-center gap-1 cursor-pointer font-mono font-bold uppercase tracking-wider"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Task</span>

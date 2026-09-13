@@ -21,6 +21,7 @@ import { adaptiveEngine } from '../services/adaptiveEngine';
 import { aiService } from '../services/aiService';
 import { sound } from '../services/soundService';
 import { FormattedContent } from '../components/FormattedContent';
+import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
 
 interface PersonalizedTestsProps {
   tests: Test[];
@@ -468,62 +469,53 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
   // 3. Catalog of Personalized Tests
   return (
     <div className="space-y-6 animate-fade-in pb-12">
-      
-      {/* Header */}
-      <div className="apple-liquid-glass p-6 sm:p-8 relative overflow-hidden">
-        <div className="glow-pink -top-24 -right-24 opacity-20" />
-        
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-300 text-xs font-mono mb-2">
-              <FileCheck2 className="w-3.5 h-3.5" />
-              <span>DIAGNOSTIC ASSESSMENT VAULT</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Personalized Tests & Diagnostics
-            </h2>
-            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-              Standard exams ask random questions. Mind Bridge AI synthesizes tests precisely targeted at your active learning gaps to measure retention and dynamically adapt your syllabus.
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Editorial Zine Header */}
+      <PageHeaderZine
+        editionTag="TEST VAULT // EXAMINATION 004"
+        badgeText="ADAPTIVE SENSORS"
+        title="DIAGNOSTIC ASSESSMENT VAULT"
+        subtitle="Standard exams ask random questions. Mind Bridge AI synthesizes tests precisely targeted at your active learning gaps to measure retention and dynamically adapt your syllabus."
+        sticker="smiley"
+      />
 
-      {/* Tests Grid */}
+      {/* Tests Grid with Masking Tape Corners & Zine Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {tests.map((test) => (
           <div
             key={test.id}
-            className="liquid-glass-block p-5 space-y-3.5 border-white/15 hover:border-purple-500/50 flex flex-col justify-between"
+            className="zine-card p-5 space-y-3.5 flex flex-col justify-between rounded-2xl"
           >
-            <div>
+            <div className="masking-tape-corner-tr z-10" />
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-25" />
+
+            <div className="relative z-10">
               <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="text-xs font-mono font-semibold text-purple-300">
+                <span className="text-xs font-woodblock uppercase tracking-wider text-[#E2F952]">
                   {test.subject}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                <span className="px-2.5 py-0.5 rounded text-[10px] font-woodblock uppercase bg-black border border-white/20 text-white shadow-[1px_1px_0px_#000000]">
                   {test.difficulty} Difficulty
                 </span>
               </div>
 
-              <h4 className="text-base font-bold text-white">{test.title}</h4>
-              <p className="text-xs text-slate-400 mt-1 font-mono">
-                Targeted Gap: <strong className="text-pink-300">{test.topic}</strong>
+              <h4 className="text-base font-woodblock tracking-wide text-white uppercase">{test.title}</h4>
+              <p className="text-xs text-slate-300 mt-1 font-editorial-mono">
+                Targeted Gap: <strong className="text-[#E2F952]">{test.topic}</strong>
               </p>
 
-              <div className="flex items-center gap-3 text-xs text-slate-400 font-mono mt-3 pt-2 border-t border-white/[0.06]">
+              <div className="flex items-center gap-3 text-xs text-slate-400 font-editorial-mono mt-3 pt-2 border-t border-white/[0.08]">
                 <span>{test.questions.length} Questions</span> • 
                 <span>{test.timeLimitMinutes} Mins</span> • 
-                <span className="text-emerald-400 font-semibold">+300 Academic XP</span>
+                <span className="text-emerald-400 font-semibold">+300 XP</span>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() => startTest(test)}
-              className="w-full btn-apple-primary py-2.5 px-4 text-xs font-semibold flex items-center justify-center gap-2 mt-2"
+              className="relative z-10 w-full editorial-btn-lime py-2.5 px-4 text-xs font-woodblock tracking-wider uppercase flex items-center justify-center gap-2 mt-2 cursor-pointer"
             >
-              <FileCheck2 className="w-3.5 h-3.5" />
+              <FileCheck2 className="w-3.5 h-3.5 text-black" />
               <span>Begin Diagnostic Test</span>
             </button>
           </div>

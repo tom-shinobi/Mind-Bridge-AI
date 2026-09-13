@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Settings,
   User,
   Cpu,
   ShieldCheck,
@@ -28,6 +27,7 @@ import { sound } from '../services/soundService';
 import { authService } from '../services/authService';
 import { supabaseDataService } from '../services/supabaseDataService';
 import { FaceIdScannerModal } from '../components/auth/FaceIdScannerModal';
+import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
 
 interface SettingsProfileProps {
   profile: StudentProfile;
@@ -271,23 +271,15 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       
-      {/* Header */}
-      <div className="apple-liquid-glass p-6 relative overflow-hidden">
-        <div className="glow-purple -top-24 -right-24 opacity-25" />
-        
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-mono mb-2">
-            <Settings className="w-3.5 h-3.5" />
-            <span>SYSTEM CONFIGURATION & SAFETY BOUNDARIES</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Student Profile & AI Intelligence Settings
-          </h2>
-          <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
-            Manage your academic credentials, customize AI model parameters, and review the strict safety guidelines governing Mind Bridge AI.
-          </p>
-        </div>
-      </div>
+      {/* Editorial Zine Header */}
+      <PageHeaderZine
+        editionTag="SECURITY & IDENTITY // PROTOCOL 010"
+        badgeText="SCHOLAR IDENTITY"
+        title="PROFILE & COGNITIVE SECURITY"
+        subtitle="Manage your student credentials, tune AI reasoning engines, configure biometric passkeys and Face ID, and govern persistent academic memory."
+        sticker="smiley"
+        sprayColor="cyan"
+      />
 
       {savedSuccess && (
         <div className="p-3.5 rounded-xl liquid-glass-emerald border border-emerald-500/40 text-emerald-200 text-xs flex items-center gap-2.5 animate-fade-in">

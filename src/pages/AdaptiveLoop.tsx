@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import type { AdaptiveAuditEntry, LearningGap, StudentProfile } from '../types';
 import { sound } from '../services/soundService';
+import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
 
 interface AdaptiveLoopProps {
   auditLog: AdaptiveAuditEntry[];
@@ -124,51 +125,37 @@ export const AdaptiveLoop: React.FC<AdaptiveLoopProps> = ({
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       
-      {/* Header */}
-      <div className="apple-liquid-glass p-6 sm:p-8 relative overflow-hidden">
-        <div className="glow-purple -top-24 -right-24 opacity-25" />
-        <div className="glow-orange -bottom-24 -left-24 opacity-20" />
+      {/* Editorial Zine Header */}
+      <PageHeaderZine
+        editionTag="FEEDBACK LOG // TELEMETRY 009"
+        badgeText="AUTONOMOUS FEEDBACK"
+        title="CONTINUOUS ADAPTIVE LOOP"
+        subtitle="The core neural loop: every test mistake, tutoring question, and workload change streams through 11 real-time feedback gates to keep your learning path perpetually calibrated."
+        sticker="smiley"
+        sprayColor="lime"
+      />
+
+      {/* Action Strip & Philosophy Card */}
+      <div className="zine-card p-5 rounded-3xl relative overflow-hidden flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-20" />
         
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-mono mb-2">
-              <RotateCw className="w-3.5 h-3.5 animate-spin-slow" />
-              <span>THE CONTINUOUS FEEDBACK LOOP</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Mind Bridge AI Adaptive Engine
-            </h2>
-            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-              The core differentiator: every test submission, tutoring session, and workload check-in feeds directly into our closed loop, keeping your academic trajectory perpetually optimized.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                sound.playClick();
-                onNavigate('tests', { topic: gaps[0]?.topic || 'B-Trees & B+ Tree Indexing' });
-              }}
-              className="btn-apple-primary py-2.5 px-4 text-xs font-semibold flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4 text-white" />
-              <span>Test Loop with Diagnostic</span>
-            </button>
-          </div>
+        <div className="flex items-center gap-3 relative z-10">
+          <span className="w-3 h-3 rounded-full bg-lime-400 animate-ping" />
+          <p className="text-xs text-slate-200 font-mono">
+            <strong className="text-lime-400 uppercase">Core Law:</strong> Diagnose Gaps → Restructure Sequence → Calibrate Agenda → Measure Delta → Evolve.
+          </p>
         </div>
 
-        {/* Central Concept Callout */}
-        <div className="mt-6 p-4 rounded-2xl liquid-glass-adaptive flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <span className="led-indicator led-emerald" />
-            <p className="text-xs text-slate-200">
-              <strong>Core Philosophy:</strong> Understand the student → Identify the gap → Personalize the learning → Measure the result → Adapt the plan.
-            </p>
-          </div>
-          <span className="text-[10px] font-mono px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 border border-purple-400/40">
-            100% Autonomous Feedback
-          </span>
-        </div>
+        <button
+          onClick={() => {
+            sound.playClick();
+            onNavigate('tests', { topic: gaps[0]?.topic || 'B-Trees & B+ Tree Indexing' });
+          }}
+          className="editorial-btn-lime py-2 px-4 text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 relative z-10"
+        >
+          <Sparkles className="w-4 h-4 text-black" />
+          <span>Trigger Diagnostic Loop</span>
+        </button>
       </div>
 
       {/* Visual 11-Step Interactive Pipeline Flow */}
@@ -177,7 +164,7 @@ export const AdaptiveLoop: React.FC<AdaptiveLoopProps> = ({
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono flex items-center gap-2">
             <span>The 11-Step Adaptive Workflow Pipeline</span>
           </h3>
-          <span className="text-[11px] text-purple-400 font-mono">Interactive Nodes</span>
+          <span className="text-[11px] text-lime-400 font-mono font-bold uppercase">Click Any Node to Navigate</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
@@ -191,30 +178,33 @@ export const AdaptiveLoop: React.FC<AdaptiveLoopProps> = ({
                   sound.playClick();
                   onNavigate(step.targetTab);
                 }}
-                className="liquid-glass-block p-4 space-y-2 border-white/15 hover:border-purple-500/50 cursor-pointer transition-all group relative overflow-hidden"
+                className="zine-card p-4 space-y-2 relative overflow-hidden rounded-2xl cursor-pointer transition-all hover:border-lime-400/60 hover:scale-[1.02] group"
               >
-                <div className="flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-purple-400 font-bold">{step.num}</span>
-                  <span className="led-indicator led-emerald" />
+                <div className="masking-tape-corner-tr z-10" />
+                <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-20" />
+
+                <div className="flex items-center justify-between text-[11px] font-mono relative z-10">
+                  <span className="text-lime-400 font-black text-sm">{step.num}</span>
+                  <span className="w-2 h-2 rounded-full bg-lime-400" />
                 </div>
 
-                <div className="flex items-center gap-2.5 pt-1">
-                  <div className="p-2 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 group-hover:scale-110 transition-transform">
+                <div className="flex items-center gap-2.5 pt-1 relative z-10">
+                  <div className="p-2 rounded-xl bg-lime-400 text-black font-bold group-hover:scale-110 transition-transform">
                     <Icon className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white leading-snug group-hover:text-purple-200">
+                    <h4 className="text-xs font-bold text-white leading-snug group-hover:text-lime-300">
                       {step.title}
                     </h4>
                   </div>
                 </div>
 
-                <p className="text-[11px] text-slate-400 leading-snug">
+                <p className="text-[11px] text-slate-300 leading-snug relative z-10">
                   {step.desc}
                 </p>
 
-                <div className="pt-2 flex items-center justify-between text-[10px] font-mono text-purple-300 border-t border-white/[0.04]">
-                  <span>Step {idx + 1} of 11</span>
+                <div className="pt-2 flex items-center justify-between text-[10px] font-mono text-lime-400 border-t border-white/[0.08] relative z-10 font-bold">
+                  <span>Phase {idx + 1} of 11</span>
                   <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
@@ -224,10 +214,13 @@ export const AdaptiveLoop: React.FC<AdaptiveLoopProps> = ({
       </div>
 
       {/* Real-Time Adaptive Audit Log */}
-      <div className="apple-liquid-glass p-6 space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+      <div className="zine-card p-6 space-y-4 rounded-3xl relative overflow-hidden">
+        <div className="masking-tape-corner-tr z-10" />
+        <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-20" />
+        
+        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] relative z-10">
           <div className="flex items-center gap-2.5">
-            <Clock className="w-4 h-4 text-purple-400" />
+            <Clock className="w-4 h-4 text-lime-400" />
             <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono">
               Live Adaptive Engine Audit Trail
             </h3>

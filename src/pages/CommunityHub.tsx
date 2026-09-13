@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { communityService } from '../services/communityService';
 import { sound } from '../services/soundService';
+import { SmileyBalloonSticker, ClayFlowerSticker, PixelCursorSticker, DoodleStarSticker } from '../components/editorial/AcidZineStickerPack';
 import type {
   Post,
   CommunityServer,
@@ -402,17 +403,28 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
-      {/* Top Banner & Hub Controls (Tyler The Creator Zine & Editorial Gazette Style) */}
+      {/* Top Banner & Hub Controls (PRIMA CHAT BERLIN & Acid Zine Style) */}
       <div className="relative overflow-hidden rounded-3xl bg-[#080B11] border-2 border-[#E2F952]/30 p-6 sm:p-8 shadow-2xl">
         <div className="masking-tape-corner-tr z-20" />
         <div className="masking-tape-corner-tl z-20" />
         <div className="editorial-paper-grain absolute inset-0 pointer-events-none z-0 opacity-40" />
+        <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-30" />
+
+        {/* Aerosol Spray Paint Cloud Halos (Image 2 Prima Chat Motif) */}
+        <div className="absolute -top-10 -right-10 w-72 h-72 airbrush-spray-magenta opacity-30 pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-72 h-72 airbrush-spray-cyan opacity-25 pointer-events-none" />
+        <div className="absolute top-1/2 left-1/3 w-60 h-60 airbrush-spray-lime opacity-20 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
+          <div className="relative">
+            {/* 3D Floating Stickers Anchored to Title */}
+            <div className="absolute -top-5 -left-4 hidden lg:block">
+              <DoodleStarSticker size={24} color="#E2F952" />
+            </div>
+
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#E2F952] text-black font-woodblock tracking-widest text-[10px] uppercase mb-3 shadow-[2px_2px_0px_#000000]">
               <Sparkles className="w-3.5 h-3.5 text-black" />
-              <span>COMMUNITY GAZETTE // VOL. IV ARCHIVE</span>
+              <span>COMMUNITY GAZETTE // PRIMA CHAT EDITION 2026</span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-woodblock text-white uppercase tracking-wider">
               CAMPUS SOCIAL PULSE & STUDY SQUADS<span className="text-[#E2F952]">*</span>
@@ -421,6 +433,14 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
               Collaborate in Discord-style academic squads, share breakthrough derivations on Campus Pulse, direct message study partners, and match with peers sharing identical learning gaps.
             </p>
           </div>
+
+          {/* Right Section: Account Visibility + 3D Smiley Balloon & Pixel Cursor */}
+          <div className="flex items-center gap-4 flex-shrink-0">
+            <div className="hidden sm:flex items-center gap-3">
+              <SmileyBalloonSticker size={58} />
+              <PixelCursorSticker size={36} />
+              <ClayFlowerSticker size={44} />
+            </div>
 
           {/* Account Visibility Badge & Toggle */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-black/60 p-3.5 rounded-2xl border border-white/15 backdrop-blur-md">
@@ -454,6 +474,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
             </button>
           </div>
         </div>
+      </div>
 
         {/* 4 Feature Tab Switcher with Tyler Highlighter Styling */}
         <div className="relative z-10 mt-8 flex flex-wrap gap-2.5 border-b border-white/10 pb-3">
