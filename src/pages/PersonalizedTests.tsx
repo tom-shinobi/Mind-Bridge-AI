@@ -22,6 +22,7 @@ import { aiService } from '../services/aiService';
 import { sound } from '../services/soundService';
 import { FormattedContent } from '../components/FormattedContent';
 import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
+import { StudyMotivationStickyCard } from '../components/editorial/StudyMotivationQuotes';
 
 interface PersonalizedTestsProps {
   tests: Test[];
@@ -477,6 +478,33 @@ export const PersonalizedTests: React.FC<PersonalizedTestsProps> = ({
         subtitle="Standard exams ask random questions. Mind Bridge AI synthesizes tests precisely targeted at your active learning gaps to measure retention and dynamically adapt your syllabus."
         sticker="smiley"
       />
+
+      {/* Exam Motivation Sticky Rally Strip (From Images 3 & 4) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <StudyMotivationStickyCard
+          quoteItem={{
+            id: 'test-sticky-1',
+            quote: 'Studying now is better then leaving the exam room wishing you studied more',
+            category: 'focus',
+            source: 'grid',
+            themeColor: 'amber',
+            rotationClass: '-rotate-1'
+          }}
+          size="sm"
+        />
+        <StudyMotivationStickyCard
+          quoteItem={{
+            id: 'test-sticky-2',
+            quote: 'SCHOOL IS TOUGH, BUT SO ARE YOU.',
+            category: 'resilience',
+            source: 'grid',
+            highlightText: 'SO ARE YOU',
+            themeColor: 'pink',
+            rotationClass: 'rotate-1'
+          }}
+          size="sm"
+        />
+      </div>
 
       {/* Tests Grid with Masking Tape Corners & Zine Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

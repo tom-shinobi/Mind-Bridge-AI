@@ -25,8 +25,13 @@ import { RotaryKnob } from '../components/hardware/RotaryKnob';
 import { StudyTimerWidget } from '../components/StudyTimerWidget';
 import { RefractiveLens } from '../components/RefractiveLens';
 import { SurrealPortalHero } from '../components/SurrealPortalHero';
-import { FloatingCloudVanHero } from '../components/editorial/FloatingCloudVanHero';
 import { SmileyBalloonSticker, PixelCursorSticker, ClayFlowerSticker } from '../components/editorial/AcidZineStickerPack';
+import { FloatingCloudVanHero } from '../components/editorial/FloatingCloudVanHero';
+import {
+  MotivationalPosterHero,
+  StudyPlannerZineBoard,
+  StudyMotivationStickyCard
+} from '../components/editorial/StudyMotivationQuotes';
 import { sound } from '../services/soundService';
 
 interface DashboardProps {
@@ -86,6 +91,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
           onNavigate('tests', { topic: criticalGap?.topic });
         }}
         ctaText="CHASE YOUR CURIOSITY // TAKE DIAGNOSTIC"
+      />
+
+      {/* 2.5 Bold Typographic Motivational Manifesto Poster (Image 2 Reference) */}
+      <MotivationalPosterHero
+        onExplore={() => {
+          sound.playClick();
+          const el = document.getElementById('study-planner-board-section');
+          el?.scrollIntoView({ behavior: 'smooth' });
+        }}
       />
 
       {/* ==========================================================================
@@ -472,6 +486,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="space-y-6">
           <StudyTimerWidget />
 
+          {/* Daily Motivational Sticky Notes (From Images 3 & 4) */}
+          <div className="space-y-3">
+            <StudyMotivationStickyCard
+              quoteItem={{
+                id: 'dash-sticky-1',
+                quote: "Don't watch the clock; do what it does. Keep going.",
+                noteNumber: 7,
+                highlightText: 'Time & Focus',
+                category: 'time',
+                source: 'planner',
+                themeColor: 'lime',
+                rotationClass: 'rotate-1'
+              }}
+              size="sm"
+            />
+            <StudyMotivationStickyCard
+              quoteItem={{
+                id: 'dash-sticky-2',
+                quote: "Today a Student, Tomorrow a Leader. Keep Studying, Keep Growing!",
+                category: 'vision',
+                source: 'planner',
+                themeColor: 'pink',
+                rotationClass: '-rotate-1'
+              }}
+              size="sm"
+            />
+          </div>
+
           <div className="apple-liquid-glass p-5 space-y-3.5 border border-white/20">
             <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
               <div className="flex items-center gap-2">
@@ -513,6 +555,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
+      </div>
+
+      {/* ==========================================================================
+          ILLUSTRATED STUDY PLANNER ZINE BOARD (Image 4 Reference)
+          ========================================================================== */}
+      <div id="study-planner-board-section">
+        <StudyPlannerZineBoard />
       </div>
 
       {/* ==========================================================================

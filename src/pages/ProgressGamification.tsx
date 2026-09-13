@@ -20,6 +20,7 @@ import {
 import type { StudentProfile, Achievement, SyllabusTopic } from '../types';
 import { sound } from '../services/soundService';
 import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
+import { StudyMotivationStickyCard } from '../components/editorial/StudyMotivationQuotes';
 
 interface ProgressGamificationProps {
   profile: StudentProfile;
@@ -360,6 +361,33 @@ export const ProgressGamification: React.FC<ProgressGamificationProps> = ({
             style={{ width: `${levelProgressPct}%` }}
           />
         </div>
+      </div>
+
+      {/* Motivation & Vision Strip (From Images 3 & 4) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <StudyMotivationStickyCard
+          quoteItem={{
+            id: 'prog-sticky-1',
+            quote: "YOU'RE NOT JUST STUDYING FOR GRADES — YOU'RE STUDYING FOR THE LIFE YOU WANT",
+            category: 'vision',
+            source: 'grid',
+            highlightText: 'THE LIFE YOU WANT',
+            themeColor: 'slate',
+            rotationClass: '-rotate-1'
+          }}
+          size="sm"
+        />
+        <StudyMotivationStickyCard
+          quoteItem={{
+            id: 'prog-sticky-2',
+            quote: 'Today a Student, Tomorrow a Leader. Keep Studying, Keep Growing!',
+            category: 'vision',
+            source: 'planner',
+            themeColor: 'lime',
+            rotationClass: 'rotate-1'
+          }}
+          size="sm"
+        />
       </div>
 
       {/* ==========================================================================

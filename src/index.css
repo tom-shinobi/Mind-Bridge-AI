@@ -2371,6 +2371,85 @@
   font-weight: 400;
 }
 
+/* 5. Continuous Study Motivation Marquee Animation */
+@keyframes studyMarquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: studyMarquee 38s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ==========================================================================
+   GLOBAL GLASS-TO-ZINE OVERRIDE FOR SURREALIST EDITORIAL THEME
+   Replaces iOS frosted glass with tactile Acid Zine paper notebook UI!
+   ========================================================================== */
+.theme-surrealist-editorial .apple-liquid-glass,
+.theme-surrealist-editorial .liquid-glass-card,
+.theme-surrealist-editorial .liquid-glass-block,
+.theme-surrealist-editorial .liquid-glass,
+.theme-surrealist-editorial .sea-glass-card {
+  background: #0B0E17 !important;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px) !important;
+  background-size: 20px 20px !important;
+  border: 2px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 4px 4px 0px #000000 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 1.25rem !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.theme-surrealist-editorial .apple-liquid-glass:hover,
+.theme-surrealist-editorial .liquid-glass-card:hover,
+.theme-surrealist-editorial .liquid-glass-block:hover,
+.theme-surrealist-editorial .sea-glass-card:hover {
+  border-color: rgba(226, 249, 82, 0.6) !important;
+  box-shadow: 6px 6px 0px #000000 !important;
+  transform: translateY(-2px);
+}
+
+.theme-surrealist-editorial .apple-liquid-glass::before,
+.theme-surrealist-editorial .liquid-glass-card::before,
+.theme-surrealist-editorial .apple-liquid-glass::after,
+.theme-surrealist-editorial .liquid-glass-card::after {
+  display: none !important;
+}
+
+.theme-surrealist-editorial .liquid-glass-input {
+  background: #06080E !important;
+  border: 2px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: none !important;
+}
+
+.theme-surrealist-editorial .liquid-glass-input:focus {
+  border-color: #E2F952 !important;
+  box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(226, 249, 82, 0.25) !important;
+}
+
+.theme-surrealist-editorial .liquid-glass-adaptive,
+.theme-surrealist-editorial .liquid-glass-purple {
+  background: #0E121E !important;
+  border: 2px solid rgba(226, 249, 82, 0.3) !important;
+  box-shadow: 4px 4px 0px #000000 !important;
+  backdrop-filter: none !important;
+}
+
+
 
 
 

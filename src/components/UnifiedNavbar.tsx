@@ -29,6 +29,7 @@ import {
 import type { StudentProfile, LearningGap, AISettings } from '../types';
 import { THEME_CONFIGS } from '../types';
 import { sound } from '../services/soundService';
+import { StudyMotivationModal } from './editorial/StudyMotivationQuotes';
 
 export interface NavItem {
   id: string;
@@ -73,7 +74,9 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const currentTheme = aiSettings.theme || 'dusk';
+  const [isMotivationModalOpen, setIsMotivationModalOpen] = useState(false);
+
+  const currentTheme = (aiSettings.theme && aiSettings.theme !== 'dusk') ? aiSettings.theme : 'surrealist_editorial';
   const activeThemeConfig = THEME_CONFIGS.find((c) => c.id === currentTheme) || THEME_CONFIGS[0];
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -235,7 +238,12 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
           1. TOP NAVIGATION BAR (Liquid Glass Island)
           ========================================================================= */}
       <header className="sticky top-2 z-40 w-full px-2.5 sm:px-4 md:px-6 pointer-events-none mb-3 pt-[max(0.25rem,env(safe-area-inset-top,0px))]">
-        <div className="pointer-events-auto apple-liquid-glass max-w-7xl mx-auto rounded-full px-3 sm:px-4 py-2 shadow-[0_16px_50px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.7)] border border-white/20 backdrop-blur-3xl flex items-center justify-between gap-2 sm:gap-3 select-none transition-all">
+        <div className={`pointer-events-auto max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center justify-between gap-2 sm:gap-3 select-none transition-all relative ${
+          currentTheme === 'surrealist_editorial'
+            ? 'bg-[#0B0F17]/95 border-2 border-[#E2F952]/40 shadow-[4px_4px_0px_#000000] rounded-2xl bg-notebook-grid-subtle'
+            : 'apple-liquid-glass rounded-full shadow-[0_16px_50px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.7)] border border-white/20 backdrop-blur-3xl'
+        }`}>
+          {currentTheme === 'surrealist_editorial' && <div className="masking-tape-corner-tr" />}
           
           {/* Brand Logo & Name */}
           <div
@@ -370,6 +378,24 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" />
               <span>Lvl {profile.level}</span>
             </div>
+
+            {/* Study Motivation Fuel Action Pill */}
+            <button
+              type="button"
+              onClick={() => {
+                sound.playClick();
+                setIsMotivationModalOpen(true);
+              }}
+              className={`px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium flex items-center gap-1 cursor-pointer transition-all touch-press ${
+                currentTheme === 'surrealist_editorial'
+                  ? 'bg-[#E2F952] text-black font-woodblock tracking-wider uppercase shadow-[2px_2px_0px_#000000] border border-black hover:scale-105'
+                  : 'bg-white/[0.06] hover:bg-white/[0.14] border border-white/15 text-white'
+              }`}
+              title="Open Study Motivation Board (Quotes & Planner)"
+            >
+              <Flame className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current animate-pulse" />
+              <span className="hidden sm:inline">FUEL</span>
+            </button>
 
             {/* Rebalance Workload Button (Desktop Large) */}
             <button
@@ -547,7 +573,11 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
           2. MOBILE FLOATING BOTTOM DOCK (iOS Dynamic Style — Adapts Like Butter)
           ========================================================================= */}
       <div className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom,0px))] inset-x-3 z-40 max-w-md mx-auto md:hidden pointer-events-auto">
-        <nav className="apple-liquid-glass rounded-full px-2 py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.5)] border border-white/20 backdrop-blur-3xl flex items-center justify-around select-none">
+        <nav className={`px-2 py-1.5 flex items-center justify-around select-none transition-all ${
+          currentTheme === 'surrealist_editorial'
+            ? 'bg-[#0B0F17]/95 border-2 border-[#E2F952]/40 shadow-[4px_4px_0px_#000000] rounded-2xl bg-notebook-grid-subtle'
+            : 'apple-liquid-glass rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.5)] border border-white/20 backdrop-blur-3xl'
+        }`}>
           
           {/* 1. Dashboard */}
           <button
@@ -637,8 +667,12 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
             className="absolute inset-0 bg-black/75 backdrop-blur-md transition-opacity"
           />
 
-          {/* Liquid Glass Bottom Sheet */}
-          <div className="relative z-10 w-full max-w-2xl mx-auto apple-liquid-glass rounded-t-[32px] sm:rounded-3xl border-t sm:border border-white/25 p-5 sm:p-6 pb-[max(2.5rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))] shadow-[0_-20px_60px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.7)] backdrop-blur-3xl max-h-[85dvh] overscroll-contain overflow-y-auto">
+          {/* Bottom Sheet: Acid Zine in surrealist_editorial, Apple Glass in other themes */}
+          <div className={`relative z-10 w-full max-w-2xl mx-auto rounded-t-[32px] sm:rounded-3xl p-5 sm:p-6 pb-[max(2.5rem,calc(env(safe-area-inset-bottom,0px)+1.5rem))] max-h-[85dvh] overscroll-contain overflow-y-auto ${
+            currentTheme === 'surrealist_editorial'
+              ? 'bg-[#0B0F17]/98 border-t-2 sm:border-2 border-[#E2F952]/40 shadow-[0_-20px_60px_rgba(0,0,0,0.9),4px_4px_0px_#000000] bg-notebook-grid'
+              : 'apple-liquid-glass border-t sm:border border-white/25 shadow-[0_-20px_60px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.7)] backdrop-blur-3xl'
+          }`}>
             
             {/* Top Drag Pill */}
             <div className="w-12 h-1.5 rounded-full bg-white/20 mx-auto mb-4" />
@@ -835,6 +869,12 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
           </div>
         </div>
       )}
+
+      {/* 4. Interactive Study Motivation Board Modal */}
+      <StudyMotivationModal
+        isOpen={isMotivationModalOpen}
+        onClose={() => setIsMotivationModalOpen(false)}
+      />
     </>
   );
 };

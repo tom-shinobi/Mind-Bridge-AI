@@ -12,6 +12,7 @@ import {
 import type { LearningGap } from '../types';
 import { sound } from '../services/soundService';
 import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
+import { StudyMotivationStickyCard } from '../components/editorial/StudyMotivationQuotes';
 
 interface LearningGapsProps {
   gaps: LearningGap[];
@@ -96,6 +97,33 @@ export const LearningGaps: React.FC<LearningGapsProps> = ({ gaps, onNavigate }) 
             Resolved: <strong className="text-emerald-400 font-bold">{gaps.filter(g => g.status === 'resolved').length}</strong>
           </span>
         </div>
+      </div>
+
+      {/* Gap Remediation Motivation Strip (From Images 3 & 4) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <StudyMotivationStickyCard
+          quoteItem={{
+            id: 'gap-sticky-1',
+            quote: 'Study. You still have a chance.',
+            category: 'resilience',
+            source: 'grid',
+            highlightText: 'You still have a chance',
+            themeColor: 'pink',
+            rotationClass: '-rotate-1'
+          }}
+          size="sm"
+        />
+        <StudyMotivationStickyCard
+          quoteItem={{
+            id: 'gap-sticky-2',
+            quote: 'do it for your future self',
+            category: 'future',
+            source: 'grid',
+            themeColor: 'lime',
+            rotationClass: 'rotate-1'
+          }}
+          size="sm"
+        />
       </div>
 
       {/* Main Two Column Grid: Weak Gaps vs Strong Mastered Topics */}

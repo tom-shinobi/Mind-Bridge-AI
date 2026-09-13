@@ -27,6 +27,10 @@ import { sound } from '../services/soundService';
 import { RotaryKnob } from '../components/hardware/RotaryKnob';
 import { FormattedContent } from '../components/FormattedContent';
 import { HorizonChairHero } from '../components/editorial/HorizonChairHero';
+import {
+  MotivationalPosterHero,
+  StudyMotivationStickyCard
+} from '../components/editorial/StudyMotivationQuotes';
 
 interface AITutorProps {
   initialTopic?: string;
@@ -770,6 +774,9 @@ export const AITutor: React.FC<AITutorProps> = ({
         actionText="ENGAGE DEEP SOCRATIC DIALOGUE"
       />
 
+      {/* 1.5 Bold Editorial Typographic Poster (Image 2) */}
+      <MotivationalPosterHero />
+
       {/* Top Header Card with Notebook Grid & Masking Tape */}
       <div id="socratic-chat-dock" className="relative z-10 apple-liquid-glass p-5 overflow-hidden border-2 border-white/20 shadow-2xl">
         <div className="masking-tape-corner-tr z-20" />
@@ -967,6 +974,46 @@ export const AITutor: React.FC<AITutorProps> = ({
         <div className="p-3 sm:p-4 border-t border-white/[0.08] bg-black/40 backdrop-blur-xl flex-shrink-0 space-y-2.5">
           {renderBottomControls()}
         </div>
+      </div>
+
+      {/* Socratic Study Sticky Note Inspiration Grid (Images 3 & 4) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+        <StudyMotivationStickyCard
+          quoteItem={{
+            id: 'tutor-sticky-1',
+            quote: "It's not about being the smartest. It's about NOT GIVING UP.",
+            category: 'grit',
+            source: 'grid',
+            highlightText: 'NOT GIVING UP',
+            themeColor: 'amber',
+            rotationClass: 'rotate-1'
+          }}
+          size="sm"
+        />
+        <StudyMotivationStickyCard
+          quoteItem={{
+            id: 'tutor-sticky-2',
+            quote: "studying doesn't suck as much as failing.",
+            category: 'grit',
+            source: 'grid',
+            themeColor: 'pink',
+            rotationClass: '-rotate-1'
+          }}
+          size="sm"
+        />
+        <StudyMotivationStickyCard
+          quoteItem={{
+            id: 'tutor-sticky-3',
+            quote: "Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle.",
+            noteNumber: 1,
+            highlightText: 'Believe in yourself',
+            category: 'resilience',
+            source: 'planner',
+            themeColor: 'lime',
+            rotationClass: 'rotate-1.5'
+          }}
+          size="sm"
+        />
       </div>
 
       {renderSettingsModal()}

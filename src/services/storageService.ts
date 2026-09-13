@@ -154,9 +154,9 @@ class StorageService {
       this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
 
-    // Default atmosphere theme to dusk if unset
-    if (!loaded.theme) {
-      loaded.theme = 'dusk';
+    // Default atmosphere theme to surrealist_editorial (migrate legacy dusk if present)
+    if (!loaded.theme || loaded.theme === 'dusk') {
+      loaded.theme = 'surrealist_editorial';
       this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
     return loaded;

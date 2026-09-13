@@ -100,7 +100,7 @@ const THEME_PARTICLE_COLORS: Record<AtmosphereTheme, string[]> = {
   ]
 };
 
-export const ParticleBackground: React.FC<ParticleProps> = ({ theme = 'dusk' }) => {
+export const ParticleBackground: React.FC<ParticleProps> = ({ theme = 'surrealist_editorial' }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {

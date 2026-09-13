@@ -27,6 +27,7 @@ import { DailyWorkloadModal } from './components/DailyWorkloadModal';
 import { AuthPortal } from './components/auth/AuthPortal';
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
 import { SyllabusUploadView } from './components/onboarding/SyllabusUploadView';
+import { StudyMotivationTicker, StudyMotivationModal } from './components/editorial/StudyMotivationQuotes';
 
 // Pages
 import { Dashboard } from './pages/Dashboard';
@@ -84,6 +85,7 @@ export function App() {
     isInitialDemo ? storageService.getDemoAuditLog() : storageService.getAuditLog()
   );
   const [aiSettings, setAISettings] = useState<AISettings>(() => storageService.getAISettings());
+  const [isMotivationBoardOpen, setIsMotivationBoardOpen] = useState<boolean>(false);
 
 
 
@@ -466,7 +468,7 @@ export function App() {
     );
   }
 
-  const currentTheme: AtmosphereTheme = aiSettings.theme || 'surrealist_editorial';
+  const currentTheme: AtmosphereTheme = (aiSettings.theme && aiSettings.theme !== 'dusk') ? aiSettings.theme : 'surrealist_editorial';
 
   // Shared Dynamic Atmospheric Background Component for Auth, Onboarding, Upload & Workspace
   const renderAtmosphereBackground = () => {
@@ -475,10 +477,29 @@ export function App() {
         case 'surrealist_editorial':
           return (
             <>
-              <div className="surreal-chromatic-mesh absolute inset-0 opacity-90 pointer-events-none" />
-              <div className="surreal-orb-sunburst -top-[120px] left-[15%] opacity-85" />
-              <div className="surreal-orb-foliage top-[25%] -right-[80px] opacity-80" />
-              <div className="surreal-orb-rose -bottom-[100px] left-[10%] opacity-75" />
+              {/* Architectural Blueprint & Notebook Graph Grid across the entire background */}
+              <div className="absolute inset-0 bg-notebook-grid opacity-75 pointer-events-none" />
+              <div className="absolute inset-0 bg-notebook-grid-subtle opacity-45 pointer-events-none" />
+
+              {/* Dynamic Animated Airbrush Aerosol Spray Paint Halos (Cyan, Magenta, Acid Lime, Solar Orange) */}
+              <div className="absolute -top-24 -left-24 w-[540px] h-[540px] airbrush-spray-cyan opacity-50 animate-spray-pulse pointer-events-none" />
+              <div className="absolute top-[18%] -right-28 w-[640px] h-[640px] airbrush-spray-magenta opacity-45 animate-spray-pulse pointer-events-none" style={{ animationDelay: '1.8s' }} />
+              <div className="absolute -bottom-28 left-[20%] w-[580px] h-[580px] airbrush-spray-lime opacity-45 animate-spray-pulse pointer-events-none" style={{ animationDelay: '3.2s' }} />
+              <div className="absolute top-[52%] -left-20 w-[460px] h-[460px] airbrush-spray-orange opacity-35 animate-spray-pulse pointer-events-none" style={{ animationDelay: '2.5s' }} />
+
+              {/* Surreal Chromatic Mesh */}
+              <div className="surreal-chromatic-mesh absolute inset-0 opacity-80 pointer-events-none" />
+
+              {/* Kinetic Drifting Star Motifs */}
+              <div className="absolute top-28 right-[12%] text-2xl text-[#E2F952]/40 animate-float-bobbing pointer-events-none select-none">
+                ✦
+              </div>
+              <div className="absolute top-[40%] left-[8%] text-xl text-[#FF85A1]/40 animate-float-reverse pointer-events-none select-none">
+                ★
+              </div>
+              <div className="absolute bottom-[22%] right-[18%] text-3xl text-[#38BDF8]/35 animate-float-bobbing pointer-events-none select-none">
+                ✦
+              </div>
             </>
           );
         case 'nebula':
@@ -572,7 +593,6 @@ export function App() {
               <div className="synthwave-orb-coral top-[46%] left-[25%] opacity-70" />
             </>
           );
-        case 'dusk':
         default:
           return (
             <>
@@ -593,11 +613,15 @@ export function App() {
         {renderThemeOrbs()}
 
         {/* Atmospheric Contrast Vignette (Preserves Deep Contrast for Razor-Sharp Text while letting bright colors glow) */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(2,4,9,0.30)_75%,rgba(2,4,9,0.72)_100%)] pointer-events-none" />
+        <div className={`absolute inset-0 pointer-events-none ${
+          currentTheme === 'surrealist_editorial'
+            ? 'bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(9,12,19,0.30)_80%,rgba(9,12,19,0.65)_100%)]'
+            : 'bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(2,4,9,0.30)_75%,rgba(2,4,9,0.72)_100%)]'
+        }`} />
 
         {/* Authentic Vintage Paper Grain Texture for Surrealist Editorial Theme */}
         {currentTheme === 'surrealist_editorial' && (
-          <div className="editorial-paper-grain absolute inset-0 pointer-events-none z-10 opacity-60" />
+          <div className="editorial-paper-grain absolute inset-0 pointer-events-none z-10 opacity-55" />
         )}
 
         {/* Luminous Interactive Dynamic Particles with Matching Theme Palette Floating On Top */}
@@ -609,7 +633,7 @@ export function App() {
   // 2. Unauthenticated and Not in Demo Mode -> Render Real Auth Portal
   if (!isDemoMode && !authUser) {
     return (
-      <div className="min-h-screen bg-[#020409] text-[#F5F5F7] relative flex flex-col font-body selection:bg-purple-500/30 selection:text-white">
+      <div className={`min-h-screen text-[#F5F5F7] relative flex flex-col font-body selection:bg-[#E2F952] selection:text-black ${currentTheme === 'surrealist_editorial' ? 'bg-[#090C13] theme-surrealist-editorial' : 'bg-[#020409]'}`}>
         {renderAtmosphereBackground()}
         <AuthPortal
           theme={currentTheme}
@@ -624,7 +648,7 @@ export function App() {
   // 3. Authenticated New User -> Render Conversational Onboarding Flow
   if (authUser && !profile.onboardingCompleted) {
     return (
-      <div className="min-h-screen bg-[#020409] text-[#F5F5F7] relative flex flex-col font-body selection:bg-purple-500/30 selection:text-white">
+      <div className={`min-h-screen text-[#F5F5F7] relative flex flex-col font-body selection:bg-[#E2F952] selection:text-black ${currentTheme === 'surrealist_editorial' ? 'bg-[#090C13] theme-surrealist-editorial' : 'bg-[#020409]'}`}>
         {renderAtmosphereBackground()}
         <div className="relative z-10 flex-1 flex flex-col w-full">
           <OnboardingFlow
@@ -650,7 +674,7 @@ export function App() {
   // 4. Authenticated User without Syllabus -> Render Document Upload & Extraction View
   if (authUser && needsSyllabusUpload) {
     return (
-      <div className="min-h-screen bg-[#020409] text-[#F5F5F7] relative flex flex-col font-body selection:bg-purple-500/30 selection:text-white">
+      <div className={`min-h-screen text-[#F5F5F7] relative flex flex-col font-body selection:bg-[#E2F952] selection:text-black ${currentTheme === 'surrealist_editorial' ? 'bg-[#090C13] theme-surrealist-editorial' : 'bg-[#020409]'}`}>
         {renderAtmosphereBackground()}
         <div className="relative z-10 flex-1 flex flex-col p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
           <SyllabusUploadView
@@ -682,7 +706,7 @@ export function App() {
 
   // 5. Main Dashboard & Workspace (Preserves all 10 pages and current layout)
   return (
-    <div className="min-h-screen bg-[#020409] text-[#F5F5F7] flex flex-col relative selection:bg-white/20 selection:text-white font-body">
+    <div className={`min-h-screen text-[#F5F5F7] flex flex-col relative selection:bg-[#E2F952] selection:text-black font-body ${currentTheme === 'surrealist_editorial' ? 'bg-[#090C13] theme-surrealist-editorial' : 'bg-[#020409]'}`}>
       
       {/* Dynamic Moving Particles & Glowing Chromatic Canvas (Sunlight Dusk vs Cosmic Nebula) */}
       {renderAtmosphereBackground()}
@@ -714,6 +738,10 @@ export function App() {
 
       {/* Symmetrical Centered Viewport Container (Phone-Friendly Spacing) */}
       <div className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10 pb-[calc(env(safe-area-inset-bottom,0px)+6.5rem)] md:pb-16">
+        
+        {/* Continuous Study Motivation Fuel Marquee Ticker */}
+        <StudyMotivationTicker onOpenBoard={() => setIsMotivationBoardOpen(true)} />
+
         <main className="w-full">
           {activeTab === 'dashboard' && (
             <Dashboard
@@ -826,6 +854,12 @@ export function App() {
         isOpen={isWorkloadModalOpen}
         onClose={() => setIsWorkloadModalOpen(false)}
         onScheduleAdapted={handleScheduleAdapted}
+      />
+
+      {/* Interactive Study Motivation Board Modal */}
+      <StudyMotivationModal
+        isOpen={isMotivationBoardOpen}
+        onClose={() => setIsMotivationBoardOpen(false)}
       />
 
     </div>

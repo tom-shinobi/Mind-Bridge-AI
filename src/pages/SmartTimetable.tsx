@@ -11,6 +11,7 @@ import {
 import type { TimetableBlock } from '../types';
 import { sound } from '../services/soundService';
 import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
+import { StudyMotivationStickyCard } from '../components/editorial/StudyMotivationQuotes';
 
 interface SmartTimetableProps {
   timetable: TimetableBlock[];
@@ -226,6 +227,48 @@ export const SmartTimetable: React.FC<SmartTimetableProps> = ({
         )}
       </div>
 
+      {/* Motivational Study Fuel Grid (From Images 3 & 4) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+        <StudyMotivationStickyCard
+          quoteItem={{
+            id: 'time-sticky-1',
+            noteNumber: 7,
+            highlightText: 'Time',
+            quote: "Don't watch the clock; do what it does. Keep going.",
+            category: 'time',
+            source: 'planner',
+            themeColor: 'cyan',
+            rotationClass: '-rotate-1'
+          }}
+          size="md"
+        />
+        <StudyMotivationStickyCard
+          quoteItem={{
+            id: 'time-sticky-2',
+            noteNumber: 3,
+            highlightText: 'Consistency',
+            quote: 'Success is the sum of small efforts repeated day in and day out.',
+            category: 'focus',
+            source: 'planner',
+            themeColor: 'lime',
+            rotationClass: 'rotate-1'
+          }}
+          size="md"
+        />
+      </div>
+
+      {/* Bottom Golden Rule Banner */}
+      <div className="relative p-4 rounded-2xl bg-[#E2F952] text-black border-2 border-black shadow-[4px_4px_0px_#000000] flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left rotate-[-0.5deg]">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xl">⚡</span>
+          <p className="text-sm sm:text-base font-woodblock tracking-wider uppercase leading-none">
+            "DON'T STOP WHEN YOU ARE TIRED, STOP WHEN YOU ARE DONE."
+          </p>
+        </div>
+        <span className="text-[10px] font-mono uppercase tracking-widest font-bold px-2.5 py-1 bg-black text-[#E2F952] rounded">
+          GOLDEN TIMETABLE RULE
+        </span>
+      </div>
     </div>
   );
 };
