@@ -12,11 +12,13 @@ import {
   ListTodo,
   CalendarDays,
   Zap,
-  Bot
+  Bot,
+  Bell,
+  BellOff
 } from 'lucide-react';
 import { calendarService } from '../services/calendarService';
 import { sound } from '../services/soundService';
-import type { CalendarEvent, CalendarTask, EventType, StudentProfile } from '../types';
+import type { CalendarEvent, CalendarTask, EventType, StudentProfile, ReminderItem } from '../types';
 import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
 
 interface AcademicCalendarProps {
@@ -30,10 +32,21 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
 }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [tasks, setTasks] = useState<CalendarTask[]>([]);
+  const [reminders, setReminders] = useState<ReminderItem[]>([]);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => calendarService.isNotificationsEnabled());
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
+
+  // New Reminder State
+  const [isAddReminderOpen, setIsAddReminderOpen] = useState(false);
+  const [remTitle, setRemTitle] = useState('');
+  const [remSubject, setRemSubject] = useState('Database Systems');
+  const [remDateTime, setRemDateTime] = useState(
+    new Date(Date.now() + 3600 * 4 * 1000).toISOString().slice(0, 16)
+  );
+  const [remPriority, setRemPriority] = useState<'urgent' | 'high' | 'medium' | 'low'>('high');
 
   // New Event Modal State
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
@@ -69,6 +82,7 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
   const refreshData = () => {
     setEvents(calendarService.getEvents());
     setTasks(calendarService.getTasks());
+    setReminders(calendarService.getReminders());
   };
 
   // ==========================================
@@ -149,6 +163,52 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
   };
 
   // ==========================================
+  // REMINDER & NOTIFICATION ACTIONS
+  // ==========================================
+  const handleToggleNotifications = async () => {
+    sound.playClick();
+    const next = !notificationsEnabled;
+    setNotificationsEnabled(next);
+    calendarService.setNotificationsEnabled(next);
+    if (next && 'Notification' in window && Notification.permission !== 'granted') {
+      try {
+        await Notification.requestPermission();
+      } catch {}
+    }
+    setSyncNotice(next ? '🔔 Audio & Browser Notifications Enabled for Reminders' : '🔕 Reminder Notifications Muted');
+    setTimeout(() => setSyncNotice(null), 5000);
+  };
+
+  const handleCreateReminder = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!remTitle.trim()) return;
+    sound.playLevelUp();
+    calendarService.addReminder({
+      userId: profile.id,
+      title: remTitle.trim(),
+      subject: remSubject.trim() || undefined,
+      dueDateTime: remDateTime,
+      priority: remPriority,
+      notificationEnabled: notificationsEnabled
+    });
+    setIsAddReminderOpen(false);
+    setRemTitle('');
+    refreshData();
+  };
+
+  const handleToggleReminder = (id: string) => {
+    sound.playSuccess();
+    calendarService.toggleReminder(id);
+    refreshData();
+  };
+
+  const handleDeleteReminder = (id: string) => {
+    sound.playClick();
+    calendarService.deleteReminder(id);
+    refreshData();
+  };
+
+  // ==========================================
   // AI SYNC
   // ==========================================
   const handleSyncWithAI = () => {
@@ -183,10 +243,15 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  // Filter events for selected day
+  // Filter events and reminders for selected day
   const selectedDayEvents = events.filter((e) => {
     const eventDay = e.startDate.split('T')[0];
     return eventDay === selectedDateStr;
+  });
+
+  const selectedDayReminders = reminders.filter((r) => {
+    const remDay = r.dueDateTime.split('T')[0];
+    return remDay === selectedDateStr;
   });
 
   const pendingTasks = tasks.filter((t) => !t.completed);
@@ -214,13 +279,37 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
             <span className="text-lime-400 font-bold uppercase">Socratic AI Engine Online</span>
           </div>
 
-          <div className="flex items-center gap-3 relative z-10">
+          <div className="flex items-center gap-2.5 relative z-10 flex-wrap">
+            <button
+              onClick={handleToggleNotifications}
+              className={`py-2 px-3.5 rounded-xl text-xs flex items-center gap-2 font-mono transition-all cursor-pointer ${
+                notificationsEnabled
+                  ? 'bg-amber-500/20 border border-amber-400 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)] font-bold'
+                  : 'btn-apple-glass text-slate-400 hover:text-white'
+              }`}
+              title="Toggle notifications on or off for study reminders"
+            >
+              {notificationsEnabled ? <Bell className="w-4 h-4 text-amber-400 animate-pulse" /> : <BellOff className="w-4 h-4" />}
+              <span>{notificationsEnabled ? 'Alerts: ON 🔔' : 'Alerts: OFF'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                sound.playClick();
+                setIsAddReminderOpen(true);
+              }}
+              className="btn-apple-glass py-2 px-3.5 text-xs flex items-center gap-1.5 font-mono text-purple-300 hover:text-white border-purple-500/30 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 text-purple-400" />
+              <span>Reminder</span>
+            </button>
+
             <button
               onClick={handleSyncWithAI}
-              className="editorial-btn-lime py-2 px-4 text-xs flex items-center gap-2 font-mono uppercase tracking-wider"
+              className="editorial-btn-lime py-2 px-4 text-xs flex items-center gap-2 font-mono uppercase tracking-wider cursor-pointer"
             >
               <Bot className="w-4 h-4 text-black" />
-              <span>Sync with Socratic AI</span>
+              <span>Sync with AI</span>
             </button>
 
             <button
@@ -228,7 +317,7 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                 sound.playClick();
                 setIsAddEventOpen(true);
               }}
-              className="btn-apple-glass py-2 px-4 text-xs flex items-center gap-2 font-mono text-white"
+              className="btn-apple-glass py-2 px-4 text-xs flex items-center gap-2 font-mono text-white cursor-pointer"
             >
               <Plus className="w-4 h-4 text-lime-400" />
               <span>Add Event</span>
@@ -245,7 +334,7 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
         )}
 
         {/* Stats Metrics Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <div className="zine-card p-3.5 rounded-2xl relative overflow-hidden">
             <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
             <span className="text-[10px] text-slate-400 uppercase font-mono font-bold">Upcoming Exams</span>
@@ -255,14 +344,14 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
           </div>
           <div className="zine-card p-3.5 rounded-2xl relative overflow-hidden">
             <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
-            <span className="text-[10px] text-slate-400 uppercase font-mono font-bold">Assignments & Deadlines</span>
+            <span className="text-[10px] text-slate-400 uppercase font-mono font-bold">Deadlines</span>
             <p className="text-2xl font-black font-mono text-amber-400 mt-1">
               {events.filter((e) => e.eventType === 'deadline').length}
             </p>
           </div>
           <div className="zine-card p-3.5 rounded-2xl relative overflow-hidden">
             <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
-            <span className="text-[10px] text-slate-400 uppercase font-mono font-bold">Squad Sessions</span>
+            <span className="text-[10px] text-slate-400 uppercase font-mono font-bold">Study Squads</span>
             <p className="text-2xl font-black font-mono text-purple-400 mt-1">
               {events.filter((e) => e.eventType === 'study_squad').length}
             </p>
@@ -272,6 +361,13 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
             <span className="text-[10px] text-slate-400 uppercase font-mono font-bold">Pending Tasks</span>
             <p className="text-2xl font-black font-mono text-lime-400 mt-1">
               {pendingTasks.length} left
+            </p>
+          </div>
+          <div className="zine-card p-3.5 rounded-2xl relative overflow-hidden">
+            <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none opacity-15" />
+            <span className="text-[10px] text-slate-400 uppercase font-mono font-bold">Active Reminders</span>
+            <p className="text-2xl font-black font-mono text-cyan-400 mt-1">
+              {reminders.filter((r) => !r.completed).length} active
             </p>
           </div>
         </div>
@@ -346,9 +442,12 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                 const isToday =
                   new Date().toISOString().split('T')[0] === dateKey;
 
-                // Find events for this day
+                // Find events and reminders for this day
                 const dayEvents = events.filter(
                   (e) => e.startDate.split('T')[0] === dateKey
+                );
+                const dayReminders = reminders.filter(
+                  (r) => r.dueDateTime.split('T')[0] === dateKey && !r.completed
                 );
 
                 return (
@@ -358,7 +457,7 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                       sound.playClick();
                       setSelectedDateStr(dateKey);
                     }}
-                    className={`h-20 sm:h-24 p-1.5 sm:p-2 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+                    className={`h-20 sm:h-24 p-1.5 sm:p-2 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between relative ${
                       isSelected
                         ? 'bg-indigo-950/40 border-indigo-500/80 shadow-md shadow-indigo-500/20'
                         : isToday
@@ -378,11 +477,19 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                       >
                         {dayNum}
                       </span>
-                      {dayEvents.length > 0 && (
-                        <span className="text-[9px] font-mono px-1 rounded bg-slate-800 text-slate-400">
-                          {dayEvents.length}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-1">
+                        {dayReminders.length > 0 && (
+                          <span
+                            title={`${dayReminders.length} reminder(s)`}
+                            className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse ring-2 ring-cyan-500/30"
+                          />
+                        )}
+                        {dayEvents.length > 0 && (
+                          <span className="text-[9px] font-mono px-1 rounded bg-slate-800 text-slate-400">
+                            {dayEvents.length}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Mini event tags */}
@@ -447,20 +554,75 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
               </span>
             </div>
 
-            {selectedDayEvents.length === 0 ? (
+            {selectedDayEvents.length === 0 && selectedDayReminders.length === 0 ? (
               <div className="p-8 text-center rounded-2xl bg-slate-950/40 border border-slate-800/80">
                 <p className="text-xs text-slate-400">
-                  No academic events scheduled for this day.
+                  No academic events or reminders scheduled for this day.
                 </p>
-                <button
-                  onClick={() => setIsAddEventOpen(true)}
-                  className="mt-2 text-xs text-indigo-400 hover:underline inline-flex items-center gap-1"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Add an event
-                </button>
+                <div className="mt-3 flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => setIsAddEventOpen(true)}
+                    className="text-xs text-indigo-400 hover:underline inline-flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add an event
+                  </button>
+                  <span className="text-slate-600">•</span>
+                  <button
+                    onClick={() => setIsAddReminderOpen(true)}
+                    className="text-xs text-purple-400 hover:underline inline-flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add a reminder
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="space-y-3">
+                {/* Day Reminders */}
+                {selectedDayReminders.map((rem) => (
+                  <div
+                    key={rem.id}
+                    className="p-3.5 rounded-2xl bg-cyan-950/20 border border-cyan-500/30 flex items-start justify-between gap-4"
+                  >
+                    <div className="flex items-start gap-3">
+                      <button
+                        onClick={() => handleToggleReminder(rem.id)}
+                        className="mt-0.5 text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                      >
+                        {rem.completed ? <CheckSquare className="w-4 h-4 text-emerald-400" /> : <Square className="w-4 h-4" />}
+                      </button>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className={`text-xs sm:text-sm font-bold ${rem.completed ? 'line-through text-slate-500' : 'text-cyan-200'}`}>
+                            {rem.title}
+                          </h4>
+                          <span
+                            className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase ${
+                              rem.priority === 'urgent'
+                                ? 'bg-rose-500/20 text-rose-300'
+                                : rem.priority === 'high'
+                                ? 'bg-amber-500/20 text-amber-300'
+                                : 'bg-cyan-500/20 text-cyan-300'
+                            }`}
+                          >
+                            {rem.priority}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 font-mono mt-0.5">
+                          {rem.subject} • Due {new Date(rem.dueDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {rem.notificationEnabled && <span className="ml-2 text-amber-400">🔔 Alert active</span>}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteReminder(rem.id)}
+                      className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+
+                {/* Day Events */}
                 {selectedDayEvents.map((evt) => (
                   <div
                     key={evt.id}
@@ -704,7 +866,110 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
             )}
           </div>
 
-          {/* Ask AI Tutor to Schedule Revision Card */}
+          {/* STUDY REMINDERS CARD */}
+            <div className="zine-card p-6 rounded-3xl relative overflow-hidden space-y-4">
+              <div className="masking-tape-corner-tr z-10" />
+              <div className="bg-notebook-grid-subtle absolute inset-0 pointer-events-none z-0 opacity-20" />
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-cyan-400" />
+                  <h3 className="text-sm font-bold text-white font-mono uppercase">
+                    Study Reminders & Alerts
+                  </h3>
+                </div>
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setIsAddReminderOpen(true);
+                  }}
+                  className="text-xs px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 flex items-center gap-1 cursor-pointer font-mono font-bold uppercase tracking-wider"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Reminder</span>
+                </button>
+              </div>
+
+              {/* Notification Status Banner */}
+              <div className="p-3 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between text-xs font-mono">
+                <span className="text-slate-400">Master Alert System</span>
+                <span className={`px-2 py-0.5 rounded-full font-bold uppercase text-[10px] ${notificationsEnabled ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-slate-800 text-slate-400'}`}>
+                  {notificationsEnabled ? '🔔 Chime & Desktop ON' : '🔕 Muted'}
+                </span>
+              </div>
+
+              {/* Reminders List */}
+              <div className="space-y-2 max-h-[320px] overflow-y-auto">
+                {reminders.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-slate-500">
+                    No active study reminders. Click "+ Reminder" to set one!
+                  </div>
+                ) : (
+                  reminders.map((rem) => (
+                    <div
+                      key={rem.id}
+                      className={`p-3.5 rounded-2xl border transition-all flex items-start justify-between gap-3 group ${
+                        rem.completed
+                          ? 'bg-slate-950/30 border-slate-900 opacity-60'
+                          : 'bg-slate-950/60 border-slate-800/80 hover:border-cyan-500/40'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <button
+                          onClick={() => handleToggleReminder(rem.id)}
+                          className="mt-0.5 text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                        >
+                          {rem.completed ? (
+                            <CheckSquare className="w-4 h-4 text-emerald-400" />
+                          ) : (
+                            <Square className="w-4 h-4" />
+                          )}
+                        </button>
+                        <div>
+                          <p
+                            className={`text-xs font-semibold leading-tight ${
+                              rem.completed ? 'line-through text-slate-500' : 'text-white'
+                            }`}
+                          >
+                            {rem.title}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                            <span
+                              className={`text-[9px] font-mono px-1.5 py-0.2 rounded uppercase ${
+                                rem.priority === 'urgent'
+                                  ? 'bg-rose-500/20 text-rose-300'
+                                  : rem.priority === 'high'
+                                  ? 'bg-amber-500/20 text-amber-300'
+                                  : 'bg-cyan-500/20 text-cyan-300'
+                              }`}
+                            >
+                              {rem.priority}
+                            </span>
+                            {rem.subject && (
+                              <span className="text-[10px] text-slate-400">{rem.subject}</span>
+                            )}
+                            <span className="text-[10px] text-slate-500 font-mono">
+                              Due: {new Date(rem.dueDateTime).toLocaleDateString([], { month: 'short', day: 'numeric' })} {new Date(rem.dueDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            {rem.notificationEnabled && notificationsEnabled && (
+                              <Bell className="w-3 h-3 text-amber-400 inline" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleDeleteReminder(rem.id)}
+                        className="p-1 rounded text-slate-500 hover:text-rose-400 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Ask AI Tutor to Schedule Revision Card */}
           <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-950/40 to-purple-950/40 border border-indigo-500/20 shadow-xl space-y-3">
             <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
               <Zap className="w-4 h-4 text-amber-400" />
@@ -838,6 +1103,101 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                   className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-indigo-500/25"
                 >
                   Save Academic Event
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Reminder Modal */}
+      {isAddReminderOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-md bg-slate-900 border border-cyan-500/30 rounded-3xl p-6 space-y-4 shadow-2xl relative">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Bell className="w-4 h-4 text-cyan-400" />
+                Add Study Reminder
+              </h3>
+              <button
+                onClick={() => setIsAddReminderOpen(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateReminder} className="space-y-3.5 text-xs font-mono">
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">Reminder Title</label>
+                <input
+                  type="text"
+                  required
+                  value={remTitle}
+                  onChange={(e) => setRemTitle(e.target.value)}
+                  placeholder="e.g. Master B+ Tree hoists before quiz..."
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">Subject</label>
+                  <input
+                    type="text"
+                    value={remSubject}
+                    onChange={(e) => setRemSubject(e.target.value)}
+                    placeholder="e.g. DBMS"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">Priority</label>
+                  <select
+                    value={remPriority}
+                    onChange={(e) => setRemPriority(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-cyan-400"
+                  >
+                    <option value="urgent">Urgent</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">Due Date & Time</label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={remDateTime}
+                  onChange={(e) => setRemDateTime(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                <span className="text-slate-300 text-xs">Audio Chime & Browser Notification</span>
+                <span className="text-[10px] font-bold text-amber-400">
+                  {notificationsEnabled ? '🔔 ACTIVE' : '🔕 MUTED'}
+                </span>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsAddReminderOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold shadow-lg shadow-cyan-500/25"
+                >
+                  Set Reminder
                 </button>
               </div>
             </form>

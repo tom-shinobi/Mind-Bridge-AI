@@ -24,7 +24,8 @@ import {
   ChevronRight,
   X,
   Users,
-  CalendarDays
+  CalendarDays,
+  BookMarked
 } from 'lucide-react';
 import type { StudentProfile, LearningGap, AISettings } from '../types';
 import { THEME_CONFIGS } from '../types';
@@ -130,6 +131,14 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       description: 'Curriculum & Modules',
       icon: BookOpen,
       gradient: 'from-emerald-500/30 to-teal-500/20'
+    },
+    {
+      id: 'dreamnotes',
+      label: 'DreamNotes',
+      shortLabel: 'Notes',
+      description: 'Zine Notes, Videos & AI Memory',
+      icon: BookMarked,
+      gradient: 'from-pink-500/30 to-purple-500/20'
     },
     {
       id: 'timetable',

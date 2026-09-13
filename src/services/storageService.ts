@@ -39,6 +39,67 @@ const STORAGE_KEYS = {
 };
 
 class StorageService {
+  public setCookie(name: string, value: string, days = 365): void {
+    if (typeof document === 'undefined') return;
+    try {
+      const date = new Date();
+      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+      const expires = '; expires=' + date.toUTCString();
+      document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}${expires}; path=/; SameSite=Lax`;
+    } catch (e) {
+      console.warn('Could not set cookie:', e);
+    }
+  }
+
+  public getCookie(name: string): string | null {
+    if (typeof document === 'undefined') return null;
+    try {
+      const nameEQ = encodeURIComponent(name) + '=';
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  public removeCookie(name: string): void {
+    if (typeof document === 'undefined') return;
+    try {
+      document.cookie = `${encodeURIComponent(name)}=; Max-Age=-99999999; path=/; SameSite=Lax`;
+    } catch {}
+  }
+
+  public setOnboardingCompleted(userIdOrEmail: string): void {
+    if (!userIdOrEmail) return;
+    const clean = userIdOrEmail.trim().toLowerCase();
+    try {
+      localStorage.setItem(`mba_onboarded_${clean}`, 'true');
+      this.setCookie(`mba_onboarded_${clean}`, 'true');
+      localStorage.setItem('mba_has_completed_onboarding', 'true');
+      this.setCookie('mba_has_completed_onboarding', 'true');
+    } catch {}
+  }
+
+  public isOnboardingCompleted(userId?: string, email?: string): boolean {
+    try {
+      if (userId && (localStorage.getItem(`mba_onboarded_${userId.trim().toLowerCase()}`) === 'true' || this.getCookie(`mba_onboarded_${userId.trim().toLowerCase()}`) === 'true')) {
+        return true;
+      }
+      if (email && (localStorage.getItem(`mba_onboarded_${email.trim().toLowerCase()}`) === 'true' || this.getCookie(`mba_onboarded_${email.trim().toLowerCase()}`) === 'true')) {
+        return true;
+      }
+      if (localStorage.getItem('mba_has_completed_onboarding') === 'true' || this.getCookie('mba_has_completed_onboarding') === 'true') {
+        return true;
+      }
+    } catch {}
+    return false;
+  }
+
   private load<T>(key: string, fallback: T): T {
     try {
       const item = localStorage.getItem(key);
@@ -57,10 +118,19 @@ class StorageService {
   }
 
   public getProfile(): StudentProfile {
-    return this.load<StudentProfile>(STORAGE_KEYS.PROFILE, initialStudentProfile);
+    const profile = this.load<StudentProfile>(STORAGE_KEYS.PROFILE, initialStudentProfile);
+    if (!profile.onboardingCompleted && this.isOnboardingCompleted(profile.id, profile.email)) {
+      profile.onboardingCompleted = true;
+      profile.onboardingStep = 12;
+    }
+    return profile;
   }
 
   public saveProfile(profile: StudentProfile): void {
+    if (profile.onboardingCompleted) {
+      this.setOnboardingCompleted(profile.id);
+      if (profile.email) this.setOnboardingCompleted(profile.email);
+    }
     this.save(STORAGE_KEYS.PROFILE, profile);
   }
 
@@ -139,18 +209,23 @@ class StorageService {
   public getAISettings(): AISettings {
     const loaded = this.load<AISettings>(STORAGE_KEYS.AI_SETTINGS, initialAISettings);
     
-    // Prioritize Gemini / OpenRouter environment key or default Google AI Studio key
-    const envKey = (import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || 'AIzaSyC_7GwAKor3ZIFj9uvq1trZHYcHctOiQcU').trim();
-    if (envKey) {
-      if (!loaded.openRouterApiKey || loaded.openRouterApiKey.startsWith('sk-or') || loaded.openRouterApiKey !== envKey) {
-        loaded.openRouterApiKey = envKey;
-        this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
-      }
+    // Prioritize Gemini / OpenRouter environment key
+    const envKey = (import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
+    const isLeakedKey = (k?: string) => k === 'AIzaSyC_7GwAKor3ZIFj9uvq1trZHYcHctOiQcU';
+
+    if (isLeakedKey(loaded.openRouterApiKey)) {
+      loaded.openRouterApiKey = '';
+      this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
 
-    // Default model to gemini-2.5-flash
-    if (!loaded.model || loaded.model.includes('liquid') || loaded.model.includes('gemini-2.0') || loaded.model === 'default') {
-      loaded.model = 'gemini-2.5-flash';
+    if (envKey && !isLeakedKey(envKey) && !loaded.openRouterApiKey) {
+      loaded.openRouterApiKey = envKey;
+      this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
+    }
+
+    // Default model to gemini-2.0-flash (official Google AI Studio flash model)
+    if (!loaded.model || loaded.model.includes('gemini-2.5') || loaded.model === 'default') {
+      loaded.model = 'gemini-2.0-flash';
       this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
 
@@ -164,6 +239,11 @@ class StorageService {
 
   public saveAISettings(settings: AISettings): void {
     this.save(STORAGE_KEYS.AI_SETTINGS, settings);
+  }
+
+  public getApiKey(): string {
+    const settings = this.getAISettings();
+    return (settings.openRouterApiKey || (import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '')).trim();
   }
 
   public getTodayStudySeconds(): number {

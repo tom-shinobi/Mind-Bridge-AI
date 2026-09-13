@@ -42,6 +42,8 @@ import { ProgressGamification } from './pages/ProgressGamification';
 import { SettingsProfile } from './pages/SettingsProfile';
 import { CommunityHub } from './pages/CommunityHub';
 import { AcademicCalendar } from './pages/AcademicCalendar';
+import { DreamNotes } from './pages/DreamNotes';
+import { LofiPlayer } from './components/editorial/LofiPlayer';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
@@ -92,36 +94,52 @@ export function App() {
   // Synchronize authenticated user data from Supabase
   const loadUserData = async (userId: string) => {
     try {
+      const localProfile = storageService.getProfile();
+      const localMatches = localProfile && (localProfile.id === userId || (authUser?.email && localProfile.email === authUser.email));
+      const isLocallyOnboarded = storageService.isOnboardingCompleted(userId, authUser?.email) || Boolean(localMatches && localProfile.onboardingCompleted);
+
       let p = await supabaseDataService.getProfile(userId);
       if (!p) {
-        // Brand new user without a profile in Supabase:
-        // Initialize fresh profile with onboardingCompleted: false so they go through onboarding!
-        const initialNewProfile: StudentProfile = {
-          id: userId,
-          name: authUser?.name || 'Scholar',
-          email: authUser?.email || '',
-          degree: 'B.Tech Computer Science',
-          department: 'Computer Science',
-          semester: 1,
-          cgpa: 0.0,
-          targetCgpa: 9.0,
-          streakDays: 1,
-          totalXp: 0,
-          level: 1,
-          joinedDate: new Date().toISOString().slice(0, 10),
-          onboardingCompleted: false, // Brand new user!
-          onboardingStep: 1,
-          syllabusUploaded: false
-        };
-        await supabaseDataService.saveProfile(initialNewProfile);
-        p = initialNewProfile;
+        if (localMatches) {
+          p = localProfile;
+        } else {
+          // Brand new user without a profile in Supabase
+          const initialNewProfile: StudentProfile = {
+            id: userId,
+            name: authUser?.name || 'Scholar',
+            email: authUser?.email || '',
+            degree: 'B.Tech Computer Science',
+            department: 'Computer Science',
+            semester: 1,
+            cgpa: 0.0,
+            targetCgpa: 9.0,
+            streakDays: 1,
+            totalXp: 0,
+            level: 1,
+            joinedDate: new Date().toISOString().slice(0, 10),
+            onboardingCompleted: Boolean(isLocallyOnboarded),
+            onboardingStep: isLocallyOnboarded ? 12 : 1,
+            syllabusUploaded: isLocallyOnboarded
+          };
+          p = initialNewProfile;
+        }
+        await supabaseDataService.saveProfile(p);
+      } else if (isLocallyOnboarded && !p.onboardingCompleted) {
+        // Recover local completed onboarding status
+        p.onboardingCompleted = true;
+        p.onboardingStep = 12;
+        await supabaseDataService.saveProfile(p);
       }
 
       setProfile(p);
       storageService.saveProfile(p);
+      if (p.onboardingCompleted) {
+        storageService.setOnboardingCompleted(p.id);
+        if (p.email) storageService.setOnboardingCompleted(p.email);
+      }
 
-      // If user has not completed onboarding, halt here so they are routed to OnboardingFlow!
-      if (!p.onboardingCompleted) {
+      // If user has genuinely not completed onboarding, halt here so they are routed to OnboardingFlow!
+      if (!p.onboardingCompleted && !isLocallyOnboarded) {
         setSyllabus([]);
         setGaps([]);
         setAcademicRecords([]);
@@ -242,14 +260,30 @@ export function App() {
     // Only trust localProfile if it specifically belongs to this authenticated user
     const matchingLocal = localProfile && (localProfile.id === user.id || localProfile.email === user.email) ? localProfile : null;
 
+    const isLocallyOnboarded = storageService.isOnboardingCompleted(user.id, user.email);
     let p: StudentProfile;
 
     if (existing) {
       // Returning user from Supabase database
       p = existing;
+      if (isLocallyOnboarded && !p.onboardingCompleted) {
+        p.onboardingCompleted = true;
+        p.onboardingStep = 12;
+      }
     } else if (matchingLocal) {
       // Local profile matching this specific user
       p = matchingLocal;
+    } else if (isLocallyOnboarded) {
+      // Local device remembers this user has completed onboarding!
+      p = {
+        ...localProfile,
+        id: user.id,
+        name: user.name || localProfile.name || 'Scholar',
+        email: user.email,
+        onboardingCompleted: true,
+        onboardingStep: 12
+      };
+      await supabaseDataService.saveProfile(p);
     } else {
       // Brand new user!
       p = {
@@ -300,6 +334,9 @@ export function App() {
     const updatedProfile: StudentProfile = {
       ...profile,
       name: answers.name || profile.name,
+      educationLevel: answers.educationLevel,
+      board: answers.board,
+      grade: answers.grade,
       college: answers.college,
       course: answers.course,
       degree: answers.course,
@@ -313,6 +350,8 @@ export function App() {
       memorySummary
     };
 
+    storageService.setOnboardingCompleted(authUser.id);
+    if (authUser.email) storageService.setOnboardingCompleted(authUser.email);
     setProfile(updatedProfile);
     storageService.saveProfile(updatedProfile);
 
@@ -409,6 +448,15 @@ export function App() {
     storageService.saveAcademicRecords(updated);
     if (authUser) {
       supabaseDataService.saveAcademicRecord(authUser.id, record);
+    }
+  };
+
+  const handleAddSyllabusTopics = (newTopics: SyllabusTopic[]) => {
+    const updated = [...syllabus, ...newTopics];
+    setSyllabus(updated);
+    storageService.saveSyllabus(updated);
+    if (authUser) {
+      supabaseDataService.saveSyllabusTopics(authUser.id, updated).catch(console.warn);
     }
   };
 
@@ -770,7 +818,19 @@ export function App() {
           )}
 
           {activeTab === 'syllabus' && (
-            <PersonalizedSyllabus syllabus={syllabus} onNavigate={handleNavigate} />
+            <PersonalizedSyllabus
+              syllabus={syllabus}
+              onNavigate={handleNavigate}
+              onAddTopics={handleAddSyllabusTopics}
+            />
+          )}
+
+          {activeTab === 'dreamnotes' && (
+            <DreamNotes
+              profile={profile}
+              syllabus={syllabus}
+              onNavigate={handleNavigate}
+            />
           )}
 
           {activeTab === 'timetable' && (
@@ -861,6 +921,9 @@ export function App() {
         isOpen={isMotivationBoardOpen}
         onClose={() => setIsMotivationBoardOpen(false)}
       />
+
+      {/* Global Lo-Fi Study Beats Player (Theme-Reactive) */}
+      <LofiPlayer />
 
     </div>
   );

@@ -16,6 +16,9 @@ export interface MemorySummary {
 
 export interface OnboardingAnswers {
   name: string;
+  educationLevel?: 'school' | 'college';
+  board?: string;
+  grade?: string;
   college: string;
   course: string;
   specialization: string;
@@ -57,6 +60,9 @@ export interface StudentProfile {
   id: string;
   name: string;
   email: string;
+  educationLevel?: 'school' | 'college';
+  board?: string;
+  grade?: string;
   degree: string;
   department: string;
   college?: string;
@@ -536,5 +542,44 @@ export interface AdminSession {
   adminEmail?: string;
   token?: string;
   sessionExpiresAt?: string;
+}
+
+// ============================================================================
+// DREAMNOTES NOTE-TAKING & AI MEMORY
+// ============================================================================
+
+export interface DreamNote {
+  id: string;
+  userId?: string;
+  title: string;
+  subject: string;
+  topic: string;
+  content: string;
+  imageUrl?: string;
+  youtubeUrl?: string;
+  youtubeVideoId?: string;
+  inAIMemory: boolean;
+  colorTheme: 'cyan' | 'purple' | 'amber' | 'emerald' | 'pink' | 'acid' | 'lime' | 'lavender';
+  sticker?: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================================
+// CALENDAR REMINDERS & NOTIFICATION SYNC
+// ============================================================================
+
+export interface ReminderItem {
+  id: string;
+  userId?: string;
+  title: string;
+  subject?: string;
+  dueDateTime: string; // ISO String or YYYY-MM-DDTHH:mm
+  priority: 'urgent' | 'high' | 'medium' | 'low';
+  completed: boolean;
+  notificationEnabled: boolean;
+  notified?: boolean;
+  createdAt?: string;
 }
 

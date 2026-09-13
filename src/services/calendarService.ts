@@ -1,8 +1,10 @@
-import type { CalendarEvent, CalendarTask } from '../types';
+import type { CalendarEvent, CalendarTask, ReminderItem } from '../types';
 
 const STORAGE_KEYS = {
   EVENTS: 'mba_calendar_events',
-  TASKS: 'mba_calendar_tasks'
+  TASKS: 'mba_calendar_tasks',
+  REMINDERS: 'mba_calendar_reminders',
+  NOTIFICATIONS_ENABLED: 'mba_reminders_notifications_enabled'
 };
 
 const getFutureDate = (daysAhead: number, timeStr = '10:00'): string => {
@@ -144,6 +146,39 @@ const INITIAL_TASKS: CalendarTask[] = [
   }
 ];
 
+const INITIAL_REMINDERS: ReminderItem[] = [
+  {
+    id: 'rem_1',
+    title: 'Review B+ Tree internal node splitting before tomorrow',
+    subject: 'Database Systems',
+    dueDateTime: getFutureDate(1, '18:00'),
+    priority: 'high',
+    completed: false,
+    notificationEnabled: true,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'rem_2',
+    title: 'Computer Networks Quiz: Check sliding window equations',
+    subject: 'Computer Networks',
+    dueDateTime: getFutureDate(2, '20:30'),
+    priority: 'urgent',
+    completed: false,
+    notificationEnabled: true,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'rem_3',
+    title: 'Submit OS Semaphore lab code pull request',
+    subject: 'Operating Systems',
+    dueDateTime: getFutureDate(4, '23:00'),
+    priority: 'medium',
+    completed: false,
+    notificationEnabled: true,
+    createdAt: new Date().toISOString()
+  }
+];
+
 class CalendarService {
   private load<T>(key: string, fallback: T): T {
     try {
@@ -238,6 +273,57 @@ class CalendarService {
   public deleteTask(id: string): void {
     const tasks = this.getTasks().filter(t => t.id !== id);
     this.saveTasks(tasks);
+  }
+
+  // ==========================================
+  // REMINDERS & NOTIFICATION MANAGEMENT
+  // ==========================================
+  public getReminders(): ReminderItem[] {
+    return this.load<ReminderItem[]>(STORAGE_KEYS.REMINDERS, INITIAL_REMINDERS);
+  }
+
+  public saveReminders(reminders: ReminderItem[]): void {
+    this.save(STORAGE_KEYS.REMINDERS, reminders);
+  }
+
+  public addReminder(data: Omit<ReminderItem, 'id' | 'completed'>): ReminderItem {
+    const reminders = this.getReminders();
+    const newReminder: ReminderItem = {
+      ...data,
+      id: `rem_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      completed: false,
+      createdAt: new Date().toISOString()
+    };
+    reminders.unshift(newReminder);
+    this.saveReminders(reminders);
+    return newReminder;
+  }
+
+  public toggleReminder(id: string): ReminderItem | null {
+    const reminders = this.getReminders();
+    let updated: ReminderItem | null = null;
+    const mapped = reminders.map(r => {
+      if (r.id === id) {
+        updated = { ...r, completed: !r.completed };
+        return updated;
+      }
+      return r;
+    });
+    this.saveReminders(mapped);
+    return updated;
+  }
+
+  public deleteReminder(id: string): void {
+    const reminders = this.getReminders().filter(r => r.id !== id);
+    this.saveReminders(reminders);
+  }
+
+  public isNotificationsEnabled(): boolean {
+    return this.load<boolean>(STORAGE_KEYS.NOTIFICATIONS_ENABLED, true);
+  }
+
+  public setNotificationsEnabled(enabled: boolean): void {
+    this.save(STORAGE_KEYS.NOTIFICATIONS_ENABLED, enabled);
   }
 
   // ==========================================

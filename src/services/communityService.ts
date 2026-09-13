@@ -152,7 +152,7 @@ const INITIAL_POSTS: Post[] = [
   }
 ];
 
-// Initial Mock Channel Messages
+// Initial Mock Channel Messages with Rich Doubts & Peer Interactions
 const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
   ch_global_general: [
     {
@@ -180,6 +180,32 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       reactions: { '🙌': ['user_elena_rostova'] }
     }
   ],
+  ch_global_doubts: [
+    {
+      id: 'msg_gd_1',
+      serverId: 'server_global',
+      channelId: 'ch_global_doubts',
+      senderId: 'user_rohan_mehta',
+      senderName: 'Rohan Mehta',
+      senderAvatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
+      senderRole: 'Scholar',
+      content: 'Quick doubt on Master Theorem: What happens when f(n) = n^(log_b a) * log n? Does Case 2 apply directly?',
+      createdAt: '2026-09-11T15:20:00Z',
+      reactions: { '❓': ['user_1'] }
+    },
+    {
+      id: 'msg_gd_2',
+      serverId: 'server_global',
+      channelId: 'ch_global_doubts',
+      senderId: 'peer_priya',
+      senderName: 'Priya Sharma',
+      senderAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+      senderRole: 'Polymath',
+      content: 'Hey Rohan! Yes, this is the Extended Case 2: if f(n) = Theta(n^(log_b a) * log^k n) where k >= 0, then T(n) = Theta(n^(log_b a) * log^(k+1) n). So here it simplifies cleanly to Theta(n^(log_b a) * log^2 n)!',
+      createdAt: '2026-09-11T15:22:15Z',
+      reactions: { '💡': ['user_rohan_mehta', 'user_2'], '🔥': ['user_3'] }
+    }
+  ],
   ch_cs_general: [
     {
       id: 'msg_cs_1',
@@ -195,6 +221,117 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       codeLanguage: 'python',
       createdAt: '2026-09-11T13:40:00Z',
       reactions: { '🧠': ['user_1', 'user_2', 'user_3'], '🚀': ['user_4'] }
+    }
+  ],
+  ch_cs_code: [
+    {
+      id: 'msg_code_1',
+      serverId: 'server_cs_ai',
+      channelId: 'ch_cs_code',
+      senderId: 'user_sarah_jenkins',
+      senderName: 'Sarah Jenkins',
+      senderAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80',
+      senderRole: 'Scholar',
+      content: 'Wrote a fast causal masking utility for PyTorch scaled dot-product attention. Tested on sequence lengths up to 4096:',
+      mediaType: 'code',
+      codeSnippet: `def create_causal_mask(seq_len: int, device: torch.device):\n    return torch.triu(torch.full((seq_len, seq_len), float('-inf'), device=device), diagonal=1)`,
+      codeLanguage: 'python',
+      createdAt: '2026-09-11T16:05:00Z',
+      reactions: { '🔥': ['user_marcus_vance'], '💯': ['user_david_kim'] }
+    }
+  ],
+  ch_cs_exams: [
+    {
+      id: 'msg_dsa_1',
+      serverId: 'server_cs_ai',
+      channelId: 'ch_cs_exams',
+      senderId: 'user_alex_chen',
+      senderName: 'Alex Chen',
+      senderAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+      senderRole: 'Scholar',
+      content: 'Tip for the upcoming mid-term: In 0/1 Knapsack, if you want 1D space optimization, make sure your capacity loop runs BACKWARDS (W down to wt[i]). If you loop forwards, you accidentally solve Unbounded Knapsack because items get used multiple times!',
+      createdAt: '2026-09-11T16:30:00Z',
+      reactions: { '🧠': ['user_1', 'user_2'], '🙌': ['user_3'] }
+    }
+  ],
+  ch_sys_general: [
+    {
+      id: 'msg_sys_1',
+      serverId: 'server_systems',
+      channelId: 'ch_sys_general',
+      senderId: 'user_david_kim',
+      senderName: 'David Kim',
+      senderAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+      senderRole: 'Polymath',
+      content: 'In 64-bit x86-64 architectures, only 48 or 57 bits are used for virtual addresses (4-level or 5-level paging). The upper bits must be sign-extended (canonical address format), otherwise the CPU triggers a general protection fault (#GP).',
+      createdAt: '2026-09-11T11:15:00Z',
+      reactions: { '⚡': ['user_1'], '💡': ['user_2'] }
+    }
+  ],
+  ch_sys_doubts: [
+    {
+      id: 'msg_sd_1',
+      serverId: 'server_systems',
+      channelId: 'ch_sys_doubts',
+      senderId: 'user_ananya_roy',
+      senderName: 'Ananya Roy',
+      senderAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+      senderRole: 'Scholar',
+      content: 'Can someone explain why counting semaphores can be implemented using two binary semaphores without priority inversion?',
+      createdAt: '2026-09-11T12:40:00Z',
+      reactions: { '❓': ['user_1'] }
+    },
+    {
+      id: 'msg_sd_2',
+      serverId: 'server_systems',
+      channelId: 'ch_sys_doubts',
+      senderId: 'user_marcus_vance',
+      senderName: 'Marcus Vance',
+      senderAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+      senderRole: 'Professor',
+      content: 'Great question! One binary semaphore acts as a mutex to guard the integer counter `val`, and the second acts as a delay queue semaphore where threads sleep when `val <= 0`. When signal() increments `val`, if threads are waiting, it releases the second semaphore.',
+      createdAt: '2026-09-11T12:44:30Z',
+      reactions: { '🧠': ['user_ananya_roy'], '🚀': ['user_2'] }
+    }
+  ],
+  ch_db_indexing: [
+    {
+      id: 'msg_dbi_1',
+      serverId: 'server_dbms',
+      channelId: 'ch_db_indexing',
+      senderId: 'peer_priya',
+      senderName: 'Priya Sharma',
+      senderAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+      senderRole: 'Polymath',
+      content: 'Reminder for the DBMS indexing assessment: B+ Tree nodes have fan-out M between 50 and 500 in practice. A 3-level B+ tree with fan-out 100 can store 100^3 = 1,000,000 leaf pages. At 8KB per page, that indexes 8GB of table data with only 3 I/O reads!',
+      createdAt: '2026-09-11T10:10:00Z',
+      reactions: { '🔥': ['user_1', 'user_2'], '💯': ['user_3'] }
+    }
+  ],
+  ch_db_normal: [
+    {
+      id: 'msg_dbn_1',
+      serverId: 'server_dbms',
+      channelId: 'ch_db_normal',
+      senderId: 'user_david_kim',
+      senderName: 'David Kim',
+      senderAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+      senderRole: 'Polymath',
+      content: 'Can someone confirm the difference between dependency preservation and lossless join in BCNF?',
+      createdAt: '2026-09-11T11:50:00Z',
+      reactions: { '❓': ['user_1'] }
+    },
+    {
+      id: 'msg_dbn_2',
+      serverId: 'server_dbms',
+      channelId: 'ch_db_normal',
+      senderId: 'peer_priya',
+      senderName: 'Priya Sharma',
+      senderAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+      senderRole: 'Polymath',
+      content: 'Crucial distinction! Lossless join is GUARANTEED in BCNF (using common attributes that form a superkey in one sub-relation). But dependency preservation is NOT always possible in BCNF. If you strictly need dependency preservation, you stop at 3NF!',
+      createdAt: '2026-09-11T11:53:20Z',
+      reactions: { '💡': ['user_david_kim'], '🔥': ['user_2'], '🙌': ['user_3'] }
     }
   ]
 };
@@ -274,6 +411,53 @@ export const MOCK_PEERS: FriendSuggestion[] = [
 class CommunityService {
   private messageSubscribers: Array<(channelId: string, msg: ChatMessage) => void> = [];
   private dmSubscribers: Array<(conversationId: string, msg: DirectMessage) => void> = [];
+  private typingSubscribers: Array<(channelId: string, username: string | null) => void> = [];
+  private broadcastChannel: BroadcastChannel | null = null;
+
+  constructor() {
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        this.broadcastChannel = new BroadcastChannel('mba_community_realtime');
+        this.broadcastChannel.onmessage = (event) => {
+          const data = event.data;
+          if (!data) return;
+          if (data.type === 'channel_message' && data.channelId && data.message) {
+            this.messageSubscribers.forEach((cb) => {
+              try { cb(data.channelId, data.message); } catch (e) {}
+            });
+          } else if (data.type === 'dm_message' && data.conversationId && data.message) {
+            this.dmSubscribers.forEach((cb) => {
+              try { cb(data.conversationId, data.message); } catch (e) {}
+            });
+          } else if (data.type === 'typing' && data.channelId) {
+            this.typingSubscribers.forEach((cb) => {
+              try { cb(data.channelId, data.username ?? null); } catch (e) {}
+            });
+          }
+        };
+      } catch (err) {
+        console.warn('BroadcastChannel error:', err);
+      }
+    }
+  }
+
+  public subscribeTyping(callback: (channelId: string, username: string | null) => void): () => void {
+    this.typingSubscribers.push(callback);
+    return () => {
+      this.typingSubscribers = this.typingSubscribers.filter((cb) => cb !== callback);
+    };
+  }
+
+  public notifyTyping(channelId: string, username: string | null): void {
+    this.typingSubscribers.forEach((cb) => {
+      try { cb(channelId, username); } catch (e) {}
+    });
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage({ type: 'typing', channelId, username });
+      } catch (e) {}
+    }
+  }
 
   // =========================================================================
   // 1. POSTS & ACADEMIC FEED (TWITTER / X STYLE)
@@ -531,7 +715,105 @@ class CommunityService {
       }
     });
 
+    // Broadcast across tabs
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage({
+          type: 'channel_message',
+          channelId,
+          message: newMessage
+        });
+      } catch (e) {}
+    }
+
+    // If sent by a student user, schedule intelligent peer response
+    if (
+      sender.id &&
+      !sender.id.startsWith('peer_') &&
+      !sender.id.startsWith('user_alex') &&
+      !sender.id.startsWith('user_marcus') &&
+      !sender.id.startsWith('user_priya') &&
+      !sender.id.startsWith('user_david') &&
+      !sender.id.startsWith('user_elena') &&
+      !sender.id.startsWith('user_sarah')
+    ) {
+      this.schedulePeerResponse(serverId, channelId, content);
+    }
+
     return newMessage;
+  }
+
+  private schedulePeerResponse(serverId: string, channelId: string, userQuery: string) {
+    // Select peer profile based on channel and content
+    const peer: StudentProfile = {
+      id: 'peer_priya',
+      name: 'Priya Sharma',
+      email: 'priya.sharma@iitb.ac.in',
+      college: 'IIT Bombay',
+      course: 'B.Tech Computer Science',
+      degree: 'B.Tech Computer Science',
+      department: 'Computer Science & Engineering',
+      semester: 6,
+      cgpa: 9.4,
+      targetCgpa: 9.8,
+      streakDays: 14,
+      totalXp: 4800,
+      joinedDate: '2026-01-10',
+      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+      level: 16
+    };
+
+    const q = userQuery.toLowerCase();
+    let replyContent = '';
+    let codeSnippet: string | undefined;
+    let codeLanguage: string | undefined;
+
+    if (q.includes('b+') || q.includes('b-tree') || q.includes('indexing') || channelId.includes('db_indexing')) {
+      peer.name = 'Priya Sharma';
+      peer.avatarUrl = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80';
+      replyContent = `Great question on B+ Trees! Remember that when a leaf node overflows (exceeds order m-1 keys), the median key is copied up to the parent, but remains in the leaf to maintain sequential scan integrity. All leaves are doubly-linked:`;
+      codeSnippet = `// Leaf node split invariant:\nconst splitIndex = Math.floor(leaf.keys.length / 2);\nconst hoistedKey = leaf.keys[splitIndex];\nparent.insertKey(hoistedKey);\nnewLeaf.keys = leaf.keys.slice(splitIndex);\nleaf.keys = leaf.keys.slice(0, splitIndex);\nleaf.next = newLeaf; newLeaf.prev = leaf;`;
+      codeLanguage = 'typescript';
+    } else if (q.includes('tcp') || q.includes('ack') || q.includes('rto') || channelId.includes('sys_networks')) {
+      peer.name = 'Marcus Vance';
+      peer.avatarUrl = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80';
+      replyContent = `On TCP ACK handling: 3 duplicate ACKs signify that packets arrived out-of-order (likely one segment dropped while downstream segments made it). This initiates Fast Retransmit without waiting for the full RTO timer to expire, instantly resetting ssthresh = cwnd / 2!`;
+    } else if (q.includes('3nf') || q.includes('bcnf') || q.includes('normal') || channelId.includes('db_normal')) {
+      peer.name = 'Elena Rostova';
+      peer.avatarUrl = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80';
+      replyContent = `The core difference between 3NF and BCNF comes down to the determinant: In BCNF, for every functional dependency X → Y, X MUST be a superkey. 3NF softens this condition: if Y is a prime attribute (part of any candidate key), X does not need to be a superkey.`;
+    } else if (q.includes('page') || q.includes('deadlock') || q.includes('clock') || channelId.includes('sys_doubts')) {
+      peer.name = 'David Kim';
+      peer.avatarUrl = 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80';
+      replyContent = `For the Clock page replacement algorithm: think of it as circular FIFO with a second chance. If the pointer inspects a page with reference bit = 1, it clears the bit to 0 and advances. It evicts the first page it finds with reference bit = 0.`;
+    } else if (q.includes('dp') || q.includes('dynamic') || q.includes('knapsack') || channelId.includes('cs_exams')) {
+      peer.name = 'Sarah Jenkins';
+      peer.avatarUrl = 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80';
+      replyContent = `For DP problems like 0/1 Knapsack, identify the state tuple (index i, remaining weight w). If items cannot be repeated, iterate weight backwards from W down to weight[i] to prevent reusing the same element in 1D array optimization!`;
+    } else {
+      replyContent = `Insightful doubt! Based on what we covered in our lecture module, try breaking this down into the base case and recurrence invariant first. You can also ask the Socratic AI Tutor on the left nav for a step-by-step breakdown!`;
+    }
+
+    // Step 1: Trigger typing indicator after 600ms
+    setTimeout(() => {
+      this.notifyTyping(channelId, peer.name);
+    }, 600);
+
+    // Step 2: Send peer response after 2200ms
+    setTimeout(() => {
+      this.notifyTyping(channelId, null);
+      this.sendChannelMessage(
+        serverId,
+        channelId,
+        peer,
+        replyContent,
+        'Polymath',
+        codeSnippet ? 'code' : 'none',
+        undefined,
+        codeSnippet,
+        codeLanguage
+      );
+    }, 2200);
   }
 
   public sendChatMessage(
@@ -653,7 +935,82 @@ class CommunityService {
       } catch (err) {}
     });
 
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage({
+          type: 'dm_message',
+          conversationId,
+          message: newDM
+        });
+      } catch (e) {}
+    }
+
+    // Schedule automated reply from peer if sent by user
+    if (!senderId.startsWith('peer_')) {
+      this.scheduleDirectMessageReply(conversationId, senderId, recipientId, content);
+    }
+
     return newDM;
+  }
+
+  private scheduleDirectMessageReply(
+    conversationId: string,
+    userId: string,
+    peerId: string,
+    _userMessage: string
+  ) {
+    const convs = this.getConversations(userId);
+    const conv = convs.find((c) => c.id === conversationId || c.peerProfile.id === peerId);
+    const peerName = conv ? conv.peerProfile.name : 'Study Peer';
+    const peerAvatar = conv ? conv.peerProfile.avatarUrl : undefined;
+
+    setTimeout(() => {
+      const replies = [
+        `Hey! Thanks for pinging me about this. I just checked my notes, and that approach aligns with the lecture slides!`,
+        `Got your message! Let's definitely review this topic together before the upcoming mid-term session.`,
+        `Solid question! I found that tracing the example through a small dry-run made it super clear. Let me know if you want to hop into the Pomodoro Lounge!`,
+        `Agreed! Check out the DreamNotes module too—you can index our notes into the AI Tutor so it tests us on it.`
+      ];
+      const selectedReply = replies[Math.floor(Math.random() * replies.length)];
+
+      const existing = this.getDirectMessages(conversationId);
+      const peerDM: DirectMessage = {
+        id: `dm_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        conversationId,
+        senderId: peerId,
+        recipientId: userId,
+        senderName: peerName,
+        senderAvatar: peerAvatar,
+        content: selectedReply,
+        createdAt: new Date().toISOString(),
+        read: false
+      };
+
+      const updated = [...existing, peerDM];
+      this.saveDirectMessages(conversationId, updated);
+
+      // Update conversation lastMessage
+      if (conv) {
+        conv.lastMessage = peerDM;
+        try {
+          localStorage.setItem(`mba_dm_conversations_${userId}`, JSON.stringify(convs));
+        } catch {}
+      }
+
+      this.dmSubscribers.forEach((cb) => {
+        try { cb(conversationId, peerDM); } catch (e) {}
+      });
+
+      if (this.broadcastChannel) {
+        try {
+          this.broadcastChannel.postMessage({
+            type: 'dm_message',
+            conversationId,
+            message: peerDM
+          });
+        } catch (e) {}
+      }
+    }, 2000);
   }
 
   public getConversations(userId: string): DMConversation[] {

@@ -57,7 +57,10 @@ export const AITutor: React.FC<AITutorProps> = ({
   const [apiStatus, setApiStatus] = useState<ApiStatus>(() => aiService.getApiStatus());
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [keyInput, setKeyInput] = useState<string>('');
-  const [modelInput, setModelInput] = useState<string>(() => storageService.getAISettings().model || 'gemini-2.5-flash');
+  const [modelInput, setModelInput] = useState<string>(() => {
+    const m = storageService.getAISettings().model;
+    return (m && m !== 'gemini-2.5-flash') ? m : 'gemini-2.0-flash';
+  });
   const [testResult, setTestResult] = useState<{ success?: boolean; message?: string; testing?: boolean } | null>(null);
 
   useEffect(() => {
@@ -518,7 +521,8 @@ export const AITutor: React.FC<AITutorProps> = ({
               onChange={(e) => setModelInput(e.target.value)}
               className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-slate-100 focus:outline-none focus:border-purple-500"
             >
-              <option value="gemini-2.5-flash">Google Gemini 2.5 Flash (Active Google AI Studio Default)</option>
+              <option value="gemini-2.0-flash">Google Gemini 2.0 Flash (Recommended, Lightning Fast)</option>
+              <option value="gemini-1.5-flash">Google Gemini 1.5 Flash (Multimodal & Fast)</option>
               <option value="liquid/lfm-2.5-2.6b:free">LiquidAI: LFM 2.5 2.6B (Free Socratic)</option>
               <option value="meta-llama/llama-3.3-70b-instruct:free">Meta Llama 3.3 70B Instruct (High Depth)</option>
               <option value="mistralai/mistral-small-3.1-24b-instruct:free">Mistral Small 3.1 24B</option>
@@ -537,11 +541,20 @@ export const AITutor: React.FC<AITutorProps> = ({
               type="password"
               value={keyInput}
               onChange={(e) => setKeyInput(e.target.value)}
-              placeholder="•••••••••••••••••••••••••••••••• (Leave blank to keep current key)"
-              className="w-full text-xs font-mono px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              placeholder="Paste Google AI Studio or OpenRouter key (e.g. AIzaSy...)"
+              className="w-full text-xs font-mono px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Google AI Studio Gemini 2.5 Flash is active. Your API key is encrypted and hidden for security.
+              Get your free Google Gemini API key from{' '}
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noreferrer"
+                className="text-purple-300 hover:text-purple-200 underline"
+              >
+                Google AI Studio
+              </a>
+              . When offline or without a key, our local Socratic Engine handles reasoning automatically.
             </p>
           </div>
 

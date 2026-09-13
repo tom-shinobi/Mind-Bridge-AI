@@ -49,6 +49,62 @@ const COMMON_COLLEGES = [
   { name: 'Anna University', emoji: '📚', tag: 'Chennai, India' }
 ];
 
+export const SCHOOL_BOARDS = [
+  { name: 'CBSE', fullName: 'Central Board of Secondary Education', emoji: '🏛️', tag: 'NCERT Curriculum' },
+  { name: 'ICSE / ISC', fullName: 'Council for Indian School Certificate', emoji: '📚', tag: 'CISCE Board' },
+  { name: 'State Board', fullName: 'State Government Education Board', emoji: '🏫', tag: 'State Curriculum' },
+  { name: 'IB (International Baccalaureate)', fullName: 'IB Primary / MYP / DP Diploma', emoji: '🌍', tag: 'International' },
+  { name: 'Cambridge / IGCSE', fullName: 'Cambridge Assessment International (CIE)', emoji: '🎓', tag: 'UK Curriculum' },
+  { name: 'Other Board', fullName: 'Independent / Private School Board', emoji: '✨', tag: 'Custom Syllabus' }
+];
+
+export const SCHOOL_GRADES = [
+  { grade: 'Grade 6', label: '6th Standard', level: 'Middle School', emoji: '🌱' },
+  { grade: 'Grade 7', label: '7th Standard', level: 'Middle School', emoji: '🌿' },
+  { grade: 'Grade 8', label: '8th Standard', level: 'Middle School', emoji: '🌾' },
+  { grade: 'Grade 9', label: '9th Standard', level: 'Secondary Prep', emoji: '📘' },
+  { grade: 'Grade 10', label: '10th Standard', level: 'Board Exam Class', emoji: '🏆' },
+  { grade: 'Grade 11', label: '11th Standard', level: 'Senior Secondary', emoji: '🔬' },
+  { grade: 'Grade 12', label: '12th Standard', level: 'Board & Entrance Year', emoji: '🎓' }
+];
+
+export const SCHOOL_STREAMS = [
+  { name: 'Science (Physics, Chemistry, Math)', code: 'PCM', badge: 'Engineering & Tech', desc: 'Calculus, Mechanics, Electromagnetism & Physical Chemistry' },
+  { name: 'Science (Physics, Chemistry, Biology)', code: 'PCB', badge: 'Medical & Bio', desc: 'Genetics, Botany, Zoology & Organic Chemistry' },
+  { name: 'General Secondary (All Core Subjects)', code: 'SEC', badge: 'Grades 6-10', desc: 'Mathematics, Science, Social Studies, English & Coding' },
+  { name: 'Commerce with Mathematics', code: 'COMM-M', badge: 'Finance & Econ', desc: 'Accountancy, Applied Math, Microeconomics & Business' },
+  { name: 'Humanities & Social Sciences', code: 'ARTS', badge: 'Civics & Literature', desc: 'History, Political Science, Psychology & English Literature' }
+];
+
+export const SCHOOL_SUBJECTS = [
+  { name: 'Mathematics', icon: '📐', category: 'STEM' },
+  { name: 'Physics', icon: '⚡', category: 'STEM' },
+  { name: 'Chemistry', icon: '🧪', category: 'STEM' },
+  { name: 'Biology', icon: '🧬', category: 'STEM' },
+  { name: 'Computer Science & Coding', icon: '💻', category: 'Tech' },
+  { name: 'English Literature & Grammar', icon: '📖', category: 'Languages' },
+  { name: 'Social Science (History & Civics)', icon: '🌍', category: 'Humanities' },
+  { name: 'Economics & Business', icon: '📊', category: 'Commerce' }
+];
+
+export const SCHOOL_DIFFICULT_TOPICS = [
+  { name: 'Trigonometric Identities & Equations', category: 'Math', tag: 'Formula Heavy' },
+  { name: 'Quadratic Equations & Roots', category: 'Math', tag: 'Algebra' },
+  { name: 'Chemical Bonding & Periodic Trends', category: 'Chemistry', tag: 'Core Concept' },
+  { name: 'Ray Optics, Reflection & Refraction', category: 'Physics', tag: 'Ray Diagrams' },
+  { name: 'Differentiation & Integration (Calculus)', category: 'Math', tag: 'Higher Secondary' },
+  { name: 'Newton\'s Laws of Motion & Friction', category: 'Physics', tag: 'Mechanics' },
+  { name: 'Cellular Respiration & Photosynthesis', category: 'Biology', tag: 'Biochemistry' },
+  { name: 'Electromagnetism & Induced Currents', category: 'Physics', tag: 'Electrodynamics' }
+];
+
+export const SCHOOL_TERMS = [
+  { term: 1, label: 'Term 1 / Midterms', period: 'First Half', desc: 'Unit tests, quarterly evaluations & mid-year syllabus' },
+  { term: 2, label: 'Term 2 / Pre-Boards', period: 'Second Half', desc: 'Mock tests, full-syllabus preparation & revision drills' },
+  { term: 3, label: 'Annual / Board Finals', period: 'Final Sprint', desc: 'Final comprehensive examinations and milestone assessment' },
+  { term: 4, label: 'Periodic / Monthly Test', period: 'Ongoing', desc: 'Weekly & monthly internal chapter mastery assessments' }
+];
+
 const COURSES = [
   { name: 'B.Tech / B.E. Computer Science', code: 'CS', icon: Code2, desc: 'Algorithms, OS, Cloud Systems & Software Architectures' },
   { name: 'B.S. Artificial Intelligence & Data Science', code: 'AI/DS', icon: Cpu, desc: 'Neural Networks, Machine Learning & Probabilistic Models' },
@@ -158,6 +214,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   // Answers State
   const [answers, setAnswers] = useState<OnboardingAnswers>({
     name: initialAnswers?.name || '',
+    educationLevel: initialAnswers?.educationLevel || 'college',
+    board: initialAnswers?.board || 'CBSE',
+    grade: initialAnswers?.grade || 'Grade 10',
     college: initialAnswers?.college || '',
     course: initialAnswers?.course || COURSES[0].name,
     specialization: initialAnswers?.specialization || SPECIALIZATIONS[0].name,
@@ -190,14 +249,19 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     } else {
       // Completed onboarding!
       setIsSaving(true);
+      const isSchool = answers.educationLevel === 'school';
       const memorySummary: MemorySummary = {
         learningStyle: answers.explanationStyle,
         currentFocus: answers.difficultTopics[0] || `${answers.subjects[0] || 'Core Modules'} Diagnostics`,
-        academicGoal: `Target ${answers.targetCgpa.toFixed(2)} CGPA in ${answers.course} (Semester ${answers.semester})`,
+        academicGoal: isSchool
+          ? `Target ${answers.targetCgpa.toFixed(0)}% in ${answers.grade || 'School'} (${answers.board || 'CBSE'} Board)`
+          : `Target ${answers.targetCgpa.toFixed(2)} CGPA in ${answers.course} (Semester ${answers.semester})`,
         studyPreferences: `${answers.dailyStudyHours} hrs daily, preferring ${answers.preferredStudyTime}`,
         difficultTopics: answers.difficultTopics,
         strengths: answers.subjects.filter((s) => !answers.difficultTopics.includes(s)),
-        notes: `Student at ${answers.college || 'University'} pursuing ${answers.specialization}.`,
+        notes: isSchool
+          ? `School Student in ${answers.grade || 'Grade 10'} under ${answers.board || 'CBSE'} Board focusing on ${answers.specialization}.`
+          : `Student at ${answers.college || 'University'} pursuing ${answers.specialization}.`,
         lastUpdated: new Date().toISOString().slice(0, 10)
       };
 
@@ -262,17 +326,25 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
   // Phase categorization
   const getPhaseInfo = () => {
-    if (currentStep <= 2) return { number: '1/5', name: 'Student Persona & Campus', icon: User, color: 'text-amber-400 border-amber-500/30 bg-amber-500/10' };
-    if (currentStep <= 5) return { number: '2/5', name: 'Degree & Timeline', icon: GraduationCap, color: 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10' };
-    if (currentStep <= 7) return { number: '3/5', name: 'CGPA & Performance Goals', icon: Award, color: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' };
-    if (currentStep === 8 || currentStep === 11) return { number: '4/5', name: 'Curriculum & Friction Areas', icon: Brain, color: 'text-rose-400 border-rose-500/30 bg-rose-500/10' };
-    return { number: '5/5', name: 'Study Habit & Pedagogy', icon: Sparkles, color: 'text-purple-400 border-purple-500/30 bg-purple-500/10' };
+    const isSchool = answers.educationLevel === 'school';
+    if (currentStep <= 2) return { number: '1/5', name: isSchool ? 'Student & Education Level' : 'Student Persona & Campus', icon: User, color: 'text-amber-400 border-amber-500/30 bg-amber-500/10' };
+    if (currentStep <= 5) return { number: '2/5', name: isSchool ? 'Board, Grade & Stream' : 'Degree & Specialization', icon: GraduationCap, color: 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10' };
+    if (currentStep <= 8) return { number: '3/5', name: isSchool ? 'Scores, Targets & Subjects' : 'Semester & CGPA Goals', icon: Award, color: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' };
+    if (currentStep <= 10) return { number: '4/5', name: 'Study Habit & Pacing', icon: Brain, color: 'text-rose-400 border-rose-500/30 bg-rose-500/10' };
+    return { number: '5/5', name: 'Friction Areas & Pedagogy', icon: Sparkles, color: 'text-purple-400 border-purple-500/30 bg-purple-500/10' };
   };
 
   const phase = getPhaseInfo();
 
-  // CGPA Tier evaluator
+  // CGPA / Marks Tier evaluator
   const getCgpaBadge = (val: number) => {
+    const isSchool = answers.educationLevel === 'school';
+    if (isSchool) {
+      if (val >= 90) return { label: '🌟 Distinction (90%+)', color: 'text-amber-300 bg-amber-500/15 border-amber-500/30' };
+      if (val >= 80) return { label: '🚀 First Class (80%+)', color: 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30' };
+      if (val >= 70) return { label: '📈 Solid Baseline (70%+)', color: 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30' };
+      return { label: '🎯 Growth Acceleration Mode', color: 'text-pink-300 bg-pink-500/15 border-pink-500/30' };
+    }
     if (val >= 9.0) return { label: '🌟 High Distinction / Dean\'s List', color: 'text-amber-300 bg-amber-500/15 border-amber-500/30' };
     if (val >= 8.0) return { label: '🚀 First Class with Distinction', color: 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30' };
     if (val >= 7.0) return { label: '📈 Solid Academic Baseline', color: 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30' };
@@ -396,47 +468,61 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               )}
               {currentStep === 2 && (
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  What university or college do you study at?
+                  What level of education are you currently in?
                 </h3>
               )}
               {currentStep === 3 && (
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  What degree or academic program are you pursuing?
+                  {answers.educationLevel === 'school'
+                    ? 'Which school education board are you studying under?'
+                    : 'What university or college do you study at?'}
                 </h3>
               )}
               {currentStep === 4 && (
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  What is your primary academic specialization?
+                  {answers.educationLevel === 'school'
+                    ? 'Which grade or standard are you in?'
+                    : 'What degree or academic program are you pursuing?'}
                 </h3>
               )}
               {currentStep === 5 && (
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  Which semester are you currently attending?
+                  {answers.educationLevel === 'school'
+                    ? 'What is your primary academic stream or focus?'
+                    : 'What is your primary academic specialization?'}
                 </h3>
               )}
               {currentStep === 6 && (
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  What is your current cumulative CGPA?
+                  {answers.educationLevel === 'school'
+                    ? 'Which academic term or exam cycle are you in?'
+                    : 'Which semester are you currently attending?'}
                 </h3>
               )}
               {currentStep === 7 && (
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  What is your target CGPA this semester?
+                  {answers.educationLevel === 'school'
+                    ? 'What is your current overall marks percentage?'
+                    : 'What is your current cumulative CGPA?'}
                 </h3>
               )}
               {currentStep === 8 && (
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  What subjects are you taking right now?
+                  {answers.educationLevel === 'school'
+                    ? 'What is your target percentage or exam goal?'
+                    : 'What is your target CGPA this semester?'}
                 </h3>
               )}
               {currentStep === 9 && (
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  How many hours can you realistically study each day?
+                  {answers.educationLevel === 'school'
+                    ? 'What school subjects are you taking right now?'
+                    : 'What subjects are you taking right now?'}
                 </h3>
               )}
               {currentStep === 10 && (
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  When do you feel most focused and productive?
+                  How many hours can you realistically study each day?
                 </h3>
               )}
               {currentStep === 11 && (
@@ -488,192 +574,422 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               </div>
             )}
 
-            {/* Step 2: College / University */}
+            {/* Step 2: Education Level */}
             {currentStep === 2 && (
               <div className="space-y-4">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-cyan-400">
-                    <School className="w-5 h-5" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Option A: School */}
+                  <div
+                    onClick={() => {
+                      sound.playClick();
+                      setAnswers((prev) => ({
+                        ...prev,
+                        educationLevel: 'school',
+                        board: prev.board || 'CBSE',
+                        grade: prev.grade || 'Grade 10',
+                        subjects: prev.educationLevel === 'school' && prev.subjects?.length ? prev.subjects : SCHOOL_SUBJECTS.slice(0, 4).map(s => s.name),
+                        difficultTopics: prev.educationLevel === 'school' && prev.difficultTopics?.length ? prev.difficultTopics : [SCHOOL_DIFFICULT_TOPICS[0].name],
+                        cgpa: prev.cgpa <= 10 ? 85 : prev.cgpa,
+                        targetCgpa: prev.targetCgpa <= 10 ? 92 : prev.targetCgpa
+                      }));
+                    }}
+                    className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-4 ${
+                      answers.educationLevel === 'school'
+                        ? 'bg-gradient-to-br from-amber-500/25 via-pink-600/20 to-purple-900/30 border-amber-400 text-white shadow-[0_0_25px_rgba(245,158,11,0.3)]'
+                        : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/25 hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-2xl">
+                        🎒
+                      </div>
+                      {answers.educationLevel === 'school' && <Check className="w-5 h-5 text-amber-300" />}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-base font-bold text-white">School Student (K-12)</h4>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          Grades 6–12
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+                        Personalized for school boards (CBSE, ICSE, State Boards, IB, Cambridge). We never ask for your school's name or location!
+                      </p>
+                    </div>
                   </div>
-                  <input
-                    type="text"
-                    autoFocus
-                    value={answers.college}
-                    onChange={(e) => setAnswers({ ...answers, college: e.target.value })}
-                    onKeyDown={(e) => e.key === 'Enter' && answers.college.trim() && handleNext()}
-                    placeholder="Enter your university or institution name..."
-                    className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/[0.06] border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 text-base sm:text-sm font-medium shadow-inner transition-all backdrop-blur-md"
-                  />
-                </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono text-slate-300 uppercase tracking-wider font-semibold">
-                      Popular Institutions (Click to auto-select):
-                    </span>
-                    {answers.college && (
-                      <span className="text-[11px] font-mono text-cyan-300">Selected</span>
-                    )}
+                  {/* Option B: College */}
+                  <div
+                    onClick={() => {
+                      sound.playClick();
+                      setAnswers((prev) => ({
+                        ...prev,
+                        educationLevel: 'college',
+                        subjects: prev.educationLevel === 'college' && prev.subjects?.length ? prev.subjects : COMMON_SUBJECTS.slice(0, 3).map(s => s.name),
+                        difficultTopics: prev.educationLevel === 'college' && prev.difficultTopics?.length ? prev.difficultTopics : [COMMON_DIFFICULT_TOPICS[0].name],
+                        cgpa: prev.cgpa > 10 ? 8.4 : prev.cgpa,
+                        targetCgpa: prev.targetCgpa > 10 ? 9.0 : prev.targetCgpa
+                      }));
+                    }}
+                    className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-4 ${
+                      answers.educationLevel !== 'school'
+                        ? 'bg-gradient-to-br from-purple-600/30 via-pink-600/20 to-purple-900/30 border-purple-400 text-white shadow-[0_0_25px_rgba(168,85,247,0.3)]'
+                        : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/25 hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-2xl">
+                        🎓
+                      </div>
+                      {answers.educationLevel !== 'school' && <Check className="w-5 h-5 text-purple-300" />}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-base font-bold text-white">College / University</h4>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          Higher Ed
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+                        Tailored for undergraduate & postgraduate engineering, computing, sciences, and professional degree programs.
+                      </p>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {COMMON_COLLEGES.map((c, i) => {
-                      const isSelected = answers.college === c.name;
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: School Board (if school) vs College / University (if college) */}
+            {currentStep === 3 && (
+              answers.educationLevel === 'school' ? (
+                <div className="space-y-4">
+                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center gap-2.5">
+                    <ShieldCheck className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                    <p className="text-xs text-amber-200">
+                      <span className="font-semibold text-white">Privacy Protection:</span> We will adapt your curriculum to your board's standards. We do not ask or store what school you attend.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {SCHOOL_BOARDS.map((b, i) => {
+                      const isSelected = answers.board === b.name;
                       return (
                         <button
                           key={i}
                           type="button"
                           onClick={() => {
                             sound.playClick();
-                            setAnswers({ ...answers, college: c.name });
+                            setAnswers({ ...answers, board: b.name });
                           }}
-                          className={`text-left p-3 rounded-xl border transition-all flex items-center justify-between gap-2 ${
+                          className={`text-left p-3.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
                             isSelected
-                              ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_15px_rgba(34,211,238,0.25)]'
+                              ? 'bg-amber-500/20 border-amber-400 text-white shadow-[0_0_15px_rgba(245,158,11,0.25)]'
                               : 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08] hover:border-white/20'
                           }`}
                         >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <span className="text-base flex-shrink-0">{c.emoji}</span>
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="text-xl flex-shrink-0">{b.emoji}</span>
                             <div className="min-w-0">
-                              <p className="text-xs font-semibold truncate">{c.name}</p>
-                              <p className="text-[10px] text-slate-400 font-mono truncate">{c.tag}</p>
+                              <p className="text-xs font-bold truncate">{b.name}</p>
+                              <p className="text-[10px] text-slate-400 truncate">{b.fullName}</p>
                             </div>
                           </div>
-                          {isSelected && <Check className="w-4 h-4 text-cyan-300 flex-shrink-0" />}
+                          {isSelected && <Check className="w-4 h-4 text-amber-300 flex-shrink-0" />}
                         </button>
                       );
                     })}
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Step 3: Course / Degree */}
-            {currentStep === 3 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {COURSES.map((c, i) => {
-                  const Icon = c.icon;
-                  const isSelected = answers.course === c.name;
-                  return (
-                    <div
-                      key={i}
-                      onClick={() => {
-                        sound.playClick();
-                        setAnswers({ ...answers, course: c.name });
-                      }}
-                      className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-3 ${
-                        isSelected
-                          ? 'bg-gradient-to-br from-purple-600/30 via-pink-600/20 to-purple-900/30 border-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.3)]'
-                          : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/25 hover:bg-white/[0.08]'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2.5">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isSelected ? 'bg-purple-500/30 text-purple-200 border border-purple-400/40' : 'bg-white/[0.08] text-slate-300'}`}>
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/10 text-slate-300 border border-white/10">
-                            {c.code}
-                          </span>
-                        </div>
-                        {isSelected && <Check className="w-4 h-4 text-purple-300" />}
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white">{c.name}</p>
-                        <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">{c.desc}</p>
-                      </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-cyan-400">
+                      <School className="w-5 h-5" />
                     </div>
-                  );
-                })}
-              </div>
+                    <input
+                      type="text"
+                      autoFocus
+                      value={answers.college}
+                      onChange={(e) => setAnswers({ ...answers, college: e.target.value })}
+                      onKeyDown={(e) => e.key === 'Enter' && answers.college.trim() && handleNext()}
+                      placeholder="Enter your university or institution name..."
+                      className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/[0.06] border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 text-base sm:text-sm font-medium shadow-inner transition-all backdrop-blur-md"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-mono text-slate-300 uppercase tracking-wider font-semibold">
+                        Popular Institutions (Click to auto-select):
+                      </span>
+                      {answers.college && (
+                        <span className="text-[11px] font-mono text-cyan-300">Selected</span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {COMMON_COLLEGES.map((c, i) => {
+                        const isSelected = answers.college === c.name;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => {
+                              sound.playClick();
+                              setAnswers({ ...answers, college: c.name });
+                            }}
+                            className={`text-left p-3 rounded-xl border transition-all flex items-center justify-between gap-2 ${
+                              isSelected
+                                ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_15px_rgba(34,211,238,0.25)]'
+                                : 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08] hover:border-white/20'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span className="text-base flex-shrink-0">{c.emoji}</span>
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold truncate">{c.name}</p>
+                                <p className="text-[10px] text-slate-400 font-mono truncate">{c.tag}</p>
+                              </div>
+                            </div>
+                            {isSelected && <Check className="w-4 h-4 text-cyan-300 flex-shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )
             )}
 
-            {/* Step 4: Specialization */}
+            {/* Step 4: Grade (if school) vs Course / Degree (if college) */}
             {currentStep === 4 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {SPECIALIZATIONS.map((s, i) => {
-                  const Icon = s.icon;
-                  const isSelected = answers.specialization === s.name;
-                  return (
-                    <div
-                      key={i}
-                      onClick={() => {
-                        sound.playClick();
-                        setAnswers({ ...answers, specialization: s.name });
-                      }}
-                      className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-start justify-between gap-3 ${
-                        isSelected
-                          ? 'bg-purple-600/25 border-purple-400 text-white shadow-[0_0_15px_rgba(168,85,247,0.25)]'
-                          : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.08]'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3 min-w-0">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${isSelected ? 'bg-purple-500/30 text-purple-200' : 'bg-white/[0.08] text-slate-300'}`}>
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="text-xs font-bold text-white truncate">{s.name}</p>
-                            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 flex-shrink-0">
-                              {s.badge}
-                            </span>
-                          </div>
-                          <p className="text-[10px] text-slate-300 mt-0.5 leading-snug">{s.desc}</p>
-                        </div>
-                      </div>
-                      {isSelected && <Check className="w-4 h-4 text-purple-300 flex-shrink-0 mt-1" />}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Step 5: Semester Grid */}
-            {currentStep === 5 && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {SEMESTERS.map((item) => {
-                    const isSelected = answers.semester === item.sem;
+              answers.educationLevel === 'school' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                  {SCHOOL_GRADES.map((g, i) => {
+                    const isSelected = answers.grade === g.grade;
                     return (
-                      <button
-                        key={item.sem}
-                        type="button"
+                      <div
+                        key={i}
                         onClick={() => {
                           sound.playClick();
-                          setAnswers({ ...answers, semester: item.sem });
+                          setAnswers({ ...answers, grade: g.grade });
                         }}
-                        className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 ${
+                        className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between gap-2.5 ${
                           isSelected
-                            ? 'bg-gradient-to-b from-purple-600/30 to-pink-600/30 border-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.35)]'
+                            ? 'bg-gradient-to-br from-amber-500/30 to-pink-600/25 border-amber-400 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)]'
                             : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/25 hover:bg-white/[0.08]'
                         }`}
                       >
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-semibold">{item.year}</span>
-                        <span className="text-xl font-bold font-heading text-white">Sem {item.roman}</span>
-                        <span className="text-[10px] text-purple-300 font-mono px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30">
-                          {item.term}
-                        </span>
-                      </button>
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{g.emoji}</span>
+                          <div>
+                            <p className="text-sm font-bold text-white">{g.grade}</p>
+                            <p className="text-[10px] text-slate-400 font-mono">{g.label} • {g.level}</p>
+                          </div>
+                        </div>
+                        {isSelected && <Check className="w-4 h-4 text-amber-300 flex-shrink-0" />}
+                      </div>
                     );
                   })}
                 </div>
-                <p className="text-xs text-slate-300 text-center font-mono">
-                  Currently selected: <span className="text-purple-300 font-bold">Semester {answers.semester}</span>
-                </p>
-              </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {COURSES.map((c, i) => {
+                    const Icon = c.icon;
+                    const isSelected = answers.course === c.name;
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => {
+                          sound.playClick();
+                          setAnswers({ ...answers, course: c.name });
+                        }}
+                        className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-3 ${
+                          isSelected
+                            ? 'bg-gradient-to-br from-purple-600/30 via-pink-600/20 to-purple-900/30 border-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.3)]'
+                            : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/25 hover:bg-white/[0.08]'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2.5">
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isSelected ? 'bg-purple-500/30 text-purple-200 border border-purple-400/40' : 'bg-white/[0.08] text-slate-300'}`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/10 text-slate-300 border border-white/10">
+                              {c.code}
+                            </span>
+                          </div>
+                          {isSelected && <Check className="w-4 h-4 text-purple-300" />}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">{c.name}</p>
+                          <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">{c.desc}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )
             )}
 
-            {/* Step 6: Current Cumulative CGPA */}
+            {/* Step 5: Stream (if school) vs Specialization (if college) */}
+            {currentStep === 5 && (
+              answers.educationLevel === 'school' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {SCHOOL_STREAMS.map((s, i) => {
+                    const isSelected = answers.specialization === s.name;
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => {
+                          sound.playClick();
+                          setAnswers({ ...answers, specialization: s.name });
+                        }}
+                        className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-start justify-between gap-3 ${
+                          isSelected
+                            ? 'bg-amber-500/25 border-amber-400 text-white shadow-[0_0_15px_rgba(245,158,11,0.25)]'
+                            : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.08]'
+                        }`}
+                      >
+                        <div className="min-w-0 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs font-bold text-white truncate">{s.name}</p>
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 flex-shrink-0">
+                              {s.badge}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-300 leading-snug">{s.desc}</p>
+                        </div>
+                        {isSelected && <Check className="w-4 h-4 text-amber-300 flex-shrink-0 mt-0.5" />}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {SPECIALIZATIONS.map((s, i) => {
+                    const Icon = s.icon;
+                    const isSelected = answers.specialization === s.name;
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => {
+                          sound.playClick();
+                          setAnswers({ ...answers, specialization: s.name });
+                        }}
+                        className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-start justify-between gap-3 ${
+                          isSelected
+                            ? 'bg-purple-600/25 border-purple-400 text-white shadow-[0_0_15px_rgba(168,85,247,0.25)]'
+                            : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.08]'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${isSelected ? 'bg-purple-500/30 text-purple-200' : 'bg-white/[0.08] text-slate-300'}`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-white truncate">{s.name}</p>
+                              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 flex-shrink-0">
+                                {s.badge}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-300 mt-0.5 leading-snug">{s.desc}</p>
+                          </div>
+                        </div>
+                        {isSelected && <Check className="w-4 h-4 text-purple-300 flex-shrink-0 mt-1" />}
+                      </div>
+                    );
+                  })}
+                </div>
+              )
+            )}
+
+            {/* Step 6: Term / Exam Cycle (if school) vs Semester (if college) */}
             {currentStep === 6 && (
+              answers.educationLevel === 'school' ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {SCHOOL_TERMS.map((t) => {
+                      const isSelected = answers.semester === t.term;
+                      return (
+                        <button
+                          key={t.term}
+                          type="button"
+                          onClick={() => {
+                            sound.playClick();
+                            setAnswers({ ...answers, semester: t.term });
+                          }}
+                          className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between gap-2.5 ${
+                            isSelected
+                              ? 'bg-gradient-to-br from-amber-500/30 to-pink-600/25 border-amber-400 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)]'
+                              : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-white">{t.label}</span>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              {t.period}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-300 leading-relaxed">{t.desc}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-slate-300 text-center font-mono">
+                    Active target: <span className="text-amber-300 font-bold">{SCHOOL_TERMS.find(t => t.term === answers.semester)?.label || 'Term 1'}</span>
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    {SEMESTERS.map((item) => {
+                      const isSelected = answers.semester === item.sem;
+                      return (
+                        <button
+                          key={item.sem}
+                          type="button"
+                          onClick={() => {
+                            sound.playClick();
+                            setAnswers({ ...answers, semester: item.sem });
+                          }}
+                          className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-gradient-to-b from-purple-600/30 to-pink-600/30 border-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.35)]'
+                              : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/25 hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-semibold">{item.year}</span>
+                          <span className="text-xl font-bold font-heading text-white">Sem {item.roman}</span>
+                          <span className="text-[10px] text-purple-300 font-mono px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30">
+                            {item.term}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-slate-300 text-center font-mono">
+                    Currently selected: <span className="text-purple-300 font-bold">Semester {answers.semester}</span>
+                  </p>
+                </div>
+              )
+            )}
+
+            {/* Step 7: Current % (if school) vs Current CGPA (if college) */}
+            {currentStep === 7 && (
               <div className="space-y-5">
                 <div className="p-4 rounded-2xl bg-white/[0.05] border border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
                   <div>
-                    <span className="text-xs font-mono text-slate-300 block">Current Cumulative CGPA</span>
-                    <span className="text-[11px] text-slate-400">Measured on standard 10.0 scale</span>
+                    <span className="text-xs font-mono text-slate-300 block">
+                      {answers.educationLevel === 'school' ? 'Current Overall Marks Percentage' : 'Current Cumulative CGPA'}
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      {answers.educationLevel === 'school' ? 'Based on your latest term or unit tests' : 'Measured on standard 10.0 scale'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-bold font-mono text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-300">
-                      {answers.cgpa.toFixed(2)}
+                      {answers.educationLevel === 'school' ? `${answers.cgpa.toFixed(0)}%` : answers.cgpa.toFixed(2)}
                     </span>
                     <span className={`text-[10px] font-mono px-2.5 py-1 rounded-xl border ${getCgpaBadge(answers.cgpa).color}`}>
                       {getCgpaBadge(answers.cgpa).label}
@@ -684,25 +1000,36 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <div className="space-y-2">
                   <input
                     type="range"
-                    min="4.0"
-                    max="10.0"
-                    step="0.05"
+                    min={answers.educationLevel === 'school' ? "40" : "4.0"}
+                    max={answers.educationLevel === 'school' ? "100" : "10.0"}
+                    step={answers.educationLevel === 'school' ? "1" : "0.05"}
                     value={answers.cgpa}
                     onChange={(e) => setAnswers({ ...answers, cgpa: parseFloat(e.target.value) })}
                     className="w-full accent-pink-500 cursor-pointer h-2 bg-white/10 rounded-lg"
                   />
                   <div className="flex justify-between text-[11px] font-mono text-slate-400">
-                    <span>4.00</span>
-                    <span>6.00</span>
-                    <span>8.00</span>
-                    <span>10.00</span>
+                    {answers.educationLevel === 'school' ? (
+                      <>
+                        <span>40%</span>
+                        <span>60%</span>
+                        <span>80%</span>
+                        <span>100%</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>4.00</span>
+                        <span>6.00</span>
+                        <span>8.00</span>
+                        <span>10.00</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
                 {/* Quick Presets */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[10px] font-mono text-slate-400 uppercase">Quick Jump:</span>
-                  {[7.0, 7.5, 8.0, 8.5, 9.0, 9.5].map((val) => (
+                  {(answers.educationLevel === 'school' ? [65, 75, 80, 85, 90, 95] : [7.0, 7.5, 8.0, 8.5, 9.0, 9.5]).map((val) => (
                     <button
                       key={val}
                       type="button"
@@ -713,27 +1040,31 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                           : 'bg-white/[0.04] border-white/10 text-slate-400 hover:text-white'
                       }`}
                     >
-                      {val.toFixed(2)}
+                      {answers.educationLevel === 'school' ? `${val}%` : val.toFixed(2)}
                     </button>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Step 7: Target CGPA Goal */}
-            {currentStep === 7 && (
+            {/* Step 8: Target % (if school) vs Target CGPA (if college) */}
+            {currentStep === 8 && (
               <div className="space-y-5">
                 <div className="p-4 rounded-2xl bg-white/[0.05] border border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
                   <div>
-                    <span className="text-xs font-mono text-slate-300 block">Target CGPA Goal</span>
-                    <span className="text-[11px] text-slate-400">Target for Semester {answers.semester}</span>
+                    <span className="text-xs font-mono text-slate-300 block">
+                      {answers.educationLevel === 'school' ? 'Target Percentage Goal' : 'Target CGPA Goal'}
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      {answers.educationLevel === 'school' ? `Target for ${answers.grade || 'this year'}` : `Target for Semester ${answers.semester}`}
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-bold font-mono text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.4)]">
-                      {answers.targetCgpa.toFixed(2)}
+                      {answers.educationLevel === 'school' ? `${answers.targetCgpa.toFixed(0)}%` : answers.targetCgpa.toFixed(2)}
                     </span>
                     <span className="text-[10px] font-mono px-2.5 py-1 rounded-xl border bg-emerald-500/15 border-emerald-500/30 text-emerald-300">
-                      {cgpaDelta >= 0 ? `+${cgpaDelta.toFixed(2)} Delta Elevation` : 'Baseline'}
+                      {cgpaDelta >= 0 ? `+${cgpaDelta.toFixed(answers.educationLevel === 'school' ? 0 : 2)}${answers.educationLevel === 'school' ? '%' : ''} Delta Elevation` : 'Baseline'}
                     </span>
                   </div>
                 </div>
@@ -741,41 +1072,54 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <div className="space-y-2">
                   <input
                     type="range"
-                    min="6.0"
-                    max="10.0"
-                    step="0.05"
+                    min={answers.educationLevel === 'school' ? "50" : "6.0"}
+                    max={answers.educationLevel === 'school' ? "100" : "10.0"}
+                    step={answers.educationLevel === 'school' ? "1" : "0.05"}
                     value={answers.targetCgpa}
                     onChange={(e) => setAnswers({ ...answers, targetCgpa: parseFloat(e.target.value) })}
                     className="w-full accent-emerald-500 cursor-pointer h-2 bg-white/10 rounded-lg"
                   />
                   <div className="flex justify-between text-[11px] font-mono text-slate-400">
-                    <span>6.00</span>
-                    <span>7.50</span>
-                    <span>9.00</span>
-                    <span>10.00</span>
+                    {answers.educationLevel === 'school' ? (
+                      <>
+                        <span>50%</span>
+                        <span>70%</span>
+                        <span>85%</span>
+                        <span>100%</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>6.00</span>
+                        <span>7.50</span>
+                        <span>9.00</span>
+                        <span>10.00</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-3">
                   <Target className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-emerald-200/90 leading-relaxed">
-                    MindBridge calculates optimal timetable study blocks, spaced repetition intervals, and high-frequency diagnostic test schedules to bridge the gap between your current <span className="font-bold text-white">{answers.cgpa.toFixed(2)}</span> and target <span className="font-bold text-white">{answers.targetCgpa.toFixed(2)}</span>.
+                    MindBridge calculates optimal timetable study blocks, spaced repetition intervals, and high-frequency diagnostic test schedules to bridge the gap between your current <span className="font-bold text-white">{answers.educationLevel === 'school' ? `${answers.cgpa.toFixed(0)}%` : answers.cgpa.toFixed(2)}</span> and target <span className="font-bold text-white">{answers.educationLevel === 'school' ? `${answers.targetCgpa.toFixed(0)}%` : answers.targetCgpa.toFixed(2)}</span>.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Step 8: Subjects */}
-            {currentStep === 8 && (
+            {/* Step 9: Subjects */}
+            {currentStep === 9 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-mono text-slate-300 uppercase tracking-wider font-semibold">
-                    Select your active courses ({answers.subjects.length} selected):
+                    {answers.educationLevel === 'school'
+                      ? `Select your school subjects (${answers.subjects.length} selected):`
+                      : `Select your active courses (${answers.subjects.length} selected):`}
                   </span>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {COMMON_SUBJECTS.map((sub, i) => {
+                  {(answers.educationLevel === 'school' ? SCHOOL_SUBJECTS : COMMON_SUBJECTS).map((sub, i) => {
                     const isSelected = answers.subjects.includes(sub.name);
                     return (
                       <button
@@ -803,13 +1147,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     value={customSubjectInput}
                     onChange={(e) => setCustomSubjectInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addCustomSubject()}
-                    placeholder="Add any other course or elective code..."
+                    placeholder={answers.educationLevel === 'school' ? "Add any other school subject..." : "Add any other course or elective code..."}
                     className="flex-1 text-xs px-4 py-3 rounded-xl bg-white/[0.06] border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-purple-400"
                   />
                   <button
                     type="button"
                     onClick={addCustomSubject}
-                    className="btn-apple-glass px-4 text-xs font-semibold flex items-center gap-1.5"
+                    className="btn-apple-glass px-4 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5 text-purple-400" />
                     <span>Add</span>
@@ -818,86 +1162,95 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               </div>
             )}
 
-            {/* Step 9: Realistic Daily Study Hours */}
-            {currentStep === 9 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {STUDY_HOURS.map((item, i) => {
-                  const Icon = item.icon;
-                  const isSelected = answers.dailyStudyHours === item.hours;
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => {
-                        sound.playClick();
-                        setAnswers({ ...answers, dailyStudyHours: item.hours });
-                      }}
-                      className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between gap-3 ${
-                        isSelected
-                          ? 'bg-gradient-to-br from-purple-600/30 to-pink-600/20 border-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.3)]'
-                          : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.08]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isSelected ? 'bg-purple-500/30 text-purple-200' : 'bg-white/[0.08] text-slate-300'}`}>
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <span className="text-sm font-bold text-white">{item.label}</span>
-                        </div>
-                        {item.badge && (
-                          <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">
-                            {item.badge}
-                          </span>
-                        )}
-                        {isSelected && !item.badge && <Check className="w-4 h-4 text-purple-300" />}
-                      </div>
-
-                      <div>
-                        <span className="text-[11px] font-mono text-purple-300 block font-semibold">{item.yield}</span>
-                        <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">{item.desc}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Step 10: Preferred Study Time */}
+            {/* Step 10: Realistic Daily Study Hours & Preferred Study Time */}
             {currentStep === 10 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {STUDY_TIMES.map((item, i) => {
-                  const Icon = item.icon;
-                  const isSelected = answers.preferredStudyTime.includes(item.label);
-                  return (
-                    <div
-                      key={i}
-                      onClick={() => {
-                        sound.playClick();
-                        setAnswers({ ...answers, preferredStudyTime: `${item.label} (${item.time})` });
-                      }}
-                      className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-3 ${
-                        isSelected
-                          ? `bg-gradient-to-br ${item.gradient} ${item.border} text-white shadow-xl`
-                          : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.08]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-white/[0.08] flex items-center justify-center text-white">
-                            <Icon className="w-4 h-4" />
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <span className="text-[11px] font-mono text-slate-300 uppercase tracking-wider font-semibold block">
+                    Daily Study Commitment:
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {STUDY_HOURS.map((item, i) => {
+                      const Icon = item.icon;
+                      const isSelected = answers.dailyStudyHours === item.hours;
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => {
+                            sound.playClick();
+                            setAnswers({ ...answers, dailyStudyHours: item.hours });
+                          }}
+                          className={`p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between gap-2.5 ${
+                            isSelected
+                              ? 'bg-gradient-to-br from-purple-600/30 to-pink-600/20 border-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.3)]'
+                              : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isSelected ? 'bg-purple-500/30 text-purple-200' : 'bg-white/[0.08] text-slate-300'}`}>
+                                <Icon className="w-4 h-4" />
+                              </div>
+                              <span className="text-sm font-bold text-white">{item.label}</span>
+                            </div>
+                            {item.badge && (
+                              <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">
+                                {item.badge}
+                              </span>
+                            )}
+                            {isSelected && !item.badge && <Check className="w-4 h-4 text-purple-300" />}
                           </div>
+
                           <div>
-                            <p className="text-xs font-bold text-white">{item.label}</p>
-                            <p className="text-[10px] text-slate-400 font-mono">{item.time}</p>
+                            <span className="text-[11px] font-mono text-purple-300 block font-semibold">{item.yield}</span>
+                            <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">{item.desc}</p>
                           </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-white/10">
+                  <span className="text-[11px] font-mono text-slate-300 uppercase tracking-wider font-semibold block">
+                    Peak Brain Focus Window:
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {STUDY_TIMES.map((item, i) => {
+                      const Icon = item.icon;
+                      const isSelected = answers.preferredStudyTime.includes(item.label);
+                      return (
+                        <div
+                          key={i}
+                          onClick={() => {
+                            sound.playClick();
+                            setAnswers({ ...answers, preferredStudyTime: `${item.label} (${item.time})` });
+                          }}
+                          className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2 ${
+                            isSelected
+                              ? `bg-gradient-to-br ${item.gradient} ${item.border} text-white shadow-xl`
+                              : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-lg bg-white/[0.08] flex items-center justify-center text-white">
+                                <Icon className="w-3.5 h-3.5" />
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-white">{item.label}</p>
+                                <p className="text-[9px] text-slate-400 font-mono">{item.time}</p>
+                              </div>
+                            </div>
+                            {isSelected && <Check className="w-4 h-4 text-white" />}
+                          </div>
+                          <p className="text-[10px] text-slate-300 leading-snug">{item.desc}</p>
                         </div>
-                        {isSelected && <Check className="w-4 h-4 text-white" />}
-                      </div>
-                      <p className="text-[11px] text-slate-300 leading-relaxed">{item.desc}</p>
-                    </div>
-                  );
-                })}
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -911,7 +1264,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {COMMON_DIFFICULT_TOPICS.map((topic, i) => {
+                  {(answers.educationLevel === 'school' ? SCHOOL_DIFFICULT_TOPICS : COMMON_DIFFICULT_TOPICS).map((topic, i) => {
                     const isSelected = answers.difficultTopics.includes(topic.name);
                     return (
                       <button
@@ -939,13 +1292,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     value={customDifficultInput}
                     onChange={(e) => setCustomDifficultInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addCustomDifficultTopic()}
-                    placeholder="Add any other difficult chapter, algorithm, or theorem..."
+                    placeholder={answers.educationLevel === 'school' ? "Add any other difficult chapter, formula, or topic..." : "Add any other difficult chapter, algorithm, or theorem..."}
                     className="flex-1 text-xs px-4 py-3 rounded-xl bg-white/[0.06] border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-rose-400"
                   />
                   <button
                     type="button"
                     onClick={addCustomDifficultTopic}
-                    className="btn-apple-glass px-4 text-xs font-semibold flex items-center gap-1.5"
+                    className="btn-apple-glass px-4 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5 text-rose-400" />
                     <span>Add</span>

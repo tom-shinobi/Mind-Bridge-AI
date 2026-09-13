@@ -81,6 +81,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   const [selectedChannelId, setSelectedChannelId] = useState<string>('ch_global_general');
   const [channelMessages, setChannelMessages] = useState<ChatMessage[]>([]);
   const [chatInputText, setChatInputText] = useState('');
+  const [typingUser, setTypingUser] = useState<string | null>(null);
   const [isChatCodeOpen, setIsChatCodeOpen] = useState(false);
   const [chatCodeText, setChatCodeText] = useState('');
   const chatBottomRef = useRef<HTMLDivElement | null>(null);
@@ -136,14 +137,27 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     if (!selectedChannelId) return;
     const msgs = communityService.getChannelMessages(selectedChannelId);
     setChannelMessages(msgs);
+    setTypingUser(null);
 
     // Subscribe to realtime updates
     const unsubscribe = communityService.subscribeChannel(selectedChannelId, (newMsg: ChatMessage) => {
-      setChannelMessages((prev) => [...prev, newMsg]);
+      setChannelMessages((prev) => {
+        if (prev.some((m) => m.id === newMsg.id)) return prev;
+        return [...prev, newMsg];
+      });
       setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     });
 
-    return () => unsubscribe();
+    const unsubscribeTyping = communityService.subscribeTyping((chId, username) => {
+      if (chId === selectedChannelId) {
+        setTypingUser(username);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeTyping();
+    };
   }, [selectedChannelId]);
 
   // Sync Active DM messages
@@ -151,6 +165,21 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     if (!activeConversationId) return;
     setActiveDmMessages(communityService.getDirectMessages(activeConversationId));
     setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+
+    const unsubscribe = communityService.subscribeToDMs((convId, newDM) => {
+      if (convId === activeConversationId) {
+        setActiveDmMessages((prev) => {
+          if (prev.some((m) => m.id === newDM.id)) return prev;
+          return [...prev, newDM];
+        });
+        setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      }
+      setConversations((prev) =>
+        prev.map((c) => (c.id === convId ? { ...c, lastMessage: newDM } : c))
+      );
+    });
+
+    return () => unsubscribe();
   }, [activeConversationId]);
 
   // Account Visibility Toggle
@@ -1307,6 +1336,42 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
 
             {/* Chat Input Box */}
             <div className="p-4 border-t border-slate-800 bg-slate-950/60 space-y-2">
+              {/* Live Peer Typing Indicator */}
+              {typingUser && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300 animate-pulse">
+                  <span className="flex gap-1 items-center">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.2s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.4s]" />
+                  </span>
+                  <span><strong className="text-white">{typingUser}</strong> is typing an academic explanation...</span>
+                </div>
+              )}
+
+              {/* Doubt Starter Prompt Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 shrink-0">Quick Doubts:</span>
+                {[
+                  '💡 How does B+ Tree split leaf nodes?',
+                  '💡 Why 3 duplicate ACKs for TCP fast retransmit?',
+                  '💡 3NF vs BCNF superkey condition?',
+                  '💡 Clock page replacement vs LRU?',
+                  '💡 DP memoization vs tabulation state?'
+                ].map((doubt, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      sound.playClick();
+                      setChatInputText(doubt.replace('💡 ', ''));
+                    }}
+                    className="shrink-0 px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-600/30 text-slate-300 hover:text-indigo-200 border border-slate-700/60 hover:border-indigo-500/40 text-[11px] font-medium transition-all cursor-pointer"
+                  >
+                    {doubt}
+                  </button>
+                ))}
+              </div>
+
               {isChatCodeOpen && (
                 <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
                   <div className="flex justify-between items-center text-[10px] text-slate-400">

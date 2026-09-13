@@ -1,6 +1,7 @@
 import type { Test, TutorMessage } from '../types';
 import { storageService } from './storageService';
 import { calendarService } from './calendarService';
+import { noteService } from './noteService';
 
 export interface TutorResponse {
   message: string;
@@ -37,9 +38,10 @@ class AIService {
   public getApiStatus(): ApiStatus {
     const settings = storageService.getAISettings();
     const rawKey = (settings.openRouterApiKey || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-2.0-flash';
     return {
       ...this.apiStatus,
-      model: settings.model || 'gemini-2.5-flash',
+      model: activeModel,
       keyMasked: rawKey ? 'Active & Encrypted' : 'None'
     };
   }
@@ -135,6 +137,17 @@ PERSISTENT ACADEMIC MEMORY & COGNITIVE PREFERENCES:
 - Mastered Strengths: ${mem.strengths && mem.strengths.length > 0 ? mem.strengths.join(', ') : 'None specified'}
 ${mem.notes ? `- Special Tutor Notes: ${mem.notes}` : ''}` : '';
 
+      const dreamNotes = noteService.getNotesForAIMemory();
+      const notesContext = dreamNotes.length > 0
+        ? `STUDENT'S PERSONAL STUDY NOTES & FLASHCARDS (SAVED IN AI MEMORY 🧠):
+${dreamNotes.map((n, i) => `[Note ${i + 1}] "${n.title}" (${n.subject} > ${n.topic})
+Tags: ${n.tags.join(', ')}
+${n.youtubeUrl ? `Referenced Video: ${n.youtubeUrl}` : ''}
+Content:
+${n.content}
+`).join('\n')}`
+        : 'No personal notes indexed in AI memory yet.';
+
       return `=== AUTHENTICATED STUDENT USER DATA ===
 STUDENT NAME: ${profile.name}
 DEGREE & PROGRAM: ${profile.degree} (Semester ${profile.semester})
@@ -159,6 +172,8 @@ FLAGGED SYLLABUS TOPICS REQUIRING ATTENTION:
 ${weakTopics || 'All syllabus topics above 50%'}
 
 ${calendarService.getCalendarAIContext()}
+
+${notesContext}
 ----------------------------------------`;
     } catch (e) {
       console.warn('Error reading student context for AI:', e);
@@ -176,14 +191,14 @@ ${calendarService.getCalendarAIContext()}
   ): Promise<TutorResponse> {
     const settings = storageService.getAISettings();
     const studentContext = this.getStudentContext();
-    const activeModel = settings.model || 'gemini-2.5-flash';
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-2.0-flash';
     const apiKey = (settings.openRouterApiKey || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
 
-    // Try OpenRouter if API key is provided
+    // Try OpenRouter or Google AI Studio if API key is provided
     if (apiKey) {
       try {
         const systemPrompt = `You are Mind Bridge AI, the personal AI academic tutor and learning assistant for the student described below.
-You have direct, authenticated access to the student's real academic record, exam marks, diagnosed learning gaps, personalized syllabus, and daily timetable.
+You have direct, authenticated access to the student's real academic record, exam marks, diagnosed learning gaps, personalized syllabus, daily timetable, and personal study notes.
 
 ${studentContext}
 
@@ -192,7 +207,7 @@ CURRENT SUBJECT / CONVERSATION SCOPE: "${topic}"
 YOUR INSTRUCTIONS:
 1. USER DATA AWARENESS:
    - If the student asks about their grades, learning gaps, schedule, weak topics, or how to improve, cite their actual numbers (e.g. 8.42 CGPA, 38% mastery in B-Trees, 62% DBMS Midterm, today's schedule).
-   - Tailor all learning explanations and advice to their level (B.Tech CSE Semester 6) and visual/hands-on learning style.
+   - Tailor all learning explanations and advice to their academic standing and visual/hands-on learning style.
 
 2. ACADEMIC TUTORING & GENERAL QUESTIONS:
    - When teaching or answering concept questions, provide deep yet crystal-clear, intuitive explanations with analogies and examples.
@@ -214,7 +229,10 @@ YOUR INSTRUCTIONS:
    - Use bold markdown asterisks (**term**) for core definitions and vital takeaways.
    - Use markdown headings (## and ###), structured bullet points (- ), and fenced code blocks for tree/code visualizations.
 
-5. OUTPUT FORMAT:
+5. STUDENT DREAMNOTES AWARENESS:
+   - The student has saved personal notes and learning materials in AI Memory. When they mention or ask to review their notes, formulas, or concepts from DreamNotes, actively reference and cite them to reinforce continuous learning.
+
+6. OUTPUT FORMAT:
    You MUST return a valid JSON object matching this schema:
    {
      "message": "Your markdown-formatted answer, feedback, or explanation to the student.",
@@ -233,7 +251,7 @@ YOUR INSTRUCTIONS:
 
         if (isGoogleGemini && apiKey.startsWith('AIzaSy')) {
           // Direct Google AI Studio Gemini Engine
-          const geminiModel = 'gemini-2.5-flash';
+          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.5-flash' ? 'gemini-2.0-flash' : activeModel) : 'gemini-2.0-flash';
           const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
 
           const geminiContents = [
@@ -282,13 +300,21 @@ YOUR INSTRUCTIONS:
               parsedErrMsg = errJson.error?.message || errBody;
             } catch {}
 
+            const isLeakedOrRevoked = response.status === 403 || parsedErrMsg.toLowerCase().includes('leaked') || parsedErrMsg.toLowerCase().includes('permission_denied');
+
             this.apiStatus = {
               isLive: false,
               isRateLimited: response.status === 429,
-              lastError: `Google AI Studio Error (${response.status}): ${parsedErrMsg}`,
-              statusMessage: response.status === 429 ? 'Google AI Studio Quota Exceeded' : `Google AI Studio Error (${response.status})`,
+              lastError: isLeakedOrRevoked
+                ? 'Google AI key was revoked/leaked. Please paste your personal free key from Google AI Studio.'
+                : `Google AI Studio Error (${response.status}): ${parsedErrMsg}`,
+              statusMessage: isLeakedOrRevoked
+                ? 'Key Revoked — Paste Personal Key'
+                : response.status === 429
+                ? 'Google AI Studio Quota Exceeded'
+                : `Google AI Studio Error (${response.status})`,
               model: geminiModel,
-              keyMasked: 'Active & Encrypted'
+              keyMasked: apiKey ? 'Active & Encrypted' : 'None'
             };
             this.notify();
           }
@@ -403,7 +429,7 @@ YOUR INSTRUCTIONS:
   public async testConnection(customKey?: string, customModel?: string): Promise<{ success: boolean; message: string; latencyMs?: number }> {
     const settings = storageService.getAISettings();
     const key = (customKey || settings.openRouterApiKey || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
-    const model = customModel || settings.model || 'gemini-2.5-flash';
+    const model = customModel || (settings.model && settings.model !== 'gemini-2.5-flash' ? settings.model : 'gemini-2.0-flash');
 
     if (!key) {
       return { success: false, message: 'No API key configured.' };
@@ -413,7 +439,7 @@ YOUR INSTRUCTIONS:
     try {
       if (key.startsWith('AIzaSy')) {
         // Direct Google AI Studio Gemini Health Check
-        const geminiModel = 'gemini-2.5-flash';
+        const geminiModel = model.includes('gemini') ? (model === 'gemini-2.5-flash' ? 'gemini-2.0-flash' : model) : 'gemini-2.0-flash';
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${key}`;
         const res = await fetch(url, {
           method: 'POST',
@@ -447,18 +473,24 @@ YOUR INSTRUCTIONS:
             parsed = json.error?.message || errText;
           } catch {}
 
+          const isLeaked = res.status === 403 || parsed.toLowerCase().includes('leaked') || parsed.toLowerCase().includes('permission_denied');
+
           this.apiStatus = {
             isLive: false,
             isRateLimited: res.status === 429,
-            lastError: `Google AI Studio Error (${res.status}): ${parsed}`,
-            statusMessage: `Google AI Studio Error (${res.status})`,
+            lastError: isLeaked
+              ? 'Google API key was revoked/leaked. Please paste your personal free key from Google AI Studio.'
+              : `Google AI Studio Error (${res.status}): ${parsed}`,
+            statusMessage: isLeaked ? 'Key Revoked/Leaked — Configure Personal Key' : `Google AI Studio Error (${res.status})`,
             model: geminiModel,
             keyMasked: 'Active & Encrypted'
           };
           this.notify();
           return {
             success: false,
-            message: `Google AI Studio (${res.status}): ${parsed}`
+            message: isLeaked
+              ? 'Your Google AI key was revoked by Google secret scanner. Please paste your free personal key from https://aistudio.google.com/app/apikey.'
+              : `Google AI Studio (${res.status}): ${parsed}`
           };
         }
       }

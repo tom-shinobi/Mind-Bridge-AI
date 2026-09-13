@@ -93,8 +93,9 @@ class SyllabusService {
    */
   public async structureSyllabusWithAI(rawText: string, contextSubject = ''): Promise<ExtractedSyllabus> {
     const settings = storageService.getAISettings();
-    const apiKey = (settings.openRouterApiKey || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
-    const model = settings.model || 'gemini-2.5-flash';
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-2.0-flash';
+    const model = activeModel;
+    const apiKey = storageService.getApiKey();
 
     const systemPrompt = `You are MindBridge Academic Intelligence, an expert curriculum parser.
 Your task is to analyze the provided university syllabus text and extract a clean, organized, hierarchical syllabus structure.
@@ -131,7 +132,8 @@ You MUST return ONLY valid JSON matching this exact structure:
 
         if (apiKey.startsWith('AIzaSy')) {
           // Direct Google AI Studio Gemini Engine
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.5-flash' ? 'gemini-2.0-flash' : activeModel) : 'gemini-2.0-flash';
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
           const response = await fetch(geminiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -206,6 +208,13 @@ You MUST return ONLY valid JSON matching this exact structure:
 
     // Heuristic structural fallback
     return this.fallbackHeuristicParser(rawText, contextSubject);
+  }
+
+  /**
+   * Alias for raw syllabus parsing
+   */
+  public async parseRawSyllabusText(rawText: string, contextSubject = ''): Promise<ExtractedSyllabus> {
+    return this.structureSyllabusWithAI(rawText, contextSubject);
   }
 
   /**
