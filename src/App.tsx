@@ -36,6 +36,7 @@ import { LearningGaps } from './pages/LearningGaps';
 import { PersonalizedSyllabus } from './pages/PersonalizedSyllabus';
 import { SmartTimetable } from './pages/SmartTimetable';
 import { AITutor } from './pages/AITutor';
+import { AIChatApp } from './pages/AIChatApp';
 import { PersonalizedTests } from './pages/PersonalizedTests';
 import { AdaptiveLoop } from './pages/AdaptiveLoop';
 import { ProgressGamification } from './pages/ProgressGamification';
@@ -863,6 +864,16 @@ export function App() {
               initialTopic={targetTopic}
               gaps={gaps}
               syllabus={syllabus}
+              onNavigate={handleNavigate}
+            />
+          )}
+
+          {activeTab === 'chat' && (
+            <AIChatApp
+              initialTopic={targetTopic}
+              gaps={gaps}
+              syllabus={syllabus}
+              profile={profile}
               onNavigate={handleNavigate}
             />
           )}

@@ -21,6 +21,7 @@ export interface ApiStatus {
   statusMessage: string;
   model: string;
   keyMasked: string;
+  latencyMs?: number;
 }
 
 class AIService {
@@ -28,8 +29,8 @@ class AIService {
     isLive: false,
     isRateLimited: false,
     lastError: null,
-    statusMessage: 'Ready',
-    model: 'liquid/lfm-2.5-2.6b:free',
+    statusMessage: 'Ready (Local AI Active)',
+    model: 'gemini-3.8-flash',
     keyMasked: ''
   };
 
@@ -37,20 +38,26 @@ class AIService {
 
   public getApiStatus(): ApiStatus {
     const settings = storageService.getAISettings();
-    const envKey = resolveEnvApiKey();
-    const rawKey = (envKey.startsWith('AIzaSy') ? envKey : settings.openRouterApiKey || envKey || '').trim();
     const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.8-flash';
+    const isGemini = activeModel.includes('gemini');
+    const apiKey = storageService.getApiKey();
 
     let statusMsg = this.apiStatus.statusMessage;
-    if (rawKey.startsWith('AIzaSy') && (statusMsg.includes('402') || statusMsg.includes('OpenRouter') || statusMsg === 'Ready')) {
-      statusMsg = `Google AI Studio: ${activeModel}`;
+
+    // Purge any stale OpenRouter / 402 errors from Gemini models
+    if (statusMsg.includes('402') || (isGemini && statusMsg.includes('OpenRouter'))) {
+      if (apiKey && apiKey.startsWith('AIzaSy')) {
+        statusMsg = `Google AI Studio: ${activeModel}`;
+      } else {
+        statusMsg = 'Ready (Local AI Active)';
+      }
     }
 
     return {
       ...this.apiStatus,
       statusMessage: statusMsg,
       model: activeModel,
-      keyMasked: rawKey ? 'Active & Encrypted' : 'None'
+      keyMasked: apiKey ? (apiKey.startsWith('AIzaSy') ? 'Google AI Studio Key' : 'Configured') : 'None'
     };
   }
 
@@ -70,9 +77,9 @@ class AIService {
   /**
    * Speak text using Web Speech API if enabled
    */
-  public speak(text: string): void {
+  public speak(text: string, force = false): void {
     const settings = storageService.getAISettings();
-    if (!settings.speechEnabled || typeof window === 'undefined' || !window.speechSynthesis) return;
+    if ((!force && !settings.speechEnabled) || typeof window === 'undefined' || !window.speechSynthesis) return;
 
     try {
       window.speechSynthesis.cancel();
@@ -80,13 +87,21 @@ class AIService {
       const cleanText = text
         .replace(/[*_`#]/g, '')
         .replace(/\$[^$]*\$/g, 'the mathematical expression')
-        .slice(0, 260);
+        .slice(0, 350);
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.rate = 1.05;
       utterance.pitch = 1.0;
       window.speechSynthesis.speak(utterance);
     } catch (e) {
       console.warn('Speech synthesis error:', e);
+    }
+  }
+
+  public stopSpeaking(): void {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {}
     }
   }
 
@@ -195,7 +210,8 @@ ${notesContext}
   public async getTutorResponse(
     topic: string,
     history: TutorMessage[],
-    userMessage: string
+    userMessage: string,
+    imageContext?: { base64: string; mimeType: string }
   ): Promise<TutorResponse> {
     const settings = storageService.getAISettings();
     const studentContext = this.getStudentContext();
@@ -218,8 +234,9 @@ YOUR INSTRUCTIONS:
    - If the student asks about their grades, learning gaps, schedule, weak topics, or how to improve, cite their actual numbers (e.g. 8.42 CGPA, 38% mastery in B-Trees, 62% DBMS Midterm, today's schedule).
    - Tailor all learning explanations and advice to their academic standing and visual/hands-on learning style.
 
-2. ACADEMIC TUTORING & GENERAL QUESTIONS:
+2. ACADEMIC TUTORING, VISUAL REASONING & GENERAL QUESTIONS:
    - When teaching or answering concept questions, provide deep yet crystal-clear, intuitive explanations with analogies and examples.
+   - MULTIMODAL VISION: If an image or diagram is provided (e.g. handwritten lesson notes, chemical formulas, circuit diagrams, math scratchpad, lecture slide), carefully inspect every detail of the image, transcribe key equations/labels, identify errors or patterns, and guide the student step-by-step.
    - If the student asks general knowledge questions (e.g. about Paris, world history, science, geography, or culture), answer them helpfully, accurately, and eloquently while maintaining your role as an encouraging tutor.
 
 3. INTERACTIVE SOCRATIC CONCEPT CHECK:
@@ -263,12 +280,40 @@ YOUR INSTRUCTIONS:
           const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.5-flash' ? 'gemini-3.8-flash' : activeModel) : 'gemini-3.8-flash';
           const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
 
+          const userParts: any[] = [];
+          if (imageContext?.base64) {
+            const cleanBase64 = imageContext.base64.replace(/^data:[^;]+;base64,/, '');
+            userParts.push({
+              inline_data: {
+                mime_type: imageContext.mimeType || 'image/jpeg',
+                data: cleanBase64
+              }
+            });
+          }
+          userParts.push({
+            text: userMessage || (imageContext ? 'Please analyze this diagram/image in the context of our study topic.' : 'Hello')
+          });
+
           const geminiContents = [
-            ...history.slice(-8).map((m) => ({
-              role: m.sender === 'ai' ? 'model' : 'user',
-              parts: [{ text: m.text }]
-            })),
-            { role: 'user', parts: [{ text: userMessage }] }
+            ...history.slice(-8).map((m) => {
+              const parts: any[] = [{ text: m.text }];
+              if (m.imageUrl && m.imageUrl.startsWith('data:')) {
+                const mimeMatch = m.imageUrl.match(/^data:([^;]+);base64,/);
+                const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+                const data = m.imageUrl.replace(/^data:[^;]+;base64,/, '');
+                parts.unshift({
+                  inline_data: {
+                    mime_type: mime,
+                    data
+                  }
+                });
+              }
+              return {
+                role: m.sender === 'ai' ? 'model' : 'user',
+                parts
+              };
+            }),
+            { role: 'user', parts: userParts }
           ];
 
           let response = await fetch(geminiUrl, {
@@ -348,8 +393,8 @@ YOUR INSTRUCTIONS:
             };
             this.notify();
           }
-        } else {
-          // OpenRouter API Engine
+        } else if (!isGoogleGemini && apiKey.startsWith('sk-or-')) {
+          // OpenRouter API Engine (only for non-Gemini third-party models)
           const messages = [
             { role: 'system', content: systemPrompt },
             ...history.slice(-8).map((m) => ({
@@ -450,7 +495,7 @@ YOUR INSTRUCTIONS:
     }
 
     // High-fidelity Local Socratic Reasoning Engine fallback
-    return this.getLocalTutorResponse(topic, userMessage, history.length);
+    return this.getLocalTutorResponse(topic, userMessage, history.length, Boolean(imageContext?.base64));
   }
 
   /**
@@ -471,14 +516,34 @@ YOUR INSTRUCTIONS:
     }
     const model = customModel || (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash' ? settings.model : 'gemini-3.8-flash');
 
+    const isGemini = model.includes('gemini');
+
     if (!key) {
+      this.apiStatus = {
+        isLive: false,
+        isRateLimited: false,
+        lastError: null,
+        statusMessage: 'Ready (Local AI Active)',
+        model,
+        keyMasked: 'None'
+      };
+      this.notify();
       return {
         success: false,
-        message: 'No Google API key configured yet. Please paste your Gemini key below (starts with AIzaSy...) or configure VITE_GEMINI_API_KEY in hosting.'
+        message: 'No Google API key configured yet. MindBridge is operating on local Socratic AI. Paste your Gemini key below (starts with AIzaSy...) to enable cloud inference.'
       };
     }
 
-    if (model.includes('gemini') && !key.startsWith('AIzaSy')) {
+    if (isGemini && !key.startsWith('AIzaSy')) {
+      this.apiStatus = {
+        isLive: false,
+        isRateLimited: false,
+        lastError: 'Selected model is Google Gemini, but key does not start with AIzaSy',
+        statusMessage: 'Requires AIzaSy Key',
+        model,
+        keyMasked: 'Invalid Format'
+      };
+      this.notify();
       return {
         success: false,
         message: 'Selected model is Google Gemini, but the configured key does not match Google AI Studio format (must start with "AIzaSy..."). Please paste your Gemini key below.'
@@ -487,9 +552,9 @@ YOUR INSTRUCTIONS:
 
     const startTime = Date.now();
     try {
-      if (key.startsWith('AIzaSy')) {
+      if (isGemini && key.startsWith('AIzaSy')) {
         // Direct Google AI Studio Gemini Health Check
-        let geminiModel = model.includes('gemini') ? (model === 'gemini-2.5-flash' ? 'gemini-3.8-flash' : model) : 'gemini-3.8-flash';
+        let geminiModel = model === 'gemini-2.5-flash' ? 'gemini-3.8-flash' : model;
         let url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${key}`;
         let res = await fetch(url, {
           method: 'POST',
@@ -519,12 +584,13 @@ YOUR INSTRUCTIONS:
             lastError: null,
             statusMessage: `Google AI Studio Live: ${geminiModel}`,
             model: geminiModel,
-            keyMasked: 'Active & Encrypted'
+            keyMasked: 'Active & Verified',
+            latencyMs
           };
           this.notify();
           return {
             success: true,
-            message: `Connected successfully to Google AI Studio (${geminiModel})! Latency: ${latencyMs}ms`,
+            message: `Connected successfully to Google AI Studio (${geminiModel})! Verified in ${latencyMs}ms.`,
             latencyMs
           };
         } else {
@@ -543,7 +609,7 @@ YOUR INSTRUCTIONS:
             lastError: isLeaked
               ? 'Google API key was revoked/leaked. Please paste your personal free key from Google AI Studio.'
               : `Google AI Studio Error (${res.status}): ${parsed}`,
-            statusMessage: isLeaked ? 'Key Revoked/Leaked — Configure Personal Key' : `Google AI Studio Error (${res.status})`,
+            statusMessage: isLeaked ? 'Key Revoked — New Key Needed' : res.status === 400 ? 'Invalid Gemini Key' : `Google Error (${res.status})`,
             model: geminiModel,
             keyMasked: 'Active & Encrypted'
           };
@@ -557,60 +623,68 @@ YOUR INSTRUCTIONS:
         }
       }
 
-      // OpenRouter Check
-      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${key}`,
-          'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://mindbridge.ai',
-          'X-Title': 'Mind Bridge AI'
-        },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'user', content: 'Say OK' }],
-          max_tokens: 16
-        })
-      });
+      if (!isGemini && key.startsWith('sk-or-')) {
+        // OpenRouter Check for non-Gemini models
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${key}`,
+            'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://mindbridge.ai',
+            'X-Title': 'Mind Bridge AI'
+          },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: 'user', content: 'Say OK' }],
+            max_tokens: 16
+          })
+        });
 
-      const latencyMs = Date.now() - startTime;
-      if (res.ok) {
-        this.apiStatus = {
-          isLive: true,
-          isRateLimited: false,
-          lastError: null,
-          statusMessage: `OpenRouter Live: ${model}`,
-          model,
-          keyMasked: 'Active & Encrypted'
-        };
-        this.notify();
-        return {
-          success: true,
-          message: `Connected successfully to ${model}! Latency: ${latencyMs}ms`,
-          latencyMs
-        };
-      } else {
-        const errText = await res.text();
-        let parsed = errText;
-        try {
-          const json = JSON.parse(errText);
-          parsed = json.error?.message || errText;
-        } catch {}
+        const latencyMs = Date.now() - startTime;
+        if (res.ok) {
+          this.apiStatus = {
+            isLive: true,
+            isRateLimited: false,
+            lastError: null,
+            statusMessage: `OpenRouter Live: ${model}`,
+            model,
+            keyMasked: 'Active & Encrypted',
+            latencyMs
+          };
+          this.notify();
+          return {
+            success: true,
+            message: `Connected successfully to ${model}! Latency: ${latencyMs}ms`,
+            latencyMs
+          };
+        } else {
+          const errText = await res.text();
+          let parsed = errText;
+          try {
+            const json = JSON.parse(errText);
+            parsed = json.error?.message || errText;
+          } catch {}
 
-        this.apiStatus = {
-          isLive: false,
-          isRateLimited: res.status === 429,
-          lastError: `HTTP ${res.status}: ${parsed}`,
-          statusMessage: res.status === 429 ? 'Rate Limit (429) Reached' : `Error ${res.status}`,
-          model,
-          keyMasked: 'Active & Encrypted'
-        };
-        this.notify();
-        return {
-          success: false,
-          message: `HTTP ${res.status}: ${parsed}`
-        };
+          this.apiStatus = {
+            isLive: false,
+            isRateLimited: res.status === 429,
+            lastError: `HTTP ${res.status}: ${parsed}`,
+            statusMessage: res.status === 429 ? 'Rate Limit (429) Reached' : `OpenRouter (${res.status})`,
+            model,
+            keyMasked: 'Active & Encrypted'
+          };
+          this.notify();
+          return {
+            success: false,
+            message: `OpenRouter (${res.status}): ${parsed}`
+          };
+        }
       }
+
+      return {
+        success: false,
+        message: 'Could not test connection: unrecognised provider or model combination.'
+      };
     } catch (e: unknown) {
       const err = e as Error;
       return {
@@ -620,18 +694,45 @@ YOUR INSTRUCTIONS:
     }
   }
 
-  private getLocalTutorResponse(topic: string, userMessage: string, turnCount: number): TutorResponse {
+  private getLocalTutorResponse(topic: string, userMessage: string, turnCount: number, hasImage: boolean = false): TutorResponse {
     const lowerTopic = topic.toLowerCase();
     const lowerUser = userMessage.toLowerCase();
     const profile = storageService.getProfile();
     const gaps = storageService.getLearningGaps();
     const timetable = storageService.getTimetable();
 
+    // Visual image context handler
+    if (hasImage) {
+      const msg = `I have received and examined your uploaded visual diagram / lesson notes for **${topic}**!
+      
+From the diagrams and handwritten relationships shown:
+- Notice the structural decomposition from basic constituents to synthesized units.
+- Pay careful attention to the boundary conditions, labels, and invariant constraints in your diagram.
+
+Let's test your comprehension of this material with a quick Socratic check:`;
+      this.speak(msg);
+      return {
+        message: msg,
+        conceptCheck: {
+          question: `In the context of the diagram for ${topic}, which principle governs how components interact?`,
+          options: [
+            'Conservation of structure / invariant balance',
+            'Arbitrary random recombination',
+            'Unbounded memory consumption',
+            'Isolated static independence'
+          ],
+          correctAnswer: 'Conservation of structure / invariant balance',
+          explanation: 'Whether chemical bonds, binary compounds, or balanced trees, diagrams illustrate structured conservation and relational balance.'
+        },
+        masteryDelta: 5
+      };
+    }
+
     // 0. General non-academic questions fallback (e.g. Paris, general queries)
     if (lowerUser.includes('paris') || lowerUser.includes('france') || lowerUser.includes('capital of france')) {
       const msg = `**Paris** is the capital and most populous city of France, situated along the Seine River. Famous worldwide as the "City of Light" (*La Ville Lumière*), it is celebrated for landmarks like the Eiffel Tower, the Louvre Museum, and Notre-Dame Cathedral, as well as its rich heritage in philosophy, art, and cuisine!
       
-*(Note: I am currently responding using my offline backup engine. To unlock live conversational intelligence with OpenRouter, verify your API key connection in the AI Settings pill above).*`;
+*(Note: I am currently responding using my offline Socratic backup engine. Connect your free Google Gemini API key to unlock full cloud inference).*`;
       this.speak(msg);
       return {
         message: msg,

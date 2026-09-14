@@ -192,6 +192,11 @@ export interface TutorMessage {
   sender: 'ai' | 'student';
   text: string;
   timestamp: string;
+  imageUrl?: string;
+  imageName?: string;
+  isAudioVoiceNote?: boolean;
+  audioDuration?: string;
+  reactions?: { emoji: string; by: 'student' | 'ai' }[];
   conceptCheck?: {
     question: string;
     options?: string[];

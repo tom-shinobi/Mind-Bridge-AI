@@ -25,7 +25,8 @@ import {
   X,
   Users,
   CalendarDays,
-  BookMarked
+  BookMarked,
+  MessageCircle
 } from 'lucide-react';
 import type { StudentProfile, LearningGap, AISettings } from '../types';
 import { THEME_CONFIGS } from '../types';
@@ -106,6 +107,14 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       description: 'Socratic Concept Deep-Dive',
       icon: Bot,
       gradient: 'from-purple-500/30 to-pink-500/20'
+    },
+    {
+      id: 'chat',
+      label: 'AI Chat',
+      shortLabel: 'iMessage',
+      description: 'iMessage Dialogue & Vision',
+      icon: MessageCircle,
+      gradient: 'from-blue-500/30 to-cyan-500/20'
     },
     {
       id: 'tests',

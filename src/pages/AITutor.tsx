@@ -18,11 +18,12 @@ import {
   AlertTriangle,
   Check,
   RefreshCw,
-  X
+  X,
+  MessageCircle
 } from 'lucide-react';
 import type { TutorMessage, LearningGap, SyllabusTopic } from '../types';
 import { aiService, type ApiStatus } from '../services/aiService';
-import { storageService, resolveEnvApiKey } from '../services/storageService';
+import { storageService, resolveGeminiApiKey } from '../services/storageService';
 import { sound } from '../services/soundService';
 import { RotaryKnob } from '../components/hardware/RotaryKnob';
 import { FormattedContent } from '../components/FormattedContent';
@@ -69,6 +70,8 @@ export const AITutor: React.FC<AITutorProps> = ({
       const currentModel = (current.model && current.model !== 'gemini-2.5-flash' && current.model !== 'gemini-2.0-flash') ? current.model : 'gemini-3.8-flash';
       setModelInput(currentModel);
       setTestResult(null);
+      // Auto-ping live API verification on modal open
+      aiService.testConnection(undefined, currentModel);
     }
   }, [isSettingsOpen]);
 
@@ -502,21 +505,31 @@ export const AITutor: React.FC<AITutorProps> = ({
           </div>
 
           {/* Status Indicator */}
-          <div className={`p-3.5 rounded-2xl border text-xs font-mono flex items-center justify-between ${
+          <div className={`p-3.5 rounded-2xl border text-xs font-mono flex items-center justify-between transition-all ${
             apiStatus.isLive
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
               : apiStatus.isRateLimited
               ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
-              : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+              : 'bg-white/[0.04] border-white/15 text-slate-300'
           }`}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <span className={`w-2.5 h-2.5 rounded-full ${
-                apiStatus.isLive ? 'bg-emerald-400' : apiStatus.isRateLimited ? 'bg-amber-400' : 'bg-rose-400'
+                apiStatus.isLive ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]' : apiStatus.isRateLimited ? 'bg-amber-400' : 'bg-cyan-400'
               }`} />
-              <span>{apiStatus.statusMessage}</span>
+              <span className="font-semibold tracking-tight">{apiStatus.statusMessage}</span>
             </div>
-            <span className="text-[10px] text-emerald-400 font-medium">
-              {apiStatus.isLive ? 'Active (Protected)' : 'Ready'}
+            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+              apiStatus.isLive
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                : apiStatus.isRateLimited
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                : 'bg-white/10 text-slate-400 border border-white/10'
+            }`}>
+              {apiStatus.isLive
+                ? (apiStatus.latencyMs ? `${apiStatus.latencyMs}ms latency` : 'Connected & Active')
+                : apiStatus.isRateLimited
+                ? 'Rate Limited (429)'
+                : 'Local Socratic AI'}
             </span>
           </div>
 
@@ -530,10 +543,10 @@ export const AITutor: React.FC<AITutorProps> = ({
               onChange={(e) => setModelInput(e.target.value)}
               className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-slate-100 focus:outline-none focus:border-purple-500"
             >
-              <option value="gemini-3.8-flash">Google Gemini 3.8 Flash (Primary Model, 1M Context, Ultra Fast)</option>
-              <option value="gemini-2.0-flash">Google Gemini 2.0 Flash</option>
+              <option value="gemini-3.8-flash">Google Gemini 3.8 Flash (Primary Model • 1M Context • Ultra Fast)</option>
+              <option value="gemini-2.0-flash">Google Gemini 2.0 Flash (Stable Production)</option>
               <option value="gemini-1.5-flash">Google Gemini 1.5 Flash (Multimodal & Fast)</option>
-              <option value="liquid/lfm-2.5-2.6b:free">LiquidAI: LFM 2.5 2.6B (Free Socratic)</option>
+              <option value="liquid/lfm-2.5-2.6b:free">LiquidAI: LFM 2.5 2.6B (Free Socratic Heuristic)</option>
               <option value="meta-llama/llama-3.3-70b-instruct:free">Meta Llama 3.3 70B Instruct (High Depth)</option>
               <option value="mistralai/mistral-small-3.1-24b-instruct:free">Mistral Small 3.1 24B</option>
             </select>
@@ -543,9 +556,23 @@ export const AITutor: React.FC<AITutorProps> = ({
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono flex items-center justify-between">
               <span>Google Gemini API Key</span>
-              <span className="text-[10px] text-emerald-400 normal-case font-normal">
-                {resolveEnvApiKey() ? '✓ Active from Hosting' : (storageService.getApiKey() ? '✓ Encrypted & Active' : 'Enter Gemini Key')}
-              </span>
+              {resolveGeminiApiKey() ? (
+                <span className="text-[10px] text-emerald-400 font-medium px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/25">
+                  ✓ Active from Hosting
+                </span>
+              ) : storageService.getApiKey()?.startsWith('AIzaSy') ? (
+                <span className="text-[10px] text-cyan-400 font-medium px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/25">
+                  ✓ Saved in Browser
+                </span>
+              ) : storageService.getAISettings().openRouterApiKey ? (
+                <span className="text-[10px] text-amber-400 font-medium px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/25">
+                  Stale Key (Clear Below)
+                </span>
+              ) : (
+                <span className="text-[10px] text-slate-400 font-medium px-2 py-0.5 rounded-md bg-white/5 border border-white/10">
+                  Optional (Local AI Active)
+                </span>
+              )}
             </label>
             <input
               type="password"
@@ -554,18 +581,34 @@ export const AITutor: React.FC<AITutorProps> = ({
               placeholder="Paste Google AI Studio key (starts with AIzaSy...)"
               className="w-full text-xs font-mono px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Get your free Google Gemini API key from{' '}
-              <a
-                href="https://aistudio.google.com/app/apikey"
-                target="_blank"
-                rel="noreferrer"
-                className="text-purple-300 hover:text-purple-200 underline"
-              >
-                Google AI Studio
-              </a>
-              . When offline or without a key, our local Socratic Engine handles reasoning automatically.
-            </p>
+            <div className="flex items-center justify-between pt-0.5">
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Get your free Google Gemini API key from{' '}
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-purple-300 hover:text-purple-200 underline font-medium"
+                >
+                  Google AI Studio ↗
+                </a>
+              </p>
+              {storageService.getAISettings().openRouterApiKey && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    storageService.clearApiKey();
+                    setKeyInput('');
+                    setTestResult({ success: true, message: 'Cleared saved key from browser. MindBridge is now using its built-in local Socratic engine.' });
+                    aiService.testConnection('', modelInput);
+                  }}
+                  className="text-[11px] text-rose-400 hover:text-rose-300 underline font-mono"
+                >
+                  Clear Browser Key
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Test Result Message */}
@@ -586,14 +629,14 @@ export const AITutor: React.FC<AITutorProps> = ({
               type="button"
               disabled={testResult?.testing}
               onClick={async () => {
-                setTestResult({ testing: true, message: 'Testing AI connection...' });
+                setTestResult({ testing: true, message: 'Pinging Google AI Studio...' });
                 const res = await aiService.testConnection(keyInput || undefined, modelInput);
                 setTestResult(res);
               }}
               className="btn-apple-glass py-2 px-4 text-xs flex items-center gap-1.5 text-slate-300 hover:text-white"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${testResult?.testing ? 'animate-spin' : ''}`} />
-              <span>Test Key</span>
+              <span>{testResult?.testing ? 'Pinging...' : 'Verify / Test Key'}</span>
             </button>
 
             <button
@@ -725,22 +768,27 @@ export const AITutor: React.FC<AITutorProps> = ({
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20'
                   : apiStatus.isRateLimited
                   ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
-                  : 'bg-rose-500/10 border-rose-500/30 text-rose-300 hover:bg-rose-500/20'
+                  : 'bg-white/[0.05] border-white/15 text-slate-300 hover:border-purple-500/40'
               }`}
-              title="AI Status: Click to configure API Key or Model"
+              title="AI Status: Click to configure Google Gemini Key or Model"
             >
               <span className="relative flex h-2 w-2">
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  apiStatus.isLive ? 'bg-emerald-400' : apiStatus.isRateLimited ? 'bg-amber-400' : 'bg-rose-400'
+                  apiStatus.isLive ? 'bg-emerald-400' : apiStatus.isRateLimited ? 'bg-amber-400' : 'bg-cyan-400'
                 }`} />
                 <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                  apiStatus.isLive ? 'bg-emerald-500' : apiStatus.isRateLimited ? 'bg-amber-500' : 'bg-rose-500'
+                  apiStatus.isLive ? 'bg-emerald-500' : apiStatus.isRateLimited ? 'bg-amber-500' : 'bg-cyan-500'
                 }`} />
               </span>
               <Cpu className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">
-                {apiStatus.isLive ? 'OpenRouter Live' : apiStatus.isRateLimited ? 'Rate Limited' : 'Offline'}
+                {apiStatus.isLive ? 'Google AI Studio Live' : apiStatus.isRateLimited ? 'Rate Limited' : 'Socratic Local AI'}
               </span>
+              {apiStatus.latencyMs && (
+                <span className="text-[10px] text-emerald-400 bg-emerald-500/15 px-1 py-0.2 rounded font-mono">
+                  {apiStatus.latencyMs}ms
+                </span>
+              )}
               <Settings className="w-3 h-3 opacity-60 ml-0.5" />
             </button>
 
@@ -882,6 +930,19 @@ export const AITutor: React.FC<AITutorProps> = ({
               <Maximize2 className="w-3.5 h-3.5" />
               <span>Fullscreen</span>
             </button>
+
+            {/* Dedicated iMessage Chat Button */}
+            <button
+              onClick={() => {
+                sound.playClick();
+                onNavigate('chat', { topic: selectedTopic });
+              }}
+              className="btn-apple-primary py-1.5 px-3 text-xs flex items-center gap-1.5 bg-[#007AFF] hover:bg-[#0071E3] text-white shadow-[0_0_15px_rgba(0,122,255,0.4)]"
+              title="Open Dedicated Apple iMessage AI Chat with Multimodal Vision & Voice Typing"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span>iMessage UI</span>
+            </button>
           </div>
 
         </div>
@@ -893,24 +954,24 @@ export const AITutor: React.FC<AITutorProps> = ({
             onClick={() => setIsSettingsOpen(true)}
             className={`flex items-center gap-2 border px-3 py-1.5 rounded-xl text-xs font-mono shadow-inner transition-all ${
               apiStatus.isLive
-                ? 'liquid-glass-emerald border-emerald-500/30 text-emerald-300 hover:border-emerald-500/50'
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
                 : apiStatus.isRateLimited
-                ? 'liquid-glass-amber border-amber-500/30 text-amber-300 hover:border-amber-500/50'
-                : 'liquid-glass-danger border-rose-500/30 text-rose-300 hover:border-rose-500/50'
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
+                : 'bg-white/[0.04] border-white/15 text-slate-300 hover:border-purple-500/40'
             }`}
             title="Click to view AI status, test connection or change API key"
           >
             <span className="relative flex h-2 w-2">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                apiStatus.isLive ? 'bg-emerald-400' : apiStatus.isRateLimited ? 'bg-amber-400' : 'bg-rose-400'
+                apiStatus.isLive ? 'bg-emerald-400' : apiStatus.isRateLimited ? 'bg-amber-400' : 'bg-cyan-400'
               }`}></span>
               <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                apiStatus.isLive ? 'bg-emerald-500' : apiStatus.isRateLimited ? 'bg-amber-500' : 'bg-rose-500'
+                apiStatus.isLive ? 'bg-emerald-500' : apiStatus.isRateLimited ? 'bg-amber-500' : 'bg-cyan-500'
               }`}></span>
             </span>
             <Cpu className="w-3.5 h-3.5" />
-            <span className="font-semibold uppercase tracking-wider">
-              AI Engine: {apiStatus.model} ({apiStatus.isLive ? 'Live' : apiStatus.isRateLimited ? 'Rate Limited' : 'Offline'})
+            <span className="font-semibold tracking-wide">
+              AI Engine: {apiStatus.model} {apiStatus.isLive ? `(Live${apiStatus.latencyMs ? ` • ${apiStatus.latencyMs}ms` : ''})` : apiStatus.isRateLimited ? '(Rate Limited)' : '(Socratic Active)'}
             </span>
             <Settings className="w-3.5 h-3.5 ml-1 text-slate-400" />
           </button>
@@ -975,17 +1036,30 @@ export const AITutor: React.FC<AITutorProps> = ({
               Topic Scope: <strong className="text-white font-bold">{selectedTopic}</strong>
             </span>
           </div>
-          <button
-            onClick={() => {
-              sound.playClick();
-              setIsFullscreen(true);
-            }}
-            className="btn-apple-glass py-1 px-3 text-[11px] flex items-center gap-1.5 text-cyan-300 hover:text-white"
-            title="Open Fullscreen (Esc to exit)"
-          >
-            <Maximize2 className="w-3 h-3" />
-            <span>Fullscreen Mode</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                sound.playClick();
+                onNavigate('chat', { topic: selectedTopic });
+              }}
+              className="btn-apple-primary py-1 px-3 text-[11px] flex items-center gap-1.5 bg-[#007AFF] hover:bg-[#0071E3] text-white shadow-[0_0_12px_rgba(0,122,255,0.3)]"
+              title="Open Dedicated Apple iMessage AI Chat with Multimodal Vision & Voice Typing"
+            >
+              <MessageCircle className="w-3 h-3" />
+              <span>Open in iMessage UI</span>
+            </button>
+            <button
+              onClick={() => {
+                sound.playClick();
+                setIsFullscreen(true);
+              }}
+              className="btn-apple-glass py-1 px-3 text-[11px] flex items-center gap-1.5 text-cyan-300 hover:text-white"
+              title="Open Fullscreen (Esc to exit)"
+            >
+              <Maximize2 className="w-3 h-3" />
+              <span>Fullscreen Mode</span>
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Messages Container */}

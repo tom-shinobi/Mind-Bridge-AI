@@ -38,7 +38,7 @@ const STORAGE_KEYS = {
   STUDY_SECONDS_TODAY: 'mba_study_seconds_today'
 };
 
-export function resolveEnvApiKey(): string {
+export function resolveGeminiApiKey(): string {
   const env = (import.meta as any).env || {};
   return (
     env.VITE_GEMINI_API_KEY ||
@@ -48,9 +48,19 @@ export function resolveEnvApiKey(): string {
     env.VITE_GOOGLE_AI_KEY ||
     env.NEXT_PUBLIC_GEMINI_API_KEY ||
     env.NEXT_PUBLIC_GOOGLE_API_KEY ||
-    env.VITE_OPENROUTER_API_KEY ||
     ''
   ).trim();
+}
+
+export function resolveOpenRouterApiKey(): string {
+  const env = (import.meta as any).env || {};
+  return (env.VITE_OPENROUTER_API_KEY || '').trim();
+}
+
+export function resolveEnvApiKey(): string {
+  const gemini = resolveGeminiApiKey();
+  if (gemini) return gemini;
+  return resolveOpenRouterApiKey();
 }
 
 class StorageService {
@@ -258,16 +268,32 @@ class StorageService {
     this.save(STORAGE_KEYS.AI_SETTINGS, settings);
   }
 
+  public clearApiKey(): void {
+    const current = this.getAISettings();
+    this.saveAISettings({
+      ...current,
+      openRouterApiKey: ''
+    });
+  }
+
   public getApiKey(): string {
-    const envKey = resolveEnvApiKey();
+    const geminiEnv = resolveGeminiApiKey();
     const settings = this.getAISettings();
-    if (envKey && envKey.startsWith('AIzaSy')) {
-      return envKey;
+    const isGemini = !settings.model || settings.model.includes('gemini');
+
+    if (isGemini) {
+      if (geminiEnv && geminiEnv.startsWith('AIzaSy')) {
+        return geminiEnv;
+      }
+      if (settings.openRouterApiKey && settings.openRouterApiKey.startsWith('AIzaSy')) {
+        return settings.openRouterApiKey.trim();
+      }
+      return geminiEnv || '';
     }
-    if (settings.openRouterApiKey && settings.openRouterApiKey.startsWith('AIzaSy')) {
-      return settings.openRouterApiKey.trim();
-    }
-    return (settings.openRouterApiKey || envKey || '').trim();
+
+    // OpenRouter model
+    const orEnv = resolveOpenRouterApiKey();
+    return (settings.openRouterApiKey || orEnv || '').trim();
   }
 
   public getTodayStudySeconds(): number {
