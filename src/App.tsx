@@ -28,6 +28,7 @@ import { AuthPortal } from './components/auth/AuthPortal';
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
 import { SyllabusUploadView } from './components/onboarding/SyllabusUploadView';
 import { StudyMotivationTicker, StudyMotivationModal } from './components/editorial/StudyMotivationQuotes';
+import { MobileInstallBanner } from './components/MobileInstallBanner';
 
 // Pages
 import { Dashboard } from './pages/Dashboard';
@@ -938,6 +939,9 @@ export function App() {
 
       {/* Global Lo-Fi Study Beats Player (Theme-Reactive) */}
       <LofiPlayer />
+
+      {/* 1-Tap Mobile App Install Banner */}
+      <MobileInstallBanner />
 
     </div>
   );

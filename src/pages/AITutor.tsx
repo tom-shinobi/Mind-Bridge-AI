@@ -130,28 +130,55 @@ export const AITutor: React.FC<AITutorProps> = ({
     setMasteryScore(initialMastery);
 
     setIsThinking(true);
+    const initialMsgId = `msg_${Date.now()}`;
+    setMessages([
+      {
+        id: initialMsgId,
+        sender: 'ai',
+        text: '',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ]);
+
     aiService
-      .getTutorResponse(selectedTopic, [], 'Hello! Teach me this concept.')
+      .streamTutorResponse(
+        selectedTopic,
+        [],
+        'Hello! Teach me this concept.',
+        (_chunk, accumulated) => {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === initialMsgId ? { ...m, text: accumulated } : m))
+          );
+        }
+      )
       .then((res) => {
-        setMessages([
-          {
-            id: `msg_${Date.now()}`,
-            sender: 'ai',
-            text: res.message,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            conceptCheck: res.conceptCheck
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === initialMsgId
               ? {
-                  question: res.conceptCheck.question,
-                  options: res.conceptCheck.options,
-                  correctAnswer: res.conceptCheck.correctAnswer,
-                  explanation: res.conceptCheck.explanation
+                  ...m,
+                  text: res.message,
+                  conceptCheck: res.conceptCheck || undefined
                 }
-              : undefined
-          }
-        ]);
+              : m
+          )
+        );
         if (res.masteryDelta) {
           setMasteryScore((prev) => Math.min(100, prev + res.masteryDelta!));
         }
+      })
+      .catch((err) => {
+        console.warn('Initial tutor load error:', err);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === initialMsgId
+              ? {
+                  ...m,
+                  text: `Welcome back to **${selectedTopic}**! Let's explore the core principles and solve problems together.`
+                }
+              : m
+          )
+        );
       })
       .finally(() => setIsThinking(false));
   }, [selectedTopic]);
@@ -168,27 +195,39 @@ export const AITutor: React.FC<AITutorProps> = ({
     };
 
     const newHistory = [...messages, userMsg];
-    setMessages(newHistory);
+    const aiMsgId = `msg_ai_${Date.now()}`;
+    const initialAiMsg: TutorMessage = {
+      id: aiMsgId,
+      sender: 'ai',
+      text: '',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setMessages([...newHistory, initialAiMsg]);
     setInputVal('');
     setIsThinking(true);
 
     try {
-      const res = await aiService.getTutorResponse(selectedTopic, newHistory, text);
-      const aiMsg: TutorMessage = {
-        id: `msg_ai_${Date.now()}`,
-        sender: 'ai',
-        text: res.message,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        conceptCheck: res.conceptCheck
-          ? {
-              question: res.conceptCheck.question,
-              options: res.conceptCheck.options,
-              correctAnswer: res.conceptCheck.correctAnswer,
-              explanation: res.conceptCheck.explanation
-            }
-          : undefined
-      };
-      setMessages((prev) => [...prev, aiMsg]);
+      const res = await aiService.streamTutorResponse(
+        selectedTopic,
+        newHistory,
+        text,
+        (_chunk, accumulated) => {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === aiMsgId ? { ...m, text: accumulated } : m))
+          );
+        }
+      );
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === aiMsgId
+            ? {
+                ...m,
+                text: res.message,
+                conceptCheck: res.conceptCheck || undefined
+              }
+            : m
+        )
+      );
       if (res.masteryDelta) {
         setMasteryScore((prev) => Math.min(100, prev + res.masteryDelta!));
       }
@@ -198,13 +237,13 @@ export const AITutor: React.FC<AITutorProps> = ({
         ? (aiService as any).getLocalTutorResponse(selectedTopic, text, newHistory.length)
         : null;
       const aiMsg: TutorMessage = {
-        id: `msg_ai_${Date.now()}`,
+        id: aiMsgId,
         sender: 'ai',
         text: fallback?.message || "I had a moment reconnecting to Google AI Studio. Let's refocus on the key concepts of " + selectedTopic + "!",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         conceptCheck: fallback?.conceptCheck || undefined
       };
-      setMessages((prev) => [...prev, aiMsg]);
+      setMessages((prev) => prev.map((m) => (m.id === aiMsgId ? aiMsg : m)));
     } finally {
       setIsThinking(false);
     }

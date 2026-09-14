@@ -24,6 +24,84 @@ export interface ApiStatus {
   latencyMs?: number;
 }
 
+export type StreamChunkCallback = (chunk: string, accumulatedClean: string) => void;
+
+function parseBlockContent(block: string): NonNullable<TutorResponse['conceptCheck']> | null {
+  const qMatch = block.match(/Question:\s*([\s\S]*?)(?=Option [A-D]:|Option [A-D]\)|[A-D]\)|[A-D]\.|$)/i);
+  const optionsMatches = [...block.matchAll(/(?:Option\s*)?[A-D][:\.)]\s*([^\n]+)/gi)].map((m) => m[1].trim());
+  const correctMatch = block.match(/Correct(?:\s*Answer)?:\s*(?:Option\s*)?([A-D][:\.)]?\s*[^\n]*|[^\n]+)/i);
+  const expMatch = block.match(/Explanation:\s*([\s\S]*)$/i);
+
+  if (!qMatch || optionsMatches.length < 2) return null;
+
+  let rawCorrect = correctMatch ? correctMatch[1].trim() : '';
+  let finalCorrectAnswer = '';
+  const letterMatch = rawCorrect.match(/^(?:Option\s*)?([A-D])/i);
+  if (letterMatch) {
+    const letter = letterMatch[1].toUpperCase();
+    const idx = letter.charCodeAt(0) - 65;
+    if (optionsMatches[idx]) finalCorrectAnswer = optionsMatches[idx];
+    else finalCorrectAnswer = rawCorrect;
+  } else {
+    const found = optionsMatches.find((opt) => opt.toLowerCase() === rawCorrect.toLowerCase());
+    finalCorrectAnswer = found || rawCorrect || optionsMatches[0];
+  }
+
+  return {
+    question: qMatch[1].trim(),
+    options: optionsMatches.slice(0, 4),
+    correctAnswer: finalCorrectAnswer,
+    explanation: expMatch ? expMatch[1].trim() : 'Verified conceptual intuition.'
+  };
+}
+
+export function parseConceptCheckBlock(rawText: string): { cleanText: string; conceptCheck: NonNullable<TutorResponse['conceptCheck']> | null } {
+  // Check if response is formatted as legacy or accidental JSON
+  const trimmed = rawText.trim();
+  if (trimmed.startsWith('{"message"') || trimmed.startsWith('{ "message"') || trimmed.startsWith('```json')) {
+    let cleanJson = trimmed;
+    if (cleanJson.startsWith('```json')) {
+      cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanJson.startsWith('```')) {
+      cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    try {
+      const parsed = JSON.parse(cleanJson);
+      if (parsed.message) {
+        return {
+          cleanText: parsed.message,
+          conceptCheck: parsed.conceptCheck || null
+        };
+      }
+    } catch {
+      const msgMatch = cleanJson.match(/"message"\s*:\s*"([\s\S]*?)(?:",\s*"conceptCheck"|"$|"\s*})/);
+      if (msgMatch && msgMatch[1]) {
+        return {
+          cleanText: msgMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\'),
+          conceptCheck: null
+        };
+      }
+    }
+  }
+
+  const match = rawText.match(/:::concept-check\s*([\s\S]*?):::/);
+  if (!match) {
+    const partialMatch = rawText.match(/:::concept-check\s*([\s\S]*)$/);
+    if (partialMatch) {
+      const block = partialMatch[1].trim();
+      const parsed = parseBlockContent(block);
+      const cleanText = rawText.slice(0, partialMatch.index).trim();
+      return { cleanText, conceptCheck: parsed };
+    }
+    return { cleanText: rawText.trim(), conceptCheck: null };
+  }
+
+  const block = match[1].trim();
+  const cleanText = (rawText.slice(0, match.index) + rawText.slice(match.index! + match[0].length)).trim();
+  const parsed = parseBlockContent(block);
+  return { cleanText, conceptCheck: parsed };
+}
+
 class AIService {
   private apiStatus: ApiStatus = {
     isLive: false,
@@ -205,21 +283,21 @@ ${notesContext}
   }
 
   /**
-   * Generates a personalized Socratic tutoring response with access to user data.
+   * Streams a personalized Socratic tutoring response token-by-token.
    */
-  public async getTutorResponse(
+  public async streamTutorResponse(
     topic: string,
     history: TutorMessage[],
     userMessage: string,
+    onChunk: StreamChunkCallback,
     imageContext?: { base64: string; mimeType: string }
   ): Promise<TutorResponse> {
     const settings = storageService.getAISettings();
     const studentContext = this.getStudentContext();
-    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.8-flash';
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.6-flash';
     const envKey = resolveEnvApiKey();
     const apiKey = (isGoogleApiKey(envKey) ? envKey : settings.openRouterApiKey || envKey || '').trim();
 
-    // Try OpenRouter or Google AI Studio if API key is provided
     if (apiKey) {
       try {
         const systemPrompt = `You are Horizon AI, the personal AI academic tutor and learning assistant for the student described below.
@@ -237,50 +315,39 @@ YOUR INSTRUCTIONS:
 2. ACADEMIC TUTORING, VISUAL REASONING & GENERAL QUESTIONS:
    - When teaching or answering concept questions, provide deep yet crystal-clear, intuitive explanations with analogies and examples.
    - MULTIMODAL VISION: If an image or diagram is provided (e.g. handwritten lesson notes, chemical formulas, circuit diagrams, math scratchpad, lecture slide), carefully inspect every detail of the image, transcribe key equations/labels, identify errors or patterns, and guide the student step-by-step.
-   - If the student asks general knowledge questions (e.g. about Paris, world history, science, geography, or culture), answer them helpfully, accurately, and eloquently while maintaining your role as an encouraging tutor.
+   - If the student asks general knowledge questions, answer helpfully, accurately, and eloquently.
 
-3. INTERACTIVE SOCRATIC CONCEPT CHECK:
-   - When teaching or clarifying an academic syllabus topic, include a targeted multiple-choice question in "conceptCheck" to test if they truly grasp the concept.
-   - If the student asks a general knowledge inquiry, asks about their marks/schedule, or says casual greetings, set "conceptCheck" to null.
-   - For "conceptCheck", provide:
-     * "question": The targeted question.
-     * "options": Exactly 4 clear choices.
-     * "correctAnswer": The exact text of the correct choice from the options array.
-     * "explanation": Why that choice is correct.
-
-4. MATHEMATICAL & MARKDOWN FORMATTING:
-   - ALWAYS format mathematical expressions, time complexities, asymptotic notations, and formulas in standard LaTeX math notation:
-     * Inline math with single dollar signs: $O(\\log n)$, $O(\\log_2 N)$, $\\lceil t/2 \\rceil$, $t - 1$, $O(N)$, $O(1)$.
-     * Display math with double dollar signs: $$...$$ for standalone formulas.
+3. MATHEMATICAL NOTATION (KATEX):
+   - ALWAYS format mathematical expressions, time complexities, asymptotic notations, coordinates, and formulas in standard LaTeX math notation:
+     * Inline math with single dollar signs: $\rho$, $(x, y, z)$, $O(\log n)$, $O(\log_2 N)$, $\lceil t/2 \rceil$, $t - 1$, $O(N)$, $O(1)$.
+     * Display math with double dollar signs: $$\rho = \sqrt{x^2 + y^2 + z^2}$$
    - Use bold markdown asterisks (**term**) for core definitions and vital takeaways.
-   - Use markdown headings (## and ###), structured bullet points (- ), and fenced code blocks for tree/code visualizations.
+   - Use markdown headings (## and ###), bullet points (- ), and code blocks for tree/code visualizations.
 
-5. STUDENT DREAMNOTES AWARENESS:
-   - The student has saved personal notes and learning materials in AI Memory. When they mention or ask to review their notes, formulas, or concepts from DreamNotes, actively reference and cite them to reinforce continuous learning.
+4. INTERACTIVE SOCRATIC CONCEPT CHECK:
+   - When teaching or clarifying an academic syllabus topic, include an interactive multiple-choice concept check at the very end using this exact delimiter format:
+:::concept-check
+Question: [Clear question testing conceptual intuition]
+Option A: [Choice A with math if applicable]
+Option B: [Choice B with math if applicable]
+Option C: [Choice C with math if applicable]
+Option D: [Choice D with math if applicable]
+Correct: Option A
+Explanation: [Concise rationale explaining why this is correct]
+:::
+   - If the student asks a casual greeting, administrative question, or general query where testing is unnecessary, do not include the :::concept-check block.
 
-6. OUTPUT FORMAT:
-   You MUST return a valid JSON object matching this schema:
-   {
-     "message": "Your markdown-formatted answer, feedback, or explanation to the student.",
-     "conceptCheck": {
-       "question": "Question text",
-       "options": ["Option A", "Option B", "Option C", "Option D"],
-       "correctAnswer": "Option A",
-       "explanation": "Why Option A is correct"
-     } or null,
-     "masteryDelta": 5
-   }`;
+5. OUTPUT FORMAT:
+   - Provide your explanation and response directly in natural, beautiful Markdown. Do NOT wrap your whole response in JSON.`;
 
         const isGoogleGemini = isGoogleApiKey(apiKey) || activeModel.includes('gemini');
-
-        let rawText: string | null = null;
+        let fullRawText = '';
 
         if (isGoogleGemini && isGoogleApiKey(apiKey)) {
-          // Direct Google AI Studio Gemini Engine
           let geminiModel = activeModel.includes('gemini')
             ? (activeModel === 'gemini-2.0-flash' || activeModel.includes('gemini-2.5') ? 'gemini-3.6-flash' : activeModel)
             : 'gemini-3.6-flash';
-          let geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
+          let geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:streamGenerateContent?alt=sse&key=${apiKey}`;
 
           const userParts: any[] = [];
           if (imageContext?.base64) {
@@ -296,7 +363,6 @@ YOUR INSTRUCTIONS:
             text: userMessage || (imageContext ? 'Please analyze this diagram/image in the context of our study topic.' : 'Hello')
           });
 
-          // Trim duplicate user message from history if caller already pushed it
           const historyCopy = [...history];
           if (
             historyCopy.length > 0 &&
@@ -325,10 +391,8 @@ YOUR INSTRUCTIONS:
             };
           });
 
-          // Append current user turn
           rawTurns.push({ role: 'user', parts: userParts });
 
-          // Normalize turns so that roles strictly alternate and start with 'user'
           const geminiContents: { role: string; parts: any[] }[] = [];
           for (const turn of rawTurns) {
             if (geminiContents.length === 0) {
@@ -350,55 +414,90 @@ YOUR INSTRUCTIONS:
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              systemInstruction: {
-                parts: [{ text: systemPrompt }]
-              },
+              systemInstruction: { parts: [{ text: systemPrompt }] },
               contents: geminiContents,
               generationConfig: {
-                responseMimeType: 'application/json',
                 temperature: 0.7,
-                maxOutputTokens: 2048
+                maxOutputTokens: 8192
               }
             })
           });
 
-          // Fallback if selected model returns non-200 (e.g. 503 high demand spike)
           if (!response.ok && geminiModel !== 'gemini-3.6-flash') {
-            const fallbackModel = 'gemini-3.6-flash';
-            const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent?key=${apiKey}`;
-            const fallbackRes = await fetch(fallbackUrl, {
+            geminiModel = 'gemini-3.6-flash';
+            geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:streamGenerateContent?alt=sse&key=${apiKey}`;
+            response = await fetch(geminiUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 contents: geminiContents,
                 generationConfig: {
-                  responseMimeType: 'application/json',
                   temperature: 0.7,
-                  maxOutputTokens: 2048
+                  maxOutputTokens: 8192
                 }
               })
             });
-            if (fallbackRes.ok) {
-              response = fallbackRes;
-              geminiModel = fallbackModel;
-            }
           }
 
-          if (response.ok) {
-            const data = await response.json();
-            rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || null;
-            if (rawText) {
-              this.apiStatus = {
-                isLive: true,
-                isRateLimited: false,
-                lastError: null,
-                statusMessage: `Google AI Studio Live: ${geminiModel}`,
-                model: geminiModel,
-                keyMasked: 'Active & Encrypted'
-              };
-              this.notify();
+          if (response.ok && response.body) {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                if (buffer.trim()) {
+                  const line = buffer.trim();
+                  if (line.startsWith('data: ')) {
+                    try {
+                      const parsed = JSON.parse(line.slice(6).trim());
+                      const part = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                      if (part) {
+                        fullRawText += part;
+                        const dIdx = fullRawText.indexOf(':::concept-check');
+                        const clean = dIdx !== -1 ? fullRawText.slice(0, dIdx).trim() : fullRawText;
+                        onChunk(part, clean);
+                      }
+                    } catch {}
+                  }
+                }
+                break;
+              }
+
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || '';
+
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('data: ')) {
+                  const jsonStr = trimmed.slice(6).trim();
+                  if (!jsonStr || jsonStr === '[DONE]') continue;
+                  try {
+                    const parsed = JSON.parse(jsonStr);
+                    const part = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    if (part) {
+                      fullRawText += part;
+                      const dIdx = fullRawText.indexOf(':::concept-check');
+                      const clean = dIdx !== -1 ? fullRawText.slice(0, dIdx).trim() : fullRawText;
+                      onChunk(part, clean);
+                    }
+                  } catch {}
+                }
+              }
             }
+
+            this.apiStatus = {
+              isLive: true,
+              isRateLimited: false,
+              lastError: null,
+              statusMessage: `Google AI Studio Live: ${geminiModel}`,
+              model: geminiModel,
+              keyMasked: 'Active & Encrypted'
+            };
+            this.notify();
           } else {
             const errBody = await response.text();
             let parsedErrMsg = errBody;
@@ -426,7 +525,7 @@ YOUR INSTRUCTIONS:
             this.notify();
           }
         } else if (!isGoogleGemini && apiKey.startsWith('sk-or-')) {
-          // OpenRouter API Engine (only for non-Gemini third-party models)
+          // OpenRouter API Engine
           const messages = [
             { role: 'system', content: systemPrompt },
             ...history.slice(-8).map((m) => ({
@@ -447,25 +546,51 @@ YOUR INSTRUCTIONS:
             body: JSON.stringify({
               model: activeModel,
               messages,
-              response_format: { type: 'json_object' },
-              max_tokens: 2048
+              stream: true,
+              temperature: 0.7
             })
           });
 
-          if (response.ok) {
-            const data = await response.json();
-            rawText = data.choices?.[0]?.message?.content || null;
-            if (rawText) {
-              this.apiStatus = {
-                isLive: true,
-                isRateLimited: false,
-                lastError: null,
-                statusMessage: `OpenRouter Live: ${activeModel}`,
-                model: activeModel,
-                keyMasked: 'Active & Encrypted'
-              };
-              this.notify();
+          if (response.ok && response.body) {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || '';
+
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('data: ')) {
+                  const jsonStr = trimmed.slice(6).trim();
+                  if (!jsonStr || jsonStr === '[DONE]') continue;
+                  try {
+                    const parsed = JSON.parse(jsonStr);
+                    const part = parsed.choices?.[0]?.delta?.content || '';
+                    if (part) {
+                      fullRawText += part;
+                      const dIdx = fullRawText.indexOf(':::concept-check');
+                      const clean = dIdx !== -1 ? fullRawText.slice(0, dIdx).trim() : fullRawText;
+                      onChunk(part, clean);
+                    }
+                  } catch {}
+                }
+              }
             }
+
+            this.apiStatus = {
+              isLive: true,
+              isRateLimited: false,
+              lastError: null,
+              statusMessage: `OpenRouter Live: ${activeModel}`,
+              model: activeModel,
+              keyMasked: 'Active & Encrypted'
+            };
+            this.notify();
           } else {
             const errBody = await response.text();
             let parsedErrMsg = errBody;
@@ -486,31 +611,14 @@ YOUR INSTRUCTIONS:
           }
         }
 
-        if (rawText) {
-          let cleaned = rawText.trim();
-          if (cleaned.startsWith('```json')) {
-            cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-          } else if (cleaned.startsWith('```')) {
-            cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
-          }
-
-          try {
-            const parsed: TutorResponse = JSON.parse(cleaned);
-            if (parsed.message) {
-              this.speak(parsed.message);
-              return parsed;
-            }
-          } catch (jsonErr) {
-            console.warn('JSON parse error from LLM output, extracting text:', jsonErr);
-            const msgMatch = cleaned.match(/"message"\s*:\s*"([\s\S]*?)(?:",\s*"conceptCheck"|"$|"\s*})/);
-            const extractedMsg = msgMatch ? msgMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : cleaned;
-            this.speak(extractedMsg);
-            return {
-              message: extractedMsg,
-              conceptCheck: null,
-              masteryDelta: 5
-            };
-          }
+        if (fullRawText) {
+          const { cleanText, conceptCheck } = parseConceptCheckBlock(fullRawText);
+          onChunk('', cleanText);
+          return {
+            message: cleanText,
+            conceptCheck,
+            masteryDelta: 5
+          };
         }
       } catch (err: unknown) {
         const error = err as Error;
@@ -527,7 +635,21 @@ YOUR INSTRUCTIONS:
     }
 
     // High-fidelity Local Socratic Reasoning Engine fallback
-    return this.getLocalTutorResponse(topic, userMessage, history.length, Boolean(imageContext?.base64));
+    const local = this.getLocalTutorResponse(topic, userMessage, history.length, Boolean(imageContext?.base64));
+    onChunk(local.message, local.message);
+    return local;
+  }
+
+  /**
+   * Generates a personalized Socratic tutoring response with access to user data.
+   */
+  public async getTutorResponse(
+    topic: string,
+    history: TutorMessage[],
+    userMessage: string,
+    imageContext?: { base64: string; mimeType: string }
+  ): Promise<TutorResponse> {
+    return this.streamTutorResponse(topic, history, userMessage, () => {}, imageContext);
   }
 
   /**

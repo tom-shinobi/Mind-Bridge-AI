@@ -88,6 +88,9 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
   // Reaction picker state
   const [activeReactionMessageId, setActiveReactionMessageId] = useState<string | null>(null);
 
+  // Streaming message state
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
+
   // Settings & connection state
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [apiStatus, setApiStatus] = useState<ApiStatus>(aiService.getApiStatus());
@@ -268,29 +271,48 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
     };
 
     const nextHistory = [...messages, userMessage];
-    setMessages(nextHistory);
+    const aiMessageId = `ai-${Date.now()}`;
+    const placeholderAiMsg: TutorMessage = {
+      id: aiMessageId,
+      sender: 'ai',
+      text: '',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setMessages([...nextHistory, placeholderAiMsg]);
     setInputMessage('');
     const imagePayload = attachedImage ? { base64: attachedImage.base64, mimeType: attachedImage.mimeType } : undefined;
     setAttachedImage(null);
     setIsLoading(true);
+    setStreamingMessageId(aiMessageId);
 
     try {
-      const response = await aiService.getTutorResponse(
+      const response = await aiService.streamTutorResponse(
         selectedTopic,
         nextHistory,
         textToSend,
+        (_chunk, accumulatedClean) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === aiMessageId
+                ? { ...m, text: accumulatedClean }
+                : m
+            )
+          );
+        },
         imagePayload
       );
 
-      const aiMessage: TutorMessage = {
-        id: `ai-${Date.now()}`,
-        sender: 'ai',
-        text: response.message,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        conceptCheck: response.conceptCheck || undefined
-      };
-
-      setMessages((prev) => [...prev, aiMessage]);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === aiMessageId
+            ? {
+                ...m,
+                text: response.message,
+                conceptCheck: response.conceptCheck || undefined
+              }
+            : m
+        )
+      );
       sound.playSuccess();
 
       // Read out aloud if voice mode is enabled
@@ -299,15 +321,19 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
       }
     } catch (err) {
       console.error('Chat error:', err);
-      const errorMessage: TutorMessage = {
-        id: `err-${Date.now()}`,
-        sender: 'ai',
-        text: "I encountered a hiccup connecting to Google AI Studio. Operating in offline Socratic mode — please feel free to try again!",
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === aiMessageId
+            ? {
+                ...m,
+                text: "I encountered a hiccup connecting to Google AI Studio. Operating in offline Socratic mode — please feel free to try again!"
+              }
+            : m
+        )
+      );
     } finally {
       setIsLoading(false);
+      setStreamingMessageId(null);
     }
   };
 
@@ -641,7 +667,20 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
                     </div>
 
                     {/* Formatted Markdown & KaTeX Math Content */}
-                    <FormattedContent content={msg.text} className="text-slate-200 text-sm leading-relaxed" />
+                    {msg.text ? (
+                      <div className="relative">
+                        <FormattedContent content={msg.text} className="text-slate-200 text-sm leading-relaxed" />
+                        {streamingMessageId === msg.id && (
+                          <span className="inline-block w-2 h-4 ml-1 bg-cyan-400 animate-pulse align-middle rounded-sm shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-cyan-300/80 text-xs font-mono py-1 animate-pulse">
+                        <Sparkles className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                        <span>Horizon AI is thinking and formulating response...</span>
+                        <span className="inline-block w-2 h-4 bg-cyan-400 animate-pulse align-middle rounded-sm shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                      </div>
+                    )}
 
                     {/* Interactive Concept Check Card */}
                     {msg.conceptCheck && (
@@ -650,7 +689,7 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
                           <HelpCircle className="w-4 h-4 text-purple-400" />
                           <span>Concept Check</span>
                         </div>
-                        <p className="text-xs text-white font-medium">{msg.conceptCheck.question}</p>
+                        <FormattedContent content={msg.conceptCheck.question} className="text-xs text-white font-medium" />
 
                         <div className="grid grid-cols-1 gap-1.5 pt-1">
                           {msg.conceptCheck.options?.map((opt, oIdx) => {
@@ -661,7 +700,7 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
                             let btnStyle = 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10';
                             if (hasAnswered) {
                               if (isCorrectAnswer) {
-                                btnStyle = 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300';
+                                btnStyle = 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 font-semibold';
                               } else if (isSelected) {
                                 btnStyle = 'bg-rose-500/20 border-rose-500/50 text-rose-300';
                               } else {
@@ -675,19 +714,20 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
                                 type="button"
                                 disabled={hasAnswered}
                                 onClick={() => handleAnswerConceptCheck(msg.id, opt)}
-                                className={`w-full text-left text-xs px-3 py-2 rounded-lg border transition-all flex items-center justify-between ${btnStyle}`}
+                                className={`w-full text-left text-xs px-3 py-2 rounded-lg border transition-all flex items-center justify-between gap-2 ${btnStyle}`}
                               >
-                                <span>{opt}</span>
-                                {hasAnswered && isCorrectAnswer && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                                <FormattedContent inline content={opt} className="text-xs font-medium flex-1 break-words" />
+                                {hasAnswered && isCorrectAnswer && <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />}
                               </button>
                             );
                           })}
                         </div>
 
                         {msg.conceptCheck.studentAnswer && msg.conceptCheck.explanation && (
-                          <p className="text-[11px] font-mono text-purple-200/90 pt-1 border-t border-white/10">
-                            💡 {msg.conceptCheck.explanation}
-                          </p>
+                          <div className="text-[11px] font-mono text-purple-200/90 pt-1 border-t border-white/10 flex items-start gap-1.5">
+                            <span className="flex-shrink-0">💡</span>
+                            <FormattedContent inline content={msg.conceptCheck.explanation} className="text-[11px]" />
+                          </div>
                         )}
                       </div>
                     )}

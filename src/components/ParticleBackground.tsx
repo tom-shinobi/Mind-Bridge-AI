@@ -1,18 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  radius: number;
-  baseAlpha: number;
-  currentAlpha: number;
-  pulseSpeed: number;
-  pulseAngle: number;
-  color: string;
-}
-
 import type { AtmosphereTheme } from '../types';
 
 interface ParticleProps {
@@ -100,6 +86,42 @@ const THEME_PARTICLE_COLORS: Record<AtmosphereTheme, string[]> = {
   ]
 };
 
+interface StardustMote {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  baseAlpha: number;
+  currentAlpha: number;
+  pulseSpeed: number;
+  pulseAngle: number;
+  color: string;
+}
+
+interface MetaphysicalOrb {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  color: string;
+  glowColor: string;
+  pulseAngle: number;
+  pulseSpeed: number;
+  depth: number;
+}
+
+interface AtmosphericCloud {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  color: string;
+  alpha: number;
+}
+
 export const ParticleBackground: React.FC<ParticleProps> = ({ theme = 'surrealist_editorial' }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -114,40 +136,113 @@ export const ParticleBackground: React.FC<ParticleProps> = ({ theme = 'surrealis
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    // Mouse coordinates for gentle interactive repelling
+    // Mouse coordinates for gentle gravitational lensing
     const mouse = {
-      x: -1000,
-      y: -1000,
-      radius: 140
+      x: -2000,
+      y: -2000,
+      targetX: -2000,
+      targetY: -2000,
+      radius: 200
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
+      mouse.targetX = e.clientX;
+      mouse.targetY = e.clientY;
     };
 
     const handleMouseLeave = () => {
-      mouse.x = -1000;
-      mouse.y = -1000;
+      mouse.targetX = -2000;
+      mouse.targetY = -2000;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches && e.touches.length > 0) {
-        mouse.x = e.touches[0].clientX;
-        mouse.y = e.touches[0].clientY;
+        mouse.targetX = e.touches[0].clientX;
+        mouse.targetY = e.touches[0].clientY;
       }
     };
 
     const handleTouchEnd = () => {
-      mouse.x = -1000;
-      mouse.y = -1000;
+      mouse.targetX = -2000;
+      mouse.targetY = -2000;
+    };
+
+    let stardust: StardustMote[] = [];
+    let orbs: MetaphysicalOrb[] = [];
+    let clouds: AtmosphericCloud[] = [];
+
+    const activePalette = THEME_PARTICLE_COLORS[theme] || THEME_PARTICLE_COLORS.surrealist_editorial;
+
+    const initEntities = () => {
+      // 1. Metaphysical Celestial Spheres (Inspired by Giorgio de Chirico & René Magritte)
+      const orbCount = Math.max(4, Math.min(Math.floor(width / 220), 8));
+      orbs = [];
+      for (let i = 0; i < orbCount; i++) {
+        const color = activePalette[i % activePalette.length];
+        const nextColor = activePalette[(i + 1) % activePalette.length];
+        const radius = 14 + Math.random() * 26; // 14px to 40px
+        orbs.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.18, // Slow, serene cosmic drift
+          vy: (Math.random() - 0.5) * 0.18,
+          radius,
+          color,
+          glowColor: nextColor,
+          pulseAngle: Math.random() * Math.PI * 2,
+          pulseSpeed: 0.008 + Math.random() * 0.012,
+          depth: 0.4 + Math.random() * 0.6
+        });
+      }
+
+      // 2. Drifting Celestial Stardust Motes
+      const moteCount = Math.min(Math.floor((width * height) / 12000), 75);
+      stardust = [];
+      for (let i = 0; i < moteCount; i++) {
+        const color = activePalette[Math.floor(Math.random() * activePalette.length)];
+        const baseAlpha = 0.25 + Math.random() * 0.5;
+        stardust.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.28,
+          vy: (Math.random() - 0.5) * 0.28,
+          radius: 1.0 + Math.random() * 2.2,
+          baseAlpha,
+          currentAlpha: baseAlpha,
+          pulseSpeed: 0.012 + Math.random() * 0.024,
+          pulseAngle: Math.random() * Math.PI * 2,
+          color
+        });
+      }
+
+      // 3. Surrealist Atmospheric Mist & Twilight Clouds
+      clouds = [
+        {
+          x: width * 0.25,
+          y: height * 0.35,
+          vx: 0.05,
+          vy: -0.02,
+          radius: Math.min(width, height) * 0.45,
+          color: activePalette[0],
+          alpha: 0.045
+        },
+        {
+          x: width * 0.75,
+          y: height * 0.65,
+          vx: -0.04,
+          vy: 0.03,
+          radius: Math.min(width, height) * 0.5,
+          color: activePalette[1 % activePalette.length],
+          alpha: 0.04
+        }
+      ];
     };
 
     const handleResize = () => {
       if (!canvas) return;
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
-      initParticles();
+      initEntities();
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
@@ -158,89 +253,140 @@ export const ParticleBackground: React.FC<ParticleProps> = ({ theme = 'surrealis
     window.addEventListener('touchcancel', handleTouchEnd);
     window.addEventListener('resize', handleResize);
 
-    // Particle pool with higher density and vibrant opacity
-    const count = Math.min(Math.floor((width * height) / 14000), 85);
-    let particles: Particle[] = [];
-    const activePalette = THEME_PARTICLE_COLORS[theme] || THEME_PARTICLE_COLORS.dusk;
-
-    const initParticles = () => {
-      particles = [];
-      for (let i = 0; i < count; i++) {
-        const color = activePalette[Math.floor(Math.random() * activePalette.length)];
-        const baseAlpha = 0.35 + Math.random() * 0.5;
-        particles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.38,
-          vy: (Math.random() - 0.5) * 0.38,
-          radius: 1.4 + Math.random() * 2.4,
-          baseAlpha,
-          currentAlpha: baseAlpha,
-          pulseSpeed: 0.015 + Math.random() * 0.03,
-          pulseAngle: Math.random() * Math.PI * 2,
-          color
-        });
-      }
-    };
-
-    initParticles();
+    initEntities();
 
     // Render loop
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Draw connecting web lines between nearby particles with matching colors
-      const maxDistance = 120;
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const p1 = particles[i];
-          const p2 = particles[j];
-          const dx = p1.x - p2.x;
-          const dy = p1.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+      // Smooth mouse interpolation
+      mouse.x += (mouse.targetX - mouse.x) * 0.08;
+      mouse.y += (mouse.targetY - mouse.y) * 0.08;
 
-          if (dist < maxDistance) {
-            const lineAlpha = (1 - dist / maxDistance) * 0.16;
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(${p1.color}, ${lineAlpha})`;
-            ctx.lineWidth = 0.8;
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-          }
-        }
+      // 1. Draw Subtle Atmospheric Twilight Clouds (Metaphysical Depth)
+      for (const cloud of clouds) {
+        cloud.x += cloud.vx;
+        cloud.y += cloud.vy;
+        if (cloud.x < -cloud.radius) cloud.x = width + cloud.radius;
+        if (cloud.x > width + cloud.radius) cloud.x = -cloud.radius;
+        if (cloud.y < -cloud.radius) cloud.y = height + cloud.radius;
+        if (cloud.y > height + cloud.radius) cloud.y = -cloud.radius;
+
+        const grad = ctx.createRadialGradient(
+          cloud.x,
+          cloud.y,
+          0,
+          cloud.x,
+          cloud.y,
+          cloud.radius
+        );
+        grad.addColorStop(0, `rgba(${cloud.color}, ${cloud.alpha})`);
+        grad.addColorStop(0.5, `rgba(${cloud.color}, ${cloud.alpha * 0.4})`);
+        grad.addColorStop(1, `rgba(${cloud.color}, 0)`);
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      // 2. Update and draw particles with glowing halos & luminous cores
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
+      // 2. Draw Floating Metaphysical Spheres / Orbs (Surrealism signature)
+      for (const orb of orbs) {
+        orb.x += orb.vx;
+        orb.y += orb.vy;
 
-        // Autonomous drift
+        // Wrap around borders seamlessly
+        const margin = orb.radius * 2;
+        if (orb.x < -margin) orb.x = width + margin;
+        if (orb.x > width + margin) orb.x = -margin;
+        if (orb.y < -margin) orb.y = height + margin;
+        if (orb.y > height + margin) orb.y = -margin;
+
+        // Subtle gravitational curvature around mouse cursor
+        const dx = mouse.x - orb.x;
+        const dy = mouse.y - orb.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < mouse.radius * 1.5 && dist > 10) {
+          const force = (1 - dist / (mouse.radius * 1.5)) * 0.4;
+          orb.x -= (dx / dist) * force;
+          orb.y -= (dy / dist) * force;
+        }
+
+        orb.pulseAngle += orb.pulseSpeed;
+        const scale = 1 + Math.sin(orb.pulseAngle) * 0.05;
+        const currentR = orb.radius * scale;
+
+        // Ethereal Outer Glow Corona
+        const glowRadius = currentR * 2.6;
+        const auraGrad = ctx.createRadialGradient(
+          orb.x,
+          orb.y,
+          currentR * 0.8,
+          orb.x,
+          orb.y,
+          glowRadius
+        );
+        auraGrad.addColorStop(0, `rgba(${orb.glowColor}, 0.22)`);
+        auraGrad.addColorStop(0.5, `rgba(${orb.glowColor}, 0.08)`);
+        auraGrad.addColorStop(1, `rgba(${orb.glowColor}, 0)`);
+
+        ctx.fillStyle = auraGrad;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, glowRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3D Spherical Volume with Specular Highlight (Giorgio de Chirico light angle)
+        const lightOffsetX = orb.x - currentR * 0.32;
+        const lightOffsetY = orb.y - currentR * 0.32;
+        const sphereGrad = ctx.createRadialGradient(
+          lightOffsetX,
+          lightOffsetY,
+          currentR * 0.08,
+          orb.x,
+          orb.y,
+          currentR
+        );
+        sphereGrad.addColorStop(0, 'rgba(255, 255, 255, 0.92)'); // Specular sunlight reflection
+        sphereGrad.addColorStop(0.25, `rgba(${orb.color}, 0.75)`);
+        sphereGrad.addColorStop(0.7, `rgba(${orb.color}, 0.4)`);
+        sphereGrad.addColorStop(1, 'rgba(3, 7, 18, 0.85)'); // Metaphysical shadow terminus
+
+        ctx.fillStyle = sphereGrad;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, currentR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Subtle soft rim light
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 + Math.sin(orb.pulseAngle) * 0.08})`;
+        ctx.lineWidth = 0.75;
+        ctx.stroke();
+      }
+
+      // 3. Draw Celestial Stardust (Twinkling cosmic motes)
+      for (const p of stardust) {
         p.x += p.vx;
         p.y += p.vy;
 
-        // Wrap boundaries smoothly
         if (p.x < -10) p.x = width + 10;
         if (p.x > width + 10) p.x = -10;
         if (p.y < -10) p.y = height + 10;
         if (p.y > height + 10) p.y = -10;
 
-        // Subtle mouse dispersion
+        // Gravitational lens deflection
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < mouse.radius && dist > 0) {
-          const force = (1 - dist / mouse.radius) * 0.85;
+          const force = (1 - dist / mouse.radius) * 0.65;
           p.x -= (dx / dist) * force;
           p.y -= (dy / dist) * force;
         }
 
-        // Breathing / twinkling pulse
         p.pulseAngle += p.pulseSpeed;
-        p.currentAlpha = p.baseAlpha + Math.sin(p.pulseAngle) * 0.2;
+        p.currentAlpha = p.baseAlpha + Math.sin(p.pulseAngle) * 0.22;
 
-        // Glowing outer halo in full theme hue
-        const haloRadius = p.radius * 4;
+        // Soft halo
+        const haloRadius = p.radius * 3.5;
         const gradient = ctx.createRadialGradient(
           p.x,
           p.y,
@@ -249,8 +395,8 @@ export const ParticleBackground: React.FC<ParticleProps> = ({ theme = 'surrealis
           p.y,
           haloRadius
         );
-        gradient.addColorStop(0, `rgba(${p.color}, ${Math.max(0, p.currentAlpha)})`);
-        gradient.addColorStop(0.4, `rgba(${p.color}, ${Math.max(0, p.currentAlpha * 0.45)})`);
+        gradient.addColorStop(0, `rgba(${p.color}, ${Math.max(0, p.currentAlpha * 0.6)})`);
+        gradient.addColorStop(0.5, `rgba(${p.color}, ${Math.max(0, p.currentAlpha * 0.2)})`);
         gradient.addColorStop(1, `rgba(${p.color}, 0)`);
 
         ctx.beginPath();
@@ -258,15 +404,15 @@ export const ParticleBackground: React.FC<ParticleProps> = ({ theme = 'surrealis
         ctx.arc(p.x, p.y, haloRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Vivid colored luminous core
+        // Luminous core
         ctx.beginPath();
-        ctx.fillStyle = `rgba(${p.color}, ${Math.min(1, p.currentAlpha + 0.3)})`;
+        ctx.fillStyle = `rgba(${p.color}, ${Math.min(1, p.currentAlpha + 0.25)})`;
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // White specular center spark
+        // Stardust center spark
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, p.currentAlpha * 0.85)})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, p.currentAlpha * 0.9)})`;
         ctx.arc(p.x, p.y, p.radius * 0.45, 0, Math.PI * 2);
         ctx.fill();
       }

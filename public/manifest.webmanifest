@@ -1,0 +1,45 @@
+{
+  "name": "Horizon AI - MindBridge Academic Assistant",
+  "short_name": "Horizon AI",
+  "description": "Personalized AI-powered academic learning assistant that connects academic history, learning gaps, and daily study.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#020409",
+  "theme_color": "#020409",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": [
+    "education",
+    "productivity"
+  ],
+  "shortcuts": [
+    {
+      "name": "Horizon AI Chat",
+      "short_name": "AI Chat",
+      "description": "Open Horizon AI fullscreen academic chat",
+      "url": "/#aichat",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Adaptive Timetable",
+      "short_name": "Timetable",
+      "description": "Open today's study schedule",
+      "url": "/#timetable",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    }
+  ]
+}

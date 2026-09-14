@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { marked } from 'marked';
 import katex from 'katex';
 import DOMPurify from 'dompurify';
@@ -6,18 +6,40 @@ import DOMPurify from 'dompurify';
 interface FormattedContentProps {
   content: string;
   className?: string;
+  inline?: boolean;
 }
 
-export const FormattedContent: React.FC<FormattedContentProps> = ({ content, className = '' }) => {
+export const FormattedContent: React.FC<FormattedContentProps> = ({
+  content,
+  className = '',
+  inline = false
+}) => {
   const html = useMemo(() => {
     if (!content) return '';
 
     try {
+      let text = content;
+
+      // Detect and unwrap accidental raw JSON strings if present
+      if (typeof text === 'string' && (text.trim().startsWith('{"message"') || text.trim().startsWith('{ "message"'))) {
+        try {
+          const parsed = JSON.parse(text.trim());
+          if (parsed && typeof parsed.message === 'string') {
+            text = parsed.message;
+          }
+        } catch {
+          const m = text.match(/"message"\s*:\s*"([\s\S]*?)(?:",\s*"conceptCheck"|"$|"\s*})/);
+          if (m && m[1]) {
+            text = m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+          }
+        }
+      }
+
       const mathTokens: { placeholder: string; html: string }[] = [];
       let tokenCounter = 0;
 
       // 1. Extract Display Math: $$...$$ and \[...\]
-      let processed = content.replace(/\$\$([\s\S]*?)\$\$/g, (_, math) => {
+      let processed = text.replace(/\$\$([\s\S]*?)\$\$/g, (_, math) => {
         const placeholder = `KATEXDISPLAYTOKEN${tokenCounter++}END`;
         try {
           const rendered = katex.renderToString(math.trim(), {
@@ -76,10 +98,9 @@ export const FormattedContent: React.FC<FormattedContentProps> = ({ content, cla
       });
 
       // 3. Render Markdown with marked
-      let renderedHtml = marked.parse(processed, {
-        gfm: true,
-        breaks: true
-      }) as string;
+      let renderedHtml = inline
+        ? (marked.parseInline(processed) as string)
+        : (marked.parse(processed, { gfm: true, breaks: true }) as string);
 
       // 4. Restore math tokens
       for (const token of mathTokens) {
@@ -135,7 +156,16 @@ export const FormattedContent: React.FC<FormattedContentProps> = ({ content, cla
       console.warn('Formatting error:', e);
       return content;
     }
-  }, [content]);
+  }, [content, inline]);
+
+  if (inline) {
+    return (
+      <span
+        className={`markdown-content-inline ${className}`}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    );
+  }
 
   return (
     <div
