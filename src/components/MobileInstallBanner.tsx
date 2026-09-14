@@ -7,7 +7,11 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 }
 
-export const MobileInstallBanner: React.FC = () => {
+interface MobileInstallBannerProps {
+  activeTab?: string;
+}
+
+export const MobileInstallBanner: React.FC<MobileInstallBannerProps> = ({ activeTab }) => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIOS, setIsIOS] = useState<boolean>(false);
   const [isStandalone, setIsStandalone] = useState<boolean>(false);
@@ -77,7 +81,7 @@ export const MobileInstallBanner: React.FC = () => {
     localStorage.setItem('mba_pwa_dismissed', Date.now().toString());
   };
 
-  if (isStandalone || !showBanner) return null;
+  if (isStandalone || !showBanner || activeTab === 'chat') return null;
 
   return (
     <>

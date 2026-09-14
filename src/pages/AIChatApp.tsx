@@ -396,41 +396,163 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
       className={`${
         isImmersionMode
           ? 'fixed inset-0 z-50 bg-[#080c14]/95'
-          : 'relative w-full h-full flex-1'
-      } flex flex-col justify-between overflow-hidden font-sans text-slate-100 bg-transparent`}
+          : 'relative w-full h-full flex-1 min-h-0'
+      } flex flex-col overflow-hidden font-sans text-slate-100 bg-transparent`}
     >
       {/* ========================================================================= */}
       {/* APPLE iMESSAGE TOP HEADER BAR */}
       {/* ========================================================================= */}
-      <header className="relative z-20 backdrop-blur-2xl bg-black/60 border-b border-white/10 px-4 sm:px-8 py-2.5 flex items-center justify-between shadow-lg">
-        {/* Left: Back Button & Topic Selector */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              sound.playClick();
-              if (isImmersionMode) {
-                setIsImmersionMode(false);
-              } else {
-                onNavigate('dashboard');
-              }
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all font-mono text-xs font-semibold shadow-md active:scale-95 cursor-pointer touch-press"
-          >
-            <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
-            <span>Back</span>
-          </button>
+      <header className="flex-none relative z-20 backdrop-blur-2xl bg-black/70 border-b border-white/10 shadow-lg pt-[max(0.6rem,env(safe-area-inset-top,0px))]">
+        {/* Row 1: Primary Navigation & Contact Bar (Symmetric on Mobile & Desktop) */}
+        <div className="px-3 sm:px-6 md:px-8 py-2 md:py-2.5 flex items-center justify-between gap-2">
+          
+          {/* Left: Back Button & (on Desktop) Topic Selector */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                sound.playClick();
+                if (isImmersionMode) {
+                  setIsImmersionMode(false);
+                } else {
+                  onNavigate('dashboard');
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all font-mono text-xs font-semibold shadow-md active:scale-95 cursor-pointer touch-press"
+            >
+              <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+              <span>Back</span>
+            </button>
 
-          {/* Topic Scope Capsule Picker */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-xs font-medium backdrop-blur-md">
-            <Layers className="w-3.5 h-3.5 text-blue-400" />
+            {/* Topic Scope Capsule Picker (Desktop Inline md+) */}
+            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-medium backdrop-blur-md">
+              <Layers className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+              <select
+                value={selectedTopic}
+                onChange={(e) => {
+                  sound.playClick();
+                  setSelectedTopic(e.target.value);
+                }}
+                className="bg-transparent text-white text-xs focus:outline-none cursor-pointer max-w-[180px] lg:max-w-[240px] truncate"
+              >
+                <option value="General Academic Advisor & Learning Gaps" className="bg-slate-900 text-white">
+                  🎓 General Advisor (All Gaps)
+                </option>
+                <optgroup label="Active Learning Gaps" className="bg-slate-900 text-white">
+                  {gaps.map((g) => (
+                    <option key={g.id} value={g.topic} className="bg-slate-900 text-white">
+                      {g.topic} ({g.severity.toUpperCase()})
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Syllabus Modules" className="bg-slate-900 text-white">
+                  {syllabus
+                    .filter((s) => !gaps.some((g) => g.topic === s.topic))
+                    .map((s) => (
+                      <option key={s.id} value={s.topic} className="bg-slate-900 text-white">
+                        {s.topic}
+                      </option>
+                    ))}
+                </optgroup>
+              </select>
+            </div>
+          </div>
+
+          {/* Center: Contact Info (Horizon AI Tutor - Centered & Balanced) */}
+          <div
+            className="flex items-center gap-2 cursor-pointer select-none py-0.5 px-2 rounded-full hover:bg-white/5 transition-colors"
+            onClick={() => setIsSettingsOpen(true)}
+            title="Horizon AI System Details & Key Settings"
+          >
+            <div className="relative flex-shrink-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 p-[2px] shadow-[0_0_16px_rgba(56,189,248,0.45)]">
+                <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-white">
+                  <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-300 animate-pulse" />
+                </div>
+              </div>
+              {/* Online pulsing indicator */}
+              <span className="absolute bottom-0 right-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 border-2 border-slate-950 shadow-[0_0_8px_#10b981]" />
+            </div>
+
+            <div className="flex flex-col text-left">
+              <div className="flex items-center gap-1 leading-none">
+                <span className="text-xs sm:text-sm font-bold text-white tracking-tight">Horizon AI</span>
+                <span className="text-[10px] text-cyan-400 font-bold">›</span>
+              </div>
+              <span className="text-[9px] font-mono text-cyan-400/90 tracking-wide mt-0.5 truncate max-w-[120px] sm:max-w-[200px]">
+                {apiStatus.isLive
+                  ? `${apiStatus.model?.split('-').slice(0, 3).join('-') || 'gemini-flash'} • Live (${apiStatus.latencyMs || 180}ms)`
+                  : 'Horizon Local AI'}
+              </span>
+            </div>
+          </div>
+
+          {/* Right: Actions (Voice Call, Fullscreen, AI Config) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            {/* Voice Speech Toggle */}
+            <button
+              onClick={() => {
+                sound.playClick();
+                setIsVoiceModeActive(!isVoiceModeActive);
+                if (!isVoiceModeActive && messages.length > 0) {
+                  const lastAi = [...messages].reverse().find((m) => m.sender === 'ai');
+                  if (lastAi) aiService.speak(lastAi.text);
+                } else {
+                  aiService.stopSpeaking();
+                }
+              }}
+              className={`p-2 rounded-full border transition-all cursor-pointer ${
+                isVoiceModeActive
+                  ? 'bg-blue-500/20 border-blue-400 text-blue-300 shadow-[0_0_12px_rgba(0,122,255,0.4)]'
+                  : 'bg-white/10 border-white/15 text-slate-300 hover:text-white'
+              }`}
+              title={isVoiceModeActive ? 'Voice Read-Aloud: ON (Click to mute)' : 'Turn Voice Read-Aloud ON'}
+            >
+              {isVoiceModeActive ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 opacity-70" />}
+            </button>
+
+            {/* Fullscreen / Immersion Toggle */}
+            <button
+              onClick={() => {
+                sound.playClick();
+                setIsImmersionMode(!isImmersionMode);
+              }}
+              className={`hidden sm:flex p-2 rounded-full border transition-all cursor-pointer ${
+                isImmersionMode
+                  ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.4)]'
+                  : 'bg-white/10 border-white/15 text-slate-300 hover:text-white'
+              }`}
+              title={isImmersionMode ? 'Exit Borderless Fullscreen (Esc)' : 'Enter Borderless Fullscreen'}
+            >
+              {isImmersionMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+
+            {/* AI Settings / Model Diagnostics Modal Trigger */}
+            <button
+              onClick={() => {
+                sound.playClick();
+                setIsSettingsOpen(true);
+              }}
+              className="p-2 rounded-full bg-white/10 border border-white/15 text-slate-300 hover:text-white hover:border-purple-400 transition-all cursor-pointer"
+              title="Google Gemini AI Studio & Model Settings"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Row 2 (Mobile only): Clean Full-Width Topic Context Strip */}
+        <div className="md:hidden w-full px-3 py-1.5 bg-black/40 border-t border-white/5 flex items-center justify-center">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs font-medium backdrop-blur-md w-full max-w-sm justify-center shadow-inner">
+            <Layers className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex-shrink-0">Topic:</span>
             <select
               value={selectedTopic}
               onChange={(e) => {
                 sound.playClick();
                 setSelectedTopic(e.target.value);
               }}
-              className="bg-transparent text-white text-xs focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[220px] truncate"
+              className="bg-transparent text-white text-xs focus:outline-none cursor-pointer flex-1 truncate text-center font-medium"
             >
               <option value="General Academic Advisor & Learning Gaps" className="bg-slate-900 text-white">
                 🎓 General Advisor (All Gaps)
@@ -454,93 +576,19 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
             </select>
           </div>
         </div>
-
-        {/* Center: Contact Info (Horizon AI Tutor) */}
-        <div className="flex flex-col items-center cursor-pointer select-none" onClick={() => setIsSettingsOpen(true)}>
-          <div className="relative">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 p-[2px] shadow-[0_0_18px_rgba(56,189,248,0.45)]">
-              <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-white">
-                <Bot className="w-4 h-4 text-cyan-300 animate-pulse" />
-              </div>
-            </div>
-            {/* Online pulsing indicator */}
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-slate-950 shadow-[0_0_8px_#10b981]" />
-          </div>
-
-          <div className="flex items-center gap-1 mt-0.5">
-            <span className="text-xs font-bold text-white tracking-tight">Horizon AI</span>
-            <span className="text-[10px] text-cyan-400 font-bold">›</span>
-          </div>
-          <span className="text-[9px] font-mono text-cyan-400/90 tracking-wide">
-            {apiStatus.isLive ? `${apiStatus.model || 'Google Gemini 3.5 Flash'} (${apiStatus.latencyMs || 180}ms)` : 'Horizon Local AI'}
-          </span>
-        </div>
-
-        {/* Right: Actions (Voice Call, Fullscreen, AI Config) */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Voice Speech Toggle */}
-          <button
-            onClick={() => {
-              sound.playClick();
-              setIsVoiceModeActive(!isVoiceModeActive);
-              if (!isVoiceModeActive && messages.length > 0) {
-                const lastAi = [...messages].reverse().find((m) => m.sender === 'ai');
-                if (lastAi) aiService.speak(lastAi.text);
-              } else {
-                aiService.stopSpeaking();
-              }
-            }}
-            className={`p-2 rounded-full border transition-all cursor-pointer ${
-              isVoiceModeActive
-                ? 'bg-blue-500/20 border-blue-400 text-blue-300 shadow-[0_0_12px_rgba(0,122,255,0.4)]'
-                : 'bg-white/10 border-white/15 text-slate-300 hover:text-white'
-            }`}
-            title={isVoiceModeActive ? 'Voice Read-Aloud: ON (Click to mute)' : 'Turn Voice Read-Aloud ON'}
-          >
-            {isVoiceModeActive ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 opacity-70" />}
-          </button>
-
-          {/* Fullscreen / Immersion Toggle */}
-          <button
-            onClick={() => {
-              sound.playClick();
-              setIsImmersionMode(!isImmersionMode);
-            }}
-            className={`p-2 rounded-full border transition-all cursor-pointer ${
-              isImmersionMode
-                ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.4)]'
-                : 'bg-white/10 border-white/15 text-slate-300 hover:text-white'
-            }`}
-            title={isImmersionMode ? 'Exit Borderless Fullscreen (Esc)' : 'Enter Borderless Fullscreen'}
-          >
-            {isImmersionMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-          </button>
-
-          {/* AI Settings / Model Diagnostics Modal Trigger */}
-          <button
-            onClick={() => {
-              sound.playClick();
-              setIsSettingsOpen(true);
-            }}
-            className="p-2 rounded-full bg-white/10 border border-white/15 text-slate-300 hover:text-white hover:border-purple-400 transition-all cursor-pointer"
-            title="Google Gemini AI Studio & Model Settings"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
-        </div>
       </header>
 
       {/* ========================================================================= */}
       {/* 2-COLUMN VIEWPORT: Left Chat Glass Panel + Right Motivation Sidebar */}
       {/* ========================================================================= */}
-      <div className="relative z-10 flex-1 flex flex-col xl:flex-row gap-4 p-2.5 sm:p-4 md:p-5 max-w-7xl w-full mx-auto overflow-hidden min-h-0">
+      <div className="relative z-10 flex-1 min-h-0 flex flex-col xl:flex-row gap-3 sm:gap-4 p-2 sm:p-3 md:p-4 max-w-7xl w-full mx-auto overflow-hidden">
         
         {/* Main Chat Panel */}
-        <div className="flex-1 flex flex-col rounded-3xl bg-black/60 backdrop-blur-2xl border border-white/15 shadow-2xl overflow-hidden min-h-0">
+        <div className="flex-1 min-h-0 flex flex-col rounded-2xl sm:rounded-3xl bg-black/60 backdrop-blur-2xl border border-white/15 shadow-2xl overflow-hidden">
           
           <div
             ref={chatScrollRef}
-            className="relative z-10 flex-1 overflow-y-auto px-3 sm:px-6 md:px-8 py-5 space-y-4 custom-scrollbar"
+            className="relative z-10 flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 md:px-8 py-3 sm:py-4 space-y-4 custom-scrollbar"
           >
         {/* Date separator pill */}
         <div className="flex justify-center my-2">
@@ -916,7 +964,7 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
       {/* ========================================================================= */}
       {/* APPLE CAPSULE BOTTOM INPUT DOCK */}
       {/* ========================================================================= */}
-      <footer className="relative z-20 backdrop-blur-3xl bg-black/60 border-t border-white/10 px-3 sm:px-6 md:px-8 py-3">
+      <footer className="flex-none relative z-20 backdrop-blur-3xl bg-black/75 border-t border-white/10 px-3 sm:px-6 md:px-8 py-2.5 sm:py-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
         <div className="max-w-5xl mx-auto space-y-2.5">
           {/* Quick Concept Prompt Chips */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
@@ -1057,7 +1105,7 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
     </div>
 
     {/* Right Column: Motivational Quote Card & Academic Context (Desktop Image 3) */}
-    <div className="hidden xl:flex flex-col gap-4 w-80 shrink-0">
+    <div className="hidden xl:flex flex-col gap-3 w-80 shrink-0 min-h-0 overflow-y-auto custom-scrollbar">
       {/* Motivational Quote Card matching Image 3 */}
       <div className="rounded-3xl bg-black/60 backdrop-blur-2xl border border-white/15 p-5 shadow-2xl space-y-3 relative overflow-hidden group">
         <div className="flex items-center justify-between">

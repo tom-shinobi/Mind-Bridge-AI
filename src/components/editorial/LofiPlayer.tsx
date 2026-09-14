@@ -89,7 +89,11 @@ export const STATIONS: MusicStation[] = [
   }
 ];
 
-export const LofiPlayer: React.FC = () => {
+interface LofiPlayerProps {
+  activeTab?: string;
+}
+
+export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStationIndex, setCurrentStationIndex] = useState(0);
   const [volume, setVolume] = useState(0.65);
@@ -232,7 +236,13 @@ export const LofiPlayer: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed bottom-5 right-5 z-40 font-mono text-xs select-none">
+    <div
+      className={`fixed z-40 font-mono text-xs select-none transition-all duration-300 ${
+        activeTab === 'chat'
+          ? 'hidden md:block md:bottom-5 md:right-5'
+          : 'bottom-20 right-3.5 md:bottom-5 md:right-5'
+      }`}
+    >
       {/* Hidden native audio tag */}
       <audio
         ref={audioRef}

@@ -254,7 +254,9 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       {/* =========================================================================
           1. TOP NAVIGATION BAR (Liquid Glass Island)
           ========================================================================= */}
-      <header className="sticky top-2 z-40 w-full px-2.5 sm:px-4 md:px-6 pointer-events-none mb-3 pt-[max(0.25rem,env(safe-area-inset-top,0px))]">
+      <header className={`sticky top-2 z-40 w-full px-2.5 sm:px-4 md:px-6 pointer-events-none mb-3 pt-[max(0.25rem,env(safe-area-inset-top,0px))] ${
+        activeTab === 'chat' ? 'hidden md:block flex-none mb-1 sm:mb-2 top-1' : ''
+      }`}>
         <div className={`pointer-events-auto max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center justify-between gap-2 sm:gap-3 select-none transition-all relative ${
           currentTheme === 'surrealist_editorial'
             ? 'bg-[#0B0F17]/90 border border-white/20 shadow-[0_16px_40px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.3)] rounded-full backdrop-blur-2xl'
@@ -593,7 +595,9 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       {/* =========================================================================
           2. MOBILE FLOATING BOTTOM DOCK (Clean iOS Dynamic Style matching Mobile Images 4 & 5)
           ========================================================================= */}
-      <div className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom,0px))] inset-x-3 z-40 max-w-md mx-auto md:hidden pointer-events-auto">
+      <div className={`fixed bottom-[max(0.75rem,env(safe-area-inset-bottom,0px))] inset-x-3 z-40 max-w-md mx-auto md:hidden pointer-events-auto ${
+        activeTab === 'chat' ? 'hidden' : ''
+      }`}>
         <nav className="px-2 py-1 flex items-center justify-around select-none transition-all apple-liquid-glass rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/20 backdrop-blur-3xl bg-black/85">
           
           {/* 1. Dashboard */}

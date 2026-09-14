@@ -769,7 +769,9 @@ export function App() {
 
   // 5. Main Dashboard & Workspace (Preserves all 10 pages and current layout)
   return (
-    <div className={`min-h-screen text-[#F5F5F7] flex flex-col relative selection:bg-[#E2F952] selection:text-black font-body ${currentTheme === 'surrealist_editorial' ? 'bg-[#090C13] theme-surrealist-editorial' : 'bg-[#020409]'}`}>
+    <div className={`${
+      activeTab === 'chat' ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-screen'
+    } text-[#F5F5F7] flex flex-col relative selection:bg-[#E2F952] selection:text-black font-body ${currentTheme === 'surrealist_editorial' ? 'bg-[#090C13] theme-surrealist-editorial' : 'bg-[#020409]'}`}>
       
       {/* Dynamic Moving Particles & Glowing Chromatic Canvas (Sunlight Dusk vs Cosmic Nebula) */}
       {renderAtmosphereBackground()}
@@ -801,7 +803,7 @@ export function App() {
 
       {/* Dynamic Viewport Container: Edge-to-Edge Fullscreen for Horizon AI Chat */}
       {activeTab === 'chat' ? (
-        <main className="flex-1 w-full h-[calc(100dvh-4.25rem)] flex flex-col relative z-10 overflow-hidden">
+        <main className="flex-1 min-h-0 w-full flex flex-col relative z-10 overflow-hidden">
           <AIChatApp
             initialTopic={targetTopic}
             gaps={gaps}
@@ -951,10 +953,10 @@ export function App() {
       />
 
       {/* Global Lo-Fi Study Beats Player (Theme-Reactive) */}
-      <LofiPlayer />
+      <LofiPlayer activeTab={activeTab} />
 
       {/* 1-Tap Mobile App Install Banner */}
-      <MobileInstallBanner />
+      <MobileInstallBanner activeTab={activeTab} />
 
     </div>
   );
