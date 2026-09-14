@@ -30,12 +30,12 @@ import {
 import { communityService } from '../services/communityService';
 import { webSocketService } from '../services/webSocketService';
 import { sound } from '../services/soundService';
+import { StandaloneDmChat } from '../components/chat/StandaloneDmChat';
 import { SmileyBalloonSticker, ClayFlowerSticker, PixelCursorSticker, DoodleStarSticker } from '../components/editorial/AcidZineStickerPack';
 import type {
   Post,
   CommunityServer,
   ChatMessage,
-  DirectMessage,
   DMConversation,
   FriendSuggestion,
   StudentProfile,
@@ -92,14 +92,10 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   const chatBottomRef = useRef<HTMLDivElement | null>(null);
 
   // =========================================================================
-  // 3. DIRECT MESSAGES (INSTAGRAM STYLE) STATE
+  // 3. DIRECT MESSAGES STATE
   // =========================================================================
   const [conversations, setConversations] = useState<DMConversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [activeDmMessages, setActiveDmMessages] = useState<DirectMessage[]>([]);
-  const [dmInputText, setDmInputText] = useState('');
-  const [dmSearchQuery, setDmSearchQuery] = useState('');
-  const dmBottomRef = useRef<HTMLDivElement | null>(null);
 
   // =========================================================================
   // 4. STUDY BUDDY MATCHMAKER (SNAPCHAT STYLE) STATE
@@ -152,7 +148,6 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     setConversations(allDMs);
     if (allDMs.length > 0 && !activeConversationId) {
       setActiveConversationId(allDMs[0].id);
-      setActiveDmMessages(communityService.getDirectMessages(allDMs[0].id));
     }
 
     // Load Friend Matches
@@ -194,27 +189,16 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     };
   }, [selectedChannelId]);
 
-  // Sync Active DM messages
+  // Keep DM conversations updated for badges & counters
   useEffect(() => {
-    if (!activeConversationId) return;
-    setActiveDmMessages(communityService.getDirectMessages(activeConversationId));
-    setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-
     const unsubscribe = communityService.subscribeToDMs((convId, newDM) => {
-      if (convId === activeConversationId) {
-        setActiveDmMessages((prev) => {
-          if (prev.some((m) => m.id === newDM.id)) return prev;
-          return [...prev, newDM];
-        });
-        setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-      }
       setConversations((prev) =>
         prev.map((c) => (c.id === convId ? { ...c, lastMessage: newDM } : c))
       );
     });
 
     return () => unsubscribe();
-  }, [activeConversationId]);
+  }, []);
 
   // Account Visibility Toggle
   const handleTogglePrivacy = () => {
@@ -390,46 +374,15 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   };
 
   // =========================================================================
-  // DIRECT MESSAGING (INSTAGRAM) ACTIONS
+  // DIRECT MESSAGING ACTIONS
   // =========================================================================
-  const handleSendDm = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!dmInputText.trim() || !activeConversationId) return;
-
-    sound.playClick();
-    const activeConv = conversations.find((c) => c.id === activeConversationId);
-    if (!activeConv) return;
-
-    const newMsg = communityService.sendDirectMessage(
-      activeConversationId,
-      profile.id,
-      activeConv.peerProfile.id,
-      profile.name,
-      dmInputText,
-      profile.avatarUrl,
-      undefined,
-      profile.handle
-    );
-
-    setActiveDmMessages((prev) => [...prev, newMsg]);
-    setDmInputText('');
-    // Update last message in conversation list
-    setConversations(
-      conversations.map((c) => (c.id === activeConversationId ? { ...c, lastMessage: newMsg } : c))
-    );
-    setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-  };
-
   const startDmWithScholar = (scholar: ScholarDirectoryUser) => {
     sound.playClick();
     const convId = communityService.getOrCreateConversationWithScholar(profile.id, scholar);
     const updatedConvs = communityService.getConversations(profile.id);
     setConversations(updatedConvs);
     setActiveConversationId(convId);
-    setActiveDmMessages(communityService.getDirectMessages(convId));
-    setDmSearchQuery('');
     setActiveTab('dms');
-    setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
 
   const startDmWithPeer = (peer: FriendSuggestion) => {
@@ -448,9 +401,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     const updatedConvs = communityService.getConversations(profile.id);
     setConversations(updatedConvs);
     setActiveConversationId(convId);
-    setActiveDmMessages(communityService.getDirectMessages(convId));
     setActiveTab('dms');
-    setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
 
   const startDmWithAuthor = (post: Post) => {
@@ -474,9 +425,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
       const updatedConvs = communityService.getConversations(profile.id);
       setConversations(updatedConvs);
       setActiveConversationId(convId);
-      setActiveDmMessages(communityService.getDirectMessages(convId));
       setActiveTab('dms');
-      setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     }
   };
 
@@ -506,7 +455,6 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
 
   const currentServer = servers.find((s) => s.id === selectedServerId) || servers[0];
   const currentChannel = currentServer?.channels.find((c) => c.id === selectedChannelId) || currentServer?.channels[0];
-  const activeConv = conversations.find((c) => c.id === activeConversationId);
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
@@ -1561,259 +1509,13 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
       )}
 
       {/* ===================================================================== */}
-      {/* TAB 3: DIRECT MESSAGES (INSTAGRAM STYLE) */}
+      {/* TAB 3: DIRECT MESSAGES (STANDALONE INTERFACE & WEBRTC VOICE CALLS) */}
       {/* ===================================================================== */}
       {activeTab === 'dms' && (
-        <div className="grid grid-cols-1 md:grid-cols-12 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl overflow-hidden min-h-[600px]">
-          {/* Conversations List (4 cols) */}
-          <div className="md:col-span-4 bg-slate-950/60 border-r border-slate-800 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-white flex items-center gap-1.5">
-                <span>Direct Messages</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono">
-                  {profile.handle || `@${profile.name.toLowerCase().replace(/\s+/g, '_')}`}
-                </span>
-              </h2>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-mono">
-                {conversations.length} Active
-              </span>
-            </div>
-
-            {/* Instagram-Style Directory Search by @handle or Name */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-              <input
-                type="text"
-                value={dmSearchQuery}
-                onChange={(e) => setDmSearchQuery(e.target.value)}
-                placeholder="Search scholars by @handle or name..."
-                className="w-full pl-9 pr-7 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 font-mono text-[11px]"
-              />
-              {dmSearchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setDmSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* If searching, display Directory Search Results */}
-            {dmSearchQuery.trim() ? (
-              <div className="space-y-1.5 overflow-y-auto max-h-[460px]">
-                <div className="text-[10px] uppercase font-mono tracking-wider text-cyan-400 px-1 py-0.5">
-                  Campus Directory Results
-                </div>
-                {communityService.searchScholars(dmSearchQuery).length === 0 ? (
-                  <div className="p-4 text-center text-xs text-slate-500 italic">
-                    No scholars found matching "{dmSearchQuery}"
-                  </div>
-                ) : (
-                  communityService.searchScholars(dmSearchQuery).map((scholar) => (
-                    <div
-                      key={scholar.id}
-                      className="p-2.5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-cyan-500/40 flex items-center justify-between gap-2 transition-all"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        {scholar.avatarUrl ? (
-                          <img
-                            src={scholar.avatarUrl}
-                            alt={scholar.name}
-                            className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-700"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-cyan-600/30 text-cyan-300 flex items-center justify-center text-xs font-bold shrink-0">
-                            {scholar.name[0]}
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-white truncate">{scholar.name}</p>
-                          <p className="text-[10px] font-mono text-cyan-300 truncate">{scholar.handle}</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => startDmWithScholar(scholar)}
-                        className="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[11px] font-medium transition-all shrink-0 cursor-pointer"
-                      >
-                        Message
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            ) : (
-              /* Regular Conversations List */
-              <div className="space-y-1.5 overflow-y-auto max-h-[460px]">
-                {conversations.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-slate-500">
-                    No active direct messages. Search a student by <span className="text-cyan-400 font-mono">@handle</span> above or connect in Matchmaker!
-                  </div>
-                ) : (
-                  conversations.map((conv) => {
-                    const isSelected = conv.id === activeConversationId;
-                    return (
-                      <button
-                        key={conv.id}
-                        onClick={() => {
-                          sound.playClick();
-                          setActiveConversationId(conv.id);
-                        }}
-                        className={`w-full text-left p-3 rounded-2xl flex items-center gap-3 transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-indigo-600/25 border border-indigo-500/40'
-                            : 'hover:bg-slate-800/50 border border-transparent'
-                        }`}
-                      >
-                        <div className="relative">
-                          {conv.peerProfile.avatarUrl ? (
-                            <img
-                              src={conv.peerProfile.avatarUrl}
-                              alt={conv.peerProfile.name}
-                              className="w-10 h-10 rounded-full object-cover border border-slate-700"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white text-sm">
-                              {conv.peerProfile.name[0]}
-                            </div>
-                          )}
-                          {conv.peerProfile.online && (
-                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-slate-950" />
-                          )}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <p className="text-xs font-bold text-white truncate">
-                                {conv.peerProfile.name}
-                              </p>
-                              {conv.peerProfile.handle && (
-                                <span className="text-[10px] font-mono text-cyan-400 truncate">
-                                  {conv.peerProfile.handle}
-                                </span>
-                              )}
-                            </div>
-                            {conv.lastMessage && (
-                              <span className="text-[10px] text-slate-500 shrink-0 ml-1">
-                                {new Date(conv.lastMessage.createdAt).toLocaleTimeString([], {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-slate-400 truncate">
-                            {conv.lastMessage?.content || 'Started conversation'}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* 1-on-1 Chat Area (8 cols) */}
-          <div className="md:col-span-8 flex flex-col justify-between bg-slate-900/40">
-            {activeConv ? (
-              <>
-                {/* Chat Top Header */}
-                <div className="px-6 py-3.5 border-b border-slate-800 bg-slate-950/40 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {activeConv.peerProfile.avatarUrl ? (
-                      <img
-                        src={activeConv.peerProfile.avatarUrl}
-                        alt={activeConv.peerProfile.name}
-                        className="w-9 h-9 rounded-full object-cover border border-slate-700"
-                      />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white text-xs">
-                        {activeConv.peerProfile.name[0]}
-                      </div>
-                    )}
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs font-bold text-white">
-                          {activeConv.peerProfile.name}
-                        </p>
-                        {activeConv.peerProfile.handle && (
-                          <span className="text-[10px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
-                            {activeConv.peerProfile.handle}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-slate-400 font-mono">
-                        {activeConv.peerProfile.college || 'Campus'} •{' '}
-                        {activeConv.peerProfile.course || 'Scholar'}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    Online
-                  </span>
-                </div>
-
-                {/* Messages Bubbles */}
-                <div className="p-6 overflow-y-auto flex-1 space-y-3 max-h-[460px]">
-                  {activeDmMessages.map((msg) => {
-                    const isMine = msg.senderId === profile.id;
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}
-                      >
-                        <div
-                          className={`max-w-md px-4 py-2.5 rounded-2xl text-xs leading-relaxed ${
-                            isMine
-                              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-tr-sm shadow-md shadow-indigo-500/20'
-                              : 'bg-slate-800 text-slate-200 rounded-tl-sm border border-slate-700/60'
-                          }`}
-                        >
-                          <p>{msg.content}</p>
-                        </div>
-                        <span className="text-[9px] text-slate-500 mt-1 font-mono px-1">
-                          {new Date(msg.createdAt).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                      </div>
-                    );
-                  })}
-                  <div ref={dmBottomRef} />
-                </div>
-
-                {/* DM Input Box */}
-                <form
-                  onSubmit={handleSendDm}
-                  className="p-4 border-t border-slate-800 bg-slate-950/60 flex items-center gap-2"
-                >
-                  <input
-                    type="text"
-                    value={dmInputText}
-                    onChange={(e) => setDmInputText(e.target.value)}
-                    placeholder={`Message ${activeConv.peerProfile.name}...`}
-                    className="flex-1 bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!dmInputText.trim()}
-                    className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-40 transition-all cursor-pointer shadow-md shadow-indigo-500/30"
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
-                </form>
-              </>
-            ) : (
-              <div className="p-12 text-center text-slate-500 text-xs">
-                Select a conversation to begin messaging
-              </div>
-            )}
-          </div>
-        </div>
+        <StandaloneDmChat
+          profile={profile}
+          initialConversationId={activeConversationId || undefined}
+        />
       )}
 
       {/* ===================================================================== */}

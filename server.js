@@ -82,20 +82,20 @@ const activePosts = [
   },
   {
     id: 'post_seed_2',
-    authorId: 'std_sanjay_2026',
-    authorName: 'J Sanjay Aron',
-    authorHandle: '@sanjay_aron',
-    authorCollege: 'Scholar Academy',
-    authorCourse: 'B.Tech Computer Science & Engineering',
-    authorLevel: 4,
-    content: 'Studying Distributed Systems consensus protocols tonight. Raft leader election state transitions are finally clicking!',
+    authorId: 'user_elena_rostova',
+    authorName: 'Elena Rostova',
+    authorHandle: '@elena_rostova',
+    authorCollege: 'UC Berkeley',
+    authorCourse: 'B.S. Electrical Eng & CS',
+    authorLevel: 17,
+    content: 'Studying Distributed Systems consensus protocols tonight. Raft leader election state transitions are finally clicking! Remember that terms act as logical clocks.',
     mediaType: 'none',
     tags: ['DistributedSystems', 'Raft', 'Consensus'],
-    likesCount: 12,
+    likesCount: 16,
     likedBy: [],
-    repostsCount: 3,
+    repostsCount: 4,
     repostedBy: [],
-    bookmarksCount: 5,
+    bookmarksCount: 8,
     bookmarkedBy: [],
     commentsCount: 1,
     comments: [
@@ -342,18 +342,23 @@ function broadcast(payload, excludeWs = null) {
 
 // Helper: Send to specific user by ID or Handle
 function sendToUser(targetUserId, payload) {
+  if (!targetUserId) return false;
   const data = typeof payload === 'string' ? payload : JSON.stringify(payload);
+  const targetClean = targetUserId.replace('@', '').toLowerCase().trim();
+  let delivered = false;
   for (const [client, user] of clientsMap.entries()) {
-    if (
-      user &&
-      (user.id === targetUserId ||
-        (user.handle && user.handle.toLowerCase() === targetUserId.toLowerCase()))
-    ) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(data);
+    if (user) {
+      const uId = (user.id || '').replace('@', '').toLowerCase().trim();
+      const uHandle = (user.handle || '').replace('@', '').toLowerCase().trim();
+      if (uId === targetClean || uHandle === targetClean) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(data);
+          delivered = true;
+        }
       }
     }
   }
+  return delivered;
 }
 
 wss.on('connection', (ws, req) => {
@@ -503,16 +508,37 @@ wss.on('connection', (ws, req) => {
           const { conversationId, message } = msg;
           if (conversationId && message) {
             const list = activeDirectMessages.get(conversationId) || [];
-            list.push(message);
-            if (list.length > 200) list.shift();
-            activeDirectMessages.set(conversationId, list);
+            if (!list.some((m) => m.id === message.id)) {
+              list.push(message);
+              if (list.length > 200) list.shift();
+              activeDirectMessages.set(conversationId, list);
+            }
 
-            // Broadcast so both sender and recipient devices receive it instantly
-            broadcast({
-              type: 'dm_message',
-              conversationId,
-              message
-            });
+            // Target recipient explicitly if recipientId or recipientHandle is set
+            if (message.recipientId) {
+              sendToUser(message.recipientId, {
+                type: 'dm_message',
+                conversationId,
+                message
+              });
+            }
+            if (message.recipientHandle && message.recipientHandle !== message.recipientId) {
+              sendToUser(message.recipientHandle, {
+                type: 'dm_message',
+                conversationId,
+                message
+              });
+            }
+
+            // Broadcast to other connected devices/browsers (excluding sender ws to avoid doubling)
+            broadcast(
+              {
+                type: 'dm_message',
+                conversationId,
+                message
+              },
+              ws
+            );
           }
           break;
         }
@@ -534,23 +560,46 @@ wss.on('connection', (ws, req) => {
           break;
         }
 
-        // Real-Time Streaming Communication (RTSC / WebRTC Signaling)
-        // Passes offers, answers, candidates, and audio/video stream session packets
+        // Real-Time Streaming Communication (RTSC / WebRTC Voice & Video Signaling)
         case 'rtsc_signal': {
-          const { targetUserId, signalData, fromUserId } = msg;
-          if (targetUserId) {
-            sendToUser(targetUserId, {
+          const { targetUserId, targetHandle, signalData, fromUserId } = msg;
+          const sender = clientsMap.get(ws);
+          const target = targetHandle || targetUserId;
+          if (target) {
+            const delivered = sendToUser(target, {
               type: 'rtsc_signal',
-              fromUserId: fromUserId || clientsMap.get(ws)?.id,
-              fromHandle: clientsMap.get(ws)?.handle,
+              fromUserId: fromUserId || sender?.id,
+              fromHandle: msg.fromHandle || sender?.handle,
+              fromName: msg.fromName || sender?.name,
+              fromAvatar: msg.fromAvatar || sender?.avatarUrl,
               signalData
             });
+
+            // If not found directly, broadcast to other connected clients so matching handles receive it
+            if (!delivered) {
+              broadcast(
+                {
+                  type: 'rtsc_signal',
+                  targetUserId,
+                  targetHandle,
+                  fromUserId: fromUserId || sender?.id,
+                  fromHandle: msg.fromHandle || sender?.handle,
+                  fromName: msg.fromName || sender?.name,
+                  fromAvatar: msg.fromAvatar || sender?.avatarUrl,
+                  signalData
+                },
+                ws
+              );
+            }
           } else {
             // Broadcast signal to room/channel
             broadcast(
               {
                 type: 'rtsc_signal',
-                fromUserId: fromUserId || clientsMap.get(ws)?.id,
+                fromUserId: fromUserId || sender?.id,
+                fromHandle: msg.fromHandle || sender?.handle,
+                fromName: msg.fromName || sender?.name,
+                fromAvatar: msg.fromAvatar || sender?.avatarUrl,
                 channelId: msg.channelId,
                 signalData
               },

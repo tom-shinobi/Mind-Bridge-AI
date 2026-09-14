@@ -18,6 +18,16 @@ const STORAGE_KEY_MESSAGES = 'mba_channel_messages';
 const STORAGE_KEY_DMS = 'mba_direct_messages';
 const STORAGE_KEY_FOLLOWING = 'mba_following_users';
 
+/**
+ * Deterministic canonical conversation ID between two users
+ * Ensures both participants share the exact same conversation ID across all devices
+ */
+export function getCanonicalConversationId(userA: string, userB: string): string {
+  const cleanA = (userA || '').replace('@', '').toLowerCase().trim();
+  const cleanB = (userB || '').replace('@', '').toLowerCase().trim();
+  return cleanA < cleanB ? `conv_${cleanA}__${cleanB}` : `conv_${cleanB}__${cleanA}`;
+}
+
 // Comprehensive Campus Directory of Verified Students & Scholars with unique Instagram-style handles
 export const CAMPUS_DIRECTORY: ScholarDirectoryUser[] = [
   {
@@ -624,9 +634,23 @@ class CommunityService {
         if (!existing.some((m) => m.id === message.id)) {
           const updated = [...existing, message];
           this.saveDirectMessages(conversationId, updated);
+
+          // Update conversation in recipient's local roster if present
+          if (message.recipientId) {
+            this.updateConversationFromIncomingMessage(message.recipientId, conversationId, message);
+          }
+
           this.dmSubscribers.forEach((cb) => {
             try { cb(conversationId, message); } catch (e) {}
           });
+
+          // Dispatch in-app DM notification for toast and audio chime
+          try {
+            window.dispatchEvent(new CustomEvent('mba_dm_notification', {
+              detail: { conversationId, message }
+            }));
+          } catch {}
+
           try {
             window.dispatchEvent(new CustomEvent('mba_community_update', {
               detail: { type: 'dm', conversationId, message }
@@ -733,7 +757,11 @@ class CommunityService {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_POSTS);
       if (stored) {
-        const parsed: Post[] = JSON.parse(stored);
+        let parsed: Post[] = JSON.parse(stored);
+        // Ensure no legacy bot seed posts appear from user account
+        parsed = parsed.filter(
+          (p) => p.authorId !== 'std_sanjay_2026' && p.id !== 'post_seed_2'
+        );
         // Ensure all posts have author handles
         let updated = false;
         parsed.forEach((p) => {
@@ -1339,7 +1367,10 @@ class CommunityService {
     content: string,
     senderAvatar?: string,
     mediaUrl?: string,
-    senderHandle?: string
+    senderHandle?: string,
+    codeSnippet?: string,
+    codeLanguage?: string,
+    recipientHandle?: string
   ): DirectMessage {
     const existing = this.getDirectMessages(conversationId);
 
@@ -1350,31 +1381,31 @@ class CommunityService {
       recipientId,
       senderName,
       senderHandle,
+      recipientHandle,
       senderAvatar,
       content: content.trim(),
       mediaUrl,
+      codeSnippet,
+      codeLanguage,
       createdAt: new Date().toISOString(),
       read: false
     };
 
-    const updated = [...existing, newDM];
-    this.saveDirectMessages(conversationId, updated);
+    // Deduplicate before saving
+    if (!existing.some((m) => m.id === newDM.id)) {
+      const updated = [...existing, newDM];
+      this.saveDirectMessages(conversationId, updated);
+    }
 
-    // Update conversation record with lastMessage
+    // Update conversation record with lastMessage in sender's roster
     const convs = this.getConversations(senderId);
-    const targetConv = convs.find((c) => c.id === conversationId);
+    const targetConv = convs.find((c) => c.id === conversationId || c.peerProfile.id === recipientId);
     if (targetConv) {
       targetConv.lastMessage = newDM;
       try {
         localStorage.setItem(`mba_dm_conversations_${senderId}`, JSON.stringify(convs));
       } catch {}
     }
-
-    this.dmSubscribers.forEach((cb) => {
-      try {
-        cb(conversationId, newDM);
-      } catch (err) {}
-    });
 
     // Broadcast across devices over WebSocket
     webSocketService.sendDirectMessage(conversationId, newDM);
@@ -1395,80 +1426,55 @@ class CommunityService {
       }));
     } catch {}
 
-    // Schedule automated reply from peer if sent by user
-    if (!senderId.startsWith('peer_') && !senderId.startsWith('user_')) {
-      this.scheduleDirectMessageReply(conversationId, senderId, recipientId, content);
-    }
+    // NOTICE: Automated bot replies are strictly disabled! Real person-to-person communication only.
 
     return newDM;
   }
 
-  private scheduleDirectMessageReply(
+  public updateConversationFromIncomingMessage(
+    recipientId: string,
     conversationId: string,
-    userId: string,
-    peerId: string,
-    _userMessage: string
-  ) {
-    const convs = this.getConversations(userId);
-    const conv = convs.find((c) => c.id === conversationId || c.peerProfile.id === peerId);
-    const peerName = conv ? conv.peerProfile.name : 'Study Peer';
-    const peerHandle = conv?.peerProfile.handle;
-    const peerAvatar = conv ? conv.peerProfile.avatarUrl : undefined;
+    message: DirectMessage
+  ): void {
+    if (typeof window === 'undefined') return;
+    const key = `mba_dm_conversations_${recipientId}`;
+    try {
+      const stored = localStorage.getItem(key);
+      let convs: DMConversation[] = stored ? JSON.parse(stored) : [];
+      let conv = convs.find(
+        (c) =>
+          c.id === conversationId ||
+          c.peerProfile.id === message.senderId ||
+          (message.senderHandle && c.peerProfile.handle?.toLowerCase() === message.senderHandle.toLowerCase())
+      );
 
-    setTimeout(() => {
-      const replies = [
-        `Hey! Thanks for pinging me on this. I just checked my lecture notes, and that completely matches what the professor covered!`,
-        `Got your message! Let's definitely review this topic together before the upcoming mid-term session.`,
-        `Solid question! I found that tracing through a small concrete example made it super intuitive. Let me know if you want to hop into the Pomodoro Lounge!`,
-        `Agreed! Check out the DreamNotes module too—you can index our notes into the AI Tutor so it tests us on it.`
-      ];
-      const selectedReply = replies[Math.floor(Math.random() * replies.length)];
-
-      const existing = this.getDirectMessages(conversationId);
-      const peerDM: DirectMessage = {
-        id: `dm_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        conversationId,
-        senderId: peerId,
-        recipientId: userId,
-        senderName: peerName,
-        senderHandle: peerHandle,
-        senderAvatar: peerAvatar,
-        content: selectedReply,
-        createdAt: new Date().toISOString(),
-        read: false
-      };
-
-      const updated = [...existing, peerDM];
-      this.saveDirectMessages(conversationId, updated);
-
-      // Update conversation lastMessage
       if (conv) {
-        conv.lastMessage = peerDM;
-        try {
-          localStorage.setItem(`mba_dm_conversations_${userId}`, JSON.stringify(convs));
-        } catch {}
+        conv.id = conversationId;
+        conv.lastMessage = message;
+        conv.unreadCount = (conv.unreadCount || 0) + 1;
+        convs = [conv, ...convs.filter((c) => c !== conv)];
+      } else {
+        const newConv: DMConversation = {
+          id: conversationId,
+          participantIds: [recipientId, message.senderId],
+          peerProfile: {
+            id: message.senderId,
+            name: message.senderName,
+            handle: message.senderHandle || `@${message.senderName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+            email: `${(message.senderHandle || 'scholar').replace('@', '')}@campus.edu`,
+            avatarUrl: message.senderAvatar,
+            online: true,
+            level: 12
+          },
+          lastMessage: message,
+          unreadCount: 1
+        };
+        convs = [newConv, ...convs];
       }
-
-      this.dmSubscribers.forEach((cb) => {
-        try { cb(conversationId, peerDM); } catch (e) {}
-      });
-
-      if (this.broadcastChannel) {
-        try {
-          this.broadcastChannel.postMessage({
-            type: 'dm_message',
-            conversationId,
-            message: peerDM
-          });
-        } catch (e) {}
-      }
-
-      try {
-        window.dispatchEvent(new CustomEvent('mba_community_update', {
-          detail: { type: 'dm', conversationId, message: peerDM }
-        }));
-      } catch {}
-    }, 2000);
+      localStorage.setItem(key, JSON.stringify(convs));
+    } catch (e) {
+      console.warn('Error updating conversation from incoming message:', e);
+    }
   }
 
   public getConversations(userId: string): DMConversation[] {
@@ -1559,22 +1565,35 @@ class CommunityService {
   }
 
   public getOrCreateConversation(userId: string, peer: DMConversation['peerProfile']): string {
+    const canonicalId = getCanonicalConversationId(userId, peer.id || peer.handle || peer.name);
     const convs = this.getConversations(userId);
-    const existing = convs.find((c) => c.peerProfile.id === peer.id || (peer.handle && c.peerProfile.handle === peer.handle));
+    const existing = convs.find(
+      (c) =>
+        c.id === canonicalId ||
+        c.peerProfile.id === peer.id ||
+        (peer.handle && c.peerProfile.handle?.toLowerCase() === peer.handle.toLowerCase())
+    );
+
     if (existing) {
+      // Ensure conversation ID is updated to canonical ID
+      if (existing.id !== canonicalId) {
+        existing.id = canonicalId;
+        try {
+          localStorage.setItem(`mba_dm_conversations_${userId}`, JSON.stringify(convs));
+        } catch {}
+      }
       if (!existing.peerProfile.handle && peer.handle) {
         existing.peerProfile.handle = peer.handle;
         try {
           localStorage.setItem(`mba_dm_conversations_${userId}`, JSON.stringify(convs));
         } catch {}
       }
-      return existing.id;
+      return canonicalId;
     }
 
     const handle = peer.handle || `@${peer.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
-    const newConvId = `conv_${peer.id || handle.replace('@', '')}`;
     const newConv: DMConversation = {
-      id: newConvId,
+      id: canonicalId,
       participantIds: [userId, peer.id],
       peerProfile: {
         ...peer,
@@ -1587,7 +1606,7 @@ class CommunityService {
     try {
       localStorage.setItem(`mba_dm_conversations_${userId}`, JSON.stringify(updated));
     } catch {}
-    return newConvId;
+    return canonicalId;
   }
 
   public subscribeToDMs(callback: (conversationId: string, msg: DirectMessage) => void): () => void {

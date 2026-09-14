@@ -184,6 +184,28 @@ class SoundService {
       osc.stop(ctx.currentTime + idx * 0.09 + 0.15);
     });
   }
+
+  // Incoming Direct Message soft chime
+  public playMessage() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const tones = [
+      { freq: 880, start: 0, dur: 0.12, vol: 0.12 },
+      { freq: 1174.66, start: 0.08, dur: 0.25, vol: 0.15 }
+    ];
+    tones.forEach(({ freq, start, dur, vol }) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+      gain.gain.setValueAtTime(vol, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + dur + 0.05);
+    });
+  }
 }
 
 export const sound = new SoundService();

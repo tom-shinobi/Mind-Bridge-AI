@@ -467,9 +467,12 @@ export interface DirectMessage {
   recipientId: string;
   senderName: string;
   senderHandle?: string;
+  recipientHandle?: string;
   senderAvatar?: string;
   content: string;
   mediaUrl?: string;
+  codeSnippet?: string;
+  codeLanguage?: string;
   createdAt: string;
   read: boolean;
 }
