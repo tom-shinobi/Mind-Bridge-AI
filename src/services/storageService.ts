@@ -148,16 +148,35 @@ class StorageService {
     }
   }
 
+  public sanitizeHandle(input?: string, fallbackName?: string): string {
+    const raw = (input || fallbackName || 'scholar')
+      .toLowerCase()
+      .replace(/^@+/, '')
+      .replace(/[^a-z0-9_]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '');
+    return `@${raw || 'scholar'}`;
+  }
+
   public getProfile(): StudentProfile {
     const profile = this.load<StudentProfile>(STORAGE_KEYS.PROFILE, initialStudentProfile);
     if (!profile.onboardingCompleted && this.isOnboardingCompleted(profile.id, profile.email)) {
       profile.onboardingCompleted = true;
       profile.onboardingStep = 12;
     }
+    if (!profile.handle) {
+      profile.handle = this.sanitizeHandle(undefined, profile.name || profile.email?.split('@')[0]);
+      this.save(STORAGE_KEYS.PROFILE, profile);
+    }
     return profile;
   }
 
   public saveProfile(profile: StudentProfile): void {
+    if (!profile.handle) {
+      profile.handle = this.sanitizeHandle(undefined, profile.name);
+    } else {
+      profile.handle = this.sanitizeHandle(profile.handle);
+    }
     if (profile.onboardingCompleted) {
       this.setOnboardingCompleted(profile.id);
       if (profile.email) this.setOnboardingCompleted(profile.email);

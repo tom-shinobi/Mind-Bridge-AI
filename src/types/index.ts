@@ -75,6 +75,7 @@ export interface StudentProfile {
   totalXp: number;
   level: number;
   avatarUrl?: string;
+  handle?: string;
   joinedDate: string;
   onboardingCompleted?: boolean;
   onboardingStep?: number;
@@ -384,6 +385,7 @@ export interface PostComment {
   postId: string;
   authorId: string;
   authorName: string;
+  authorHandle?: string;
   authorAvatar?: string;
   authorCollege?: string;
   content: string;
@@ -394,6 +396,7 @@ export interface Post {
   id: string;
   authorId: string;
   authorName: string;
+  authorHandle?: string;
   authorAvatar?: string;
   authorCollege?: string;
   authorCourse?: string;
@@ -445,6 +448,7 @@ export interface ChatMessage {
   channelId: string;
   senderId: string;
   senderName: string;
+  senderHandle?: string;
   senderAvatar?: string;
   senderRole?: 'Professor' | 'Polymath' | 'Scholar' | 'Apprentice' | 'Admin';
   content: string;
@@ -462,6 +466,7 @@ export interface DirectMessage {
   senderId: string;
   recipientId: string;
   senderName: string;
+  senderHandle?: string;
   senderAvatar?: string;
   content: string;
   mediaUrl?: string;
@@ -475,6 +480,7 @@ export interface DMConversation {
   peerProfile: {
     id: string;
     name: string;
+    handle?: string;
     email: string;
     college?: string;
     course?: string;
@@ -489,6 +495,7 @@ export interface DMConversation {
 export interface FriendSuggestion {
   id: string;
   name: string;
+  handle?: string;
   email: string;
   avatarUrl?: string;
   college?: string;
@@ -502,6 +509,22 @@ export interface FriendSuggestion {
   commonLearningGaps: string[];
   isFollowing?: boolean;
   isPrivate?: boolean;
+}
+
+export interface ScholarDirectoryUser {
+  id: string;
+  name: string;
+  handle: string; // e.g. '@alex_chen'
+  email: string;
+  avatarUrl?: string;
+  college?: string;
+  course?: string;
+  level: number;
+  bio?: string;
+  online?: boolean;
+  semester?: number;
+  mutualSubjects?: string[];
+  commonLearningGaps?: string[];
 }
 
 // ============================================================================

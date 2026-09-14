@@ -598,7 +598,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       <div className={`fixed bottom-[max(0.75rem,env(safe-area-inset-bottom,0px))] inset-x-3 z-40 max-w-md mx-auto md:hidden pointer-events-auto ${
         activeTab === 'chat' ? 'hidden' : ''
       }`}>
-        <nav className="grid grid-cols-5 items-center w-full px-1.5 py-1.5 select-none transition-all apple-liquid-glass rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/20 backdrop-blur-3xl bg-black/90">
+        <nav className="grid grid-cols-5 items-center w-full px-1.5 py-1.5 select-none transition-all apple-liquid-glass !overflow-visible rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/20 backdrop-blur-3xl bg-black/90 relative">
           
           {/* 1. Dashboard */}
           <button
@@ -629,19 +629,19 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
           </button>
 
           {/* 3. Center Elevated Floating Star Action Button (Study Motivation & Fuel) */}
-          <div className="w-full flex flex-col items-center justify-center -mt-3.5 mb-0.5">
+          <div className="w-full flex flex-col items-center justify-center -mt-4 mb-0.5 relative z-20">
             <button
               type="button"
               onClick={() => {
                 sound.playClick();
                 setIsMotivationModalOpen(true);
               }}
-              className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#E2F952] to-[#38BDF8] text-black flex items-center justify-center shadow-[0_0_20px_rgba(226,249,82,0.6)] border-2 border-black active:scale-90 transition-transform cursor-pointer"
+              className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#E2F952] to-[#38BDF8] text-black flex items-center justify-center shadow-[0_0_22px_rgba(226,249,82,0.65),0_4px_12px_rgba(0,0,0,0.8)] border-2 border-black active:scale-90 transition-transform cursor-pointer relative"
               title="Study Motivation & Fuel"
             >
-              <Flame className="w-5 h-5 fill-current animate-pulse" />
+              <Flame className="w-5 h-5 fill-current animate-pulse text-black" />
             </button>
-            <span className="text-[8px] mt-0.5 text-[#E2F952] font-mono font-bold tracking-tight leading-none">FUEL</span>
+            <span className="text-[8px] mt-0.5 text-[#E2F952] font-mono font-bold tracking-tight leading-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">FUEL</span>
           </div>
 
           {/* 4. Notes & Library */}

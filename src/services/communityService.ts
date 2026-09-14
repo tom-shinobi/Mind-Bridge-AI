@@ -7,13 +7,138 @@ import type {
   FriendSuggestion,
   StudentProfile,
   LearningGap,
-  DMConversation
+  DMConversation,
+  ScholarDirectoryUser
 } from '../types';
 
 const STORAGE_KEY_POSTS = 'mba_community_posts';
 const STORAGE_KEY_MESSAGES = 'mba_channel_messages';
 const STORAGE_KEY_DMS = 'mba_direct_messages';
 const STORAGE_KEY_FOLLOWING = 'mba_following_users';
+
+// Comprehensive Campus Directory of Verified Students & Scholars with unique Instagram-style handles
+export const CAMPUS_DIRECTORY: ScholarDirectoryUser[] = [
+  {
+    id: 'user_alex_chen',
+    name: 'Alex Chen',
+    handle: '@alex_chen',
+    email: 'alex.chen@stanford.edu',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    college: 'Stanford University',
+    course: 'B.Tech Computer Science',
+    level: 14,
+    bio: 'Tree indexing & algorithm optimization enthusiast. Socratic learner.',
+    online: true,
+    semester: 6,
+    mutualSubjects: ['Database Systems', 'Data Structures & Algorithms'],
+    commonLearningGaps: ['B-Trees & B+ Tree Indexing']
+  },
+  {
+    id: 'peer_priya',
+    name: 'Priya Sharma',
+    handle: '@priya_sharma',
+    email: 'priya.sharma@iitb.ac.in',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+    college: 'Indian Institute of Technology (IIT)',
+    course: 'B.Tech / B.E. Computer Science',
+    level: 16,
+    bio: 'Polymath scholar focusing on DBMS, concurrency control, and distributed systems.',
+    online: true,
+    semester: 6,
+    mutualSubjects: ['Database Management Systems', 'Computer Networks'],
+    commonLearningGaps: ['B-Trees & B+ Tree Indexing', 'TCP Congestion Control']
+  },
+  {
+    id: 'peer_marcus',
+    name: 'Marcus Vance',
+    handle: '@marcus_vance',
+    email: 'marcus.vance@mit.edu',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    college: 'MIT',
+    course: 'M.S. Computer Science',
+    level: 19,
+    bio: 'Systems, kernel internals, and network protocol optimization.',
+    online: true,
+    semester: 6,
+    mutualSubjects: ['Operating Systems', 'Computer Networks'],
+    commonLearningGaps: ['TCP Congestion Control', 'Deadlock Avoidance']
+  },
+  {
+    id: 'peer_david',
+    name: 'David Kim',
+    handle: '@david_kim',
+    email: 'david.kim@stanford.edu',
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    college: 'Stanford University',
+    course: 'B.Tech / B.E. Computer Science',
+    level: 18,
+    bio: 'Paging architectures, virtual memory & cache hierarchies.',
+    online: true,
+    semester: 6,
+    mutualSubjects: ['Operating Systems', 'Data Structures & Algorithms'],
+    commonLearningGaps: ['Virtual Memory & Page Replacement']
+  },
+  {
+    id: 'user_elena_rostova',
+    name: 'Elena Rostova',
+    handle: '@elena_rostova',
+    email: 'elena.rostova@berkeley.edu',
+    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
+    college: 'UC Berkeley',
+    course: 'B.S. Electrical Eng & CS',
+    level: 17,
+    bio: 'Database normalization theory and formal automated verification.',
+    online: false,
+    semester: 6,
+    mutualSubjects: ['Database Systems', 'Compiler Design'],
+    commonLearningGaps: ['Relational Normalization (BCNF & 3NF)']
+  },
+  {
+    id: 'user_sarah_jenkins',
+    name: 'Sarah Jenkins',
+    handle: '@sarah_jenkins',
+    email: 'sarah.jenkins@berkeley.edu',
+    avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80',
+    college: 'UC Berkeley',
+    course: 'B.S. Artificial Intelligence',
+    level: 12,
+    bio: 'Deep learning models, attention mechanisms, and dynamic programming.',
+    online: true,
+    semester: 6,
+    mutualSubjects: ['Machine Learning', 'Data Structures & Algorithms'],
+    commonLearningGaps: ['Dynamic Programming State Spaces']
+  },
+  {
+    id: 'peer_ananya',
+    name: 'Ananya Roy',
+    handle: '@ananya_roy',
+    email: 'ananya.roy@mit.edu',
+    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+    college: 'MIT',
+    course: 'B.S. Artificial Intelligence & Data Science',
+    level: 13,
+    bio: 'Semaphores, synchronization primitives, and neural loss landscapes.',
+    online: false,
+    semester: 6,
+    mutualSubjects: ['Operating Systems', 'Machine Learning'],
+    commonLearningGaps: ['Counting Semaphores', 'Backpropagation']
+  },
+  {
+    id: 'user_rohan_mehta',
+    name: 'Rohan Mehta',
+    handle: '@rohan_mehta',
+    email: 'rohan.mehta@iitd.ac.in',
+    avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
+    college: 'IIT Delhi',
+    course: 'B.Tech Computer Engineering',
+    level: 15,
+    bio: 'Master Theorem proofs, asymptotic complexity, and graph theory.',
+    online: true,
+    semester: 6,
+    mutualSubjects: ['Data Structures & Algorithms', 'Discrete Mathematics'],
+    commonLearningGaps: ['Master Theorem Recurrences']
+  }
+];
 
 // Pre-configured Academic Community Servers (Discord Logic)
 export const DEFAULT_SERVERS: CommunityServer[] = [
@@ -71,12 +196,13 @@ export const DEFAULT_SERVERS: CommunityServer[] = [
   }
 ];
 
-// Initial Seed Posts (Twitter/X Style)
+// Initial Seed Posts (Twitter/X Style with Unique Instagram-Style Handles)
 const INITIAL_POSTS: Post[] = [
   {
     id: 'post_1',
     authorId: 'user_alex_chen',
     authorName: 'Alex Chen',
+    authorHandle: '@alex_chen',
     authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     authorCollege: 'Stanford University',
     authorCourse: 'B.Tech Computer Science',
@@ -93,8 +219,9 @@ const INITIAL_POSTS: Post[] = [
       {
         id: 'c_1',
         postId: 'post_1',
-        authorId: 'user_priya_sharma',
+        authorId: 'peer_priya',
         authorName: 'Priya Sharma',
+        authorHandle: '@priya_sharma',
         authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
         authorCollege: 'IIT Bombay',
         content: 'This diagram clarifies why range queries in B+ Trees are O(log N + K) vs B-Trees! Thanks Alex.',
@@ -109,8 +236,9 @@ const INITIAL_POSTS: Post[] = [
   },
   {
     id: 'post_2',
-    authorId: 'user_marcus_vance',
+    authorId: 'peer_marcus',
     authorName: 'Marcus Vance',
+    authorHandle: '@marcus_vance',
     authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     authorCollege: 'MIT',
     authorCourse: 'M.S. Computer Science',
@@ -132,6 +260,7 @@ const INITIAL_POSTS: Post[] = [
     id: 'post_3',
     authorId: 'user_sarah_jenkins',
     authorName: 'Sarah Jenkins',
+    authorHandle: '@sarah_jenkins',
     authorAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80',
     authorCollege: 'UC Berkeley',
     authorCourse: 'B.S. Artificial Intelligence',
@@ -161,6 +290,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       channelId: 'ch_global_general',
       senderId: 'user_elena_rostova',
       senderName: 'Elena Rostova',
+      senderHandle: '@elena_rostova',
       senderAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Scholar',
       content: 'Has anyone integrated the new syllabus upload with their university LMS yet? The OCR scanned my 4-page Operating Systems curriculum in 12 seconds!',
@@ -173,6 +303,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       channelId: 'ch_global_general',
       senderId: 'user_david_kim',
       senderName: 'David Kim',
+      senderHandle: '@david_kim',
       senderAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Polymath',
       content: 'Yes! It immediately populated the Smart Timetable with prioritized blocks for Virtual Memory and Page Replacement algorithms. Super seamless.',
@@ -187,6 +318,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       channelId: 'ch_global_doubts',
       senderId: 'user_rohan_mehta',
       senderName: 'Rohan Mehta',
+      senderHandle: '@rohan_mehta',
       senderAvatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Scholar',
       content: 'Quick doubt on Master Theorem: What happens when f(n) = n^(log_b a) * log n? Does Case 2 apply directly?',
@@ -199,6 +331,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       channelId: 'ch_global_doubts',
       senderId: 'peer_priya',
       senderName: 'Priya Sharma',
+      senderHandle: '@priya_sharma',
       senderAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Polymath',
       content: 'Hey Rohan! Yes, this is the Extended Case 2: if f(n) = Theta(n^(log_b a) * log^k n) where k >= 0, then T(n) = Theta(n^(log_b a) * log^(k+1) n). So here it simplifies cleanly to Theta(n^(log_b a) * log^2 n)!',
@@ -213,6 +346,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       channelId: 'ch_cs_general',
       senderId: 'user_marcus_vance',
       senderName: 'Marcus Vance',
+      senderHandle: '@marcus_vance',
       senderAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Professor',
       content: 'Remember: In multi-head self-attention, projection matrices W_Q, W_K, W_V project from d_model into d_k = d_model / h. This keeps overall computational cost equivalent to single-head attention while learning distinct representation subspaces.',
@@ -230,6 +364,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       channelId: 'ch_cs_code',
       senderId: 'user_sarah_jenkins',
       senderName: 'Sarah Jenkins',
+      senderHandle: '@sarah_jenkins',
       senderAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Scholar',
       content: 'Wrote a fast causal masking utility for PyTorch scaled dot-product attention. Tested on sequence lengths up to 4096:',
@@ -247,6 +382,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       channelId: 'ch_cs_exams',
       senderId: 'user_alex_chen',
       senderName: 'Alex Chen',
+      senderHandle: '@alex_chen',
       senderAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Scholar',
       content: 'Tip for the upcoming mid-term: In 0/1 Knapsack, if you want 1D space optimization, make sure your capacity loop runs BACKWARDS (W down to wt[i]). If you loop forwards, you accidentally solve Unbounded Knapsack because items get used multiple times!',
@@ -261,6 +397,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       channelId: 'ch_sys_general',
       senderId: 'user_david_kim',
       senderName: 'David Kim',
+      senderHandle: '@david_kim',
       senderAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Polymath',
       content: 'In 64-bit x86-64 architectures, only 48 or 57 bits are used for virtual addresses (4-level or 5-level paging). The upper bits must be sign-extended (canonical address format), otherwise the CPU triggers a general protection fault (#GP).',
@@ -273,8 +410,9 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       id: 'msg_sd_1',
       serverId: 'server_systems',
       channelId: 'ch_sys_doubts',
-      senderId: 'user_ananya_roy',
+      senderId: 'peer_ananya',
       senderName: 'Ananya Roy',
+      senderHandle: '@ananya_roy',
       senderAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Scholar',
       content: 'Can someone explain why counting semaphores can be implemented using two binary semaphores without priority inversion?',
@@ -285,8 +423,9 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       id: 'msg_sd_2',
       serverId: 'server_systems',
       channelId: 'ch_sys_doubts',
-      senderId: 'user_marcus_vance',
+      senderId: 'peer_marcus',
       senderName: 'Marcus Vance',
+      senderHandle: '@marcus_vance',
       senderAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Professor',
       content: 'Great question! One binary semaphore acts as a mutex to guard the integer counter `val`, and the second acts as a delay queue semaphore where threads sleep when `val <= 0`. When signal() increments `val`, if threads are waiting, it releases the second semaphore.',
@@ -301,6 +440,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       channelId: 'ch_db_indexing',
       senderId: 'peer_priya',
       senderName: 'Priya Sharma',
+      senderHandle: '@priya_sharma',
       senderAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Polymath',
       content: 'Reminder for the DBMS indexing assessment: B+ Tree nodes have fan-out M between 50 and 500 in practice. A 3-level B+ tree with fan-out 100 can store 100^3 = 1,000,000 leaf pages. At 8KB per page, that indexes 8GB of table data with only 3 I/O reads!',
@@ -315,6 +455,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       channelId: 'ch_db_normal',
       senderId: 'user_david_kim',
       senderName: 'David Kim',
+      senderHandle: '@david_kim',
       senderAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Polymath',
       content: 'Can someone confirm the difference between dependency preservation and lossless join in BCNF?',
@@ -327,6 +468,7 @@ const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
       channelId: 'ch_db_normal',
       senderId: 'peer_priya',
       senderName: 'Priya Sharma',
+      senderHandle: '@priya_sharma',
       senderAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
       senderRole: 'Polymath',
       content: 'Crucial distinction! Lossless join is GUARANTEED in BCNF (using common attributes that form a superkey in one sub-relation). But dependency preservation is NOT always possible in BCNF. If you strictly need dependency preservation, you stop at 3NF!',
@@ -341,6 +483,7 @@ export const MOCK_PEERS: FriendSuggestion[] = [
   {
     id: 'peer_priya',
     name: 'Priya Sharma',
+    handle: '@priya_sharma',
     email: 'priya.sharma@iitb.ac.in',
     avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
     college: 'Indian Institute of Technology (IIT)',
@@ -358,6 +501,7 @@ export const MOCK_PEERS: FriendSuggestion[] = [
   {
     id: 'peer_david',
     name: 'David Kim',
+    handle: '@david_kim',
     email: 'david.kim@stanford.edu',
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
     college: 'Stanford University',
@@ -375,6 +519,7 @@ export const MOCK_PEERS: FriendSuggestion[] = [
   {
     id: 'peer_ananya',
     name: 'Ananya Roy',
+    handle: '@ananya_roy',
     email: 'ananya.roy@mit.edu',
     avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
     college: 'MIT',
@@ -392,6 +537,7 @@ export const MOCK_PEERS: FriendSuggestion[] = [
   {
     id: 'peer_marcus',
     name: 'Marcus Vance',
+    handle: '@marcus_vance',
     email: 'marcus.vance@cmu.edu',
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     college: 'Carnegie Mellon University (CMU)',
@@ -409,66 +555,87 @@ export const MOCK_PEERS: FriendSuggestion[] = [
 ];
 
 class CommunityService {
+  private postSubscribers: Array<(posts: Post[]) => void> = [];
   private messageSubscribers: Array<(channelId: string, msg: ChatMessage) => void> = [];
   private dmSubscribers: Array<(conversationId: string, msg: DirectMessage) => void> = [];
   private typingSubscribers: Array<(channelId: string, username: string | null) => void> = [];
   private broadcastChannel: BroadcastChannel | null = null;
 
   constructor() {
-    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-      try {
-        this.broadcastChannel = new BroadcastChannel('mba_community_realtime');
-        this.broadcastChannel.onmessage = (event) => {
-          const data = event.data;
-          if (!data) return;
-          if (data.type === 'channel_message' && data.channelId && data.message) {
-            this.messageSubscribers.forEach((cb) => {
-              try { cb(data.channelId, data.message); } catch (e) {}
-            });
-          } else if (data.type === 'dm_message' && data.conversationId && data.message) {
-            this.dmSubscribers.forEach((cb) => {
-              try { cb(data.conversationId, data.message); } catch (e) {}
-            });
-          } else if (data.type === 'typing' && data.channelId) {
-            this.typingSubscribers.forEach((cb) => {
-              try { cb(data.channelId, data.username ?? null); } catch (e) {}
-            });
-          }
-        };
-      } catch (err) {
-        console.warn('BroadcastChannel error:', err);
+    if (typeof window !== 'undefined') {
+      if ('BroadcastChannel' in window) {
+        try {
+          this.broadcastChannel = new BroadcastChannel('mba_community_realtime');
+          this.broadcastChannel.onmessage = (event) => {
+            const data = event.data;
+            if (!data) return;
+            if (data.type === 'posts_update' && Array.isArray(data.posts)) {
+              this.postSubscribers.forEach((cb) => {
+                try { cb(data.posts); } catch (e) {}
+              });
+            } else if (data.type === 'channel_message' && data.channelId && data.message) {
+              this.messageSubscribers.forEach((cb) => {
+                try { cb(data.channelId, data.message); } catch (e) {}
+              });
+            } else if (data.type === 'dm_message' && data.conversationId && data.message) {
+              this.dmSubscribers.forEach((cb) => {
+                try { cb(data.conversationId, data.message); } catch (e) {}
+              });
+            } else if (data.type === 'typing' && data.channelId) {
+              this.typingSubscribers.forEach((cb) => {
+                try { cb(data.channelId, data.username ?? null); } catch (e) {}
+              });
+            }
+          };
+        } catch (err) {
+          console.warn('BroadcastChannel error:', err);
+        }
       }
+
+      // Storage event listener fallback for cross-tab realtime sync
+      window.addEventListener('storage', (e) => {
+        if (e.key === STORAGE_KEY_POSTS && e.newValue) {
+          try {
+            const parsed = JSON.parse(e.newValue);
+            this.postSubscribers.forEach((cb) => {
+              try { cb(parsed); } catch (err) {}
+            });
+          } catch {}
+        }
+      });
     }
   }
 
-  public subscribeTyping(callback: (channelId: string, username: string | null) => void): () => void {
-    this.typingSubscribers.push(callback);
+  // =========================================================================
+  // 1. POSTS & ACADEMIC FEED (REAL-TIME REACTIVE STREAM)
+  // =========================================================================
+
+  public subscribeToPosts(callback: (posts: Post[]) => void): () => void {
+    this.postSubscribers.push(callback);
     return () => {
-      this.typingSubscribers = this.typingSubscribers.filter((cb) => cb !== callback);
+      this.postSubscribers = this.postSubscribers.filter((cb) => cb !== callback);
     };
   }
-
-  public notifyTyping(channelId: string, username: string | null): void {
-    this.typingSubscribers.forEach((cb) => {
-      try { cb(channelId, username); } catch (e) {}
-    });
-    if (this.broadcastChannel) {
-      try {
-        this.broadcastChannel.postMessage({ type: 'typing', channelId, username });
-      } catch (e) {}
-    }
-  }
-
-  // =========================================================================
-  // 1. POSTS & ACADEMIC FEED (TWITTER / X STYLE)
-  // =========================================================================
 
   public getPosts(): Post[] {
     if (typeof window === 'undefined') return INITIAL_POSTS;
     try {
       const stored = localStorage.getItem(STORAGE_KEY_POSTS);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed: Post[] = JSON.parse(stored);
+        // Ensure all posts have author handles
+        let updated = false;
+        parsed.forEach((p) => {
+          if (!p.authorHandle) {
+            const scholar = CAMPUS_DIRECTORY.find((s) => s.id === p.authorId || s.name === p.authorName);
+            p.authorHandle = scholar ? scholar.handle : `@${p.authorName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+            updated = true;
+          }
+        });
+        if (updated) {
+          try { localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(parsed)); } catch {}
+        }
+        return parsed;
       }
     } catch (e) {
       console.warn('Error reading posts from storage:', e);
@@ -484,6 +651,23 @@ class CommunityService {
     } catch (e) {
       console.warn('Error saving posts to storage:', e);
     }
+
+    // 1. In-process subscribers
+    this.postSubscribers.forEach((cb) => {
+      try { cb(posts); } catch (e) {}
+    });
+
+    // 2. BroadcastChannel across tabs
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage({ type: 'posts_update', posts });
+      } catch (e) {}
+    }
+
+    // 3. Dispatch Custom Window Event for any listening component
+    try {
+      window.dispatchEvent(new CustomEvent('mba_community_update', { detail: { type: 'posts', posts } }));
+    } catch {}
   }
 
   public createPost(
@@ -496,10 +680,12 @@ class CommunityService {
     tags: string[] = []
   ): Post {
     const posts = this.getPosts();
+    const handle = author.handle || `@${(author.name || 'scholar').toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
     const newPost: Post = {
       id: `post_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       authorId: author.id,
       authorName: author.name,
+      authorHandle: handle,
       authorAvatar: author.avatarUrl,
       authorCollege: author.college || 'Scholar Academy',
       authorCourse: author.course || author.degree,
@@ -523,7 +709,67 @@ class CommunityService {
 
     const updated = [newPost, ...posts];
     this.savePosts(updated);
+
+    // If post is created by student, schedule realistic peer likes & comments in real-time
+    if (!author.id.startsWith('user_') && !author.id.startsWith('peer_')) {
+      this.schedulePeerPostEngagement(newPost.id, newPost.content);
+    }
+
     return newPost;
+  }
+
+  private schedulePeerPostEngagement(postId: string, content: string) {
+    const q = content.toLowerCase();
+
+    // 1. Peer like after 3.5 seconds
+    setTimeout(() => {
+      const posts = this.getPosts();
+      const target = posts.find((p) => p.id === postId);
+      if (!target) return;
+      const peerLiker = CAMPUS_DIRECTORY[Math.floor(Math.random() * CAMPUS_DIRECTORY.length)];
+      if (!target.likedBy.includes(peerLiker.id)) {
+        target.likedBy.push(peerLiker.id);
+        target.likesCount += 1;
+        this.savePosts(posts);
+      }
+    }, 3500);
+
+    // 2. Peer insightful comment after 6.5 seconds
+    setTimeout(() => {
+      const posts = this.getPosts();
+      const target = posts.find((p) => p.id === postId);
+      if (!target) return;
+
+      let peer = CAMPUS_DIRECTORY[1]; // Priya Sharma (@priya_sharma)
+      let commentText = 'Incredible breakdown! This clarifies a tricky concept before the upcoming midterm.';
+
+      if (q.includes('tcp') || q.includes('network') || q.includes('ack') || q.includes('packet')) {
+        peer = CAMPUS_DIRECTORY[2]; // Marcus Vance (@marcus_vance)
+        commentText = 'Spot-on explanation! Remembering how window scaling interacts with RTT and duplicate ACKs makes all the difference.';
+      } else if (q.includes('sql') || q.includes('index') || q.includes('b+') || q.includes('tree')) {
+        peer = CAMPUS_DIRECTORY[0]; // Alex Chen (@alex_chen)
+        commentText = 'Exactly right. Hoisting the median key preserves tree balance so elegantly while leaves remain linked. Appreciate this derivation!';
+      } else if (q.includes('ai') || q.includes('dp') || q.includes('dynamic') || q.includes('knapsack')) {
+        peer = CAMPUS_DIRECTORY[5]; // Sarah Jenkins (@sarah_jenkins)
+        commentText = 'Love this! The memoized transition state fits the recurrence relation perfectly.';
+      }
+
+      const comment: PostComment = {
+        id: `comment_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        postId,
+        authorId: peer.id,
+        authorName: peer.name,
+        authorHandle: peer.handle,
+        authorAvatar: peer.avatarUrl,
+        authorCollege: peer.college,
+        content: commentText,
+        createdAt: new Date().toISOString()
+      };
+
+      target.comments.push(comment);
+      target.commentsCount = target.comments.length;
+      this.savePosts(posts);
+    }, 6500);
   }
 
   public toggleLike(postId: string, userId: string): Post | null {
@@ -587,11 +833,13 @@ class CommunityService {
     const target = posts.find((p) => p.id === postId);
     if (!target) return null;
 
+    const handle = author.handle || `@${(author.name || 'scholar').toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
     const comment: PostComment = {
       id: `comment_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       postId,
       authorId: author.id,
       authorName: author.name,
+      authorHandle: handle,
       authorAvatar: author.avatarUrl,
       authorCollege: author.college,
       content: content.trim(),
@@ -601,6 +849,31 @@ class CommunityService {
     target.comments.push(comment);
     target.commentsCount = target.comments.length;
     this.savePosts(posts);
+
+    // If user commented on someone else's post, schedule quick peer response
+    if (target.authorId !== author.id && !author.id.startsWith('user_') && !author.id.startsWith('peer_')) {
+      setTimeout(() => {
+        const curPosts = this.getPosts();
+        const curTarget = curPosts.find((p) => p.id === postId);
+        if (!curTarget) return;
+        const authorScholar = CAMPUS_DIRECTORY.find((s) => s.id === curTarget.authorId) || CAMPUS_DIRECTORY[0];
+        const replyComment: PostComment = {
+          id: `comment_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          postId,
+          authorId: authorScholar.id,
+          authorName: authorScholar.name,
+          authorHandle: authorScholar.handle,
+          authorAvatar: authorScholar.avatarUrl,
+          authorCollege: authorScholar.college,
+          content: `Thanks ${handle}! That is a really sharp observation.`,
+          createdAt: new Date().toISOString()
+        };
+        curTarget.comments.push(replyComment);
+        curTarget.commentsCount = curTarget.comments.length;
+        this.savePosts(curPosts);
+      }, 4000);
+    }
+
     return comment;
   }
 
@@ -686,12 +959,15 @@ class CommunityService {
       else if (sender.level < 5) actualRole = 'Apprentice';
     }
 
+    const senderHandle = sender.handle || `@${(sender.name || 'scholar').toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+
     const newMessage: ChatMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       serverId,
       channelId,
       senderId: sender.id,
       senderName: sender.name,
+      senderHandle,
       senderAvatar: sender.avatarUrl,
       senderRole: actualRole,
       content: content.trim(),
@@ -726,6 +1002,12 @@ class CommunityService {
       } catch (e) {}
     }
 
+    try {
+      window.dispatchEvent(new CustomEvent('mba_community_update', {
+        detail: { type: 'channel_message', channelId, message: newMessage }
+      }));
+    } catch {}
+
     // If sent by a student user, schedule intelligent peer response
     if (
       sender.id &&
@@ -748,6 +1030,7 @@ class CommunityService {
     const peer: StudentProfile = {
       id: 'peer_priya',
       name: 'Priya Sharma',
+      handle: '@priya_sharma',
       email: 'priya.sharma@iitb.ac.in',
       college: 'IIT Bombay',
       course: 'B.Tech Computer Science',
@@ -770,24 +1053,29 @@ class CommunityService {
 
     if (q.includes('b+') || q.includes('b-tree') || q.includes('indexing') || channelId.includes('db_indexing')) {
       peer.name = 'Priya Sharma';
+      peer.handle = '@priya_sharma';
       peer.avatarUrl = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80';
-      replyContent = `Great question on B+ Trees! Remember that when a leaf node overflows (exceeds order m-1 keys), the median key is copied up to the parent, but remains in the leaf to maintain sequential scan integrity. All leaves are doubly-linked:`;
+      replyContent = `Great question on B+ Trees! Remember that when a leaf node overflows (exceeds order m-1 keys), the median key is hoisted up to the parent, but remains in the leaf to maintain sequential scan integrity. All leaves are doubly-linked:`;
       codeSnippet = `// Leaf node split invariant:\nconst splitIndex = Math.floor(leaf.keys.length / 2);\nconst hoistedKey = leaf.keys[splitIndex];\nparent.insertKey(hoistedKey);\nnewLeaf.keys = leaf.keys.slice(splitIndex);\nleaf.keys = leaf.keys.slice(0, splitIndex);\nleaf.next = newLeaf; newLeaf.prev = leaf;`;
       codeLanguage = 'typescript';
     } else if (q.includes('tcp') || q.includes('ack') || q.includes('rto') || channelId.includes('sys_networks')) {
       peer.name = 'Marcus Vance';
+      peer.handle = '@marcus_vance';
       peer.avatarUrl = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80';
       replyContent = `On TCP ACK handling: 3 duplicate ACKs signify that packets arrived out-of-order (likely one segment dropped while downstream segments made it). This initiates Fast Retransmit without waiting for the full RTO timer to expire, instantly resetting ssthresh = cwnd / 2!`;
     } else if (q.includes('3nf') || q.includes('bcnf') || q.includes('normal') || channelId.includes('db_normal')) {
       peer.name = 'Elena Rostova';
+      peer.handle = '@elena_rostova';
       peer.avatarUrl = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80';
       replyContent = `The core difference between 3NF and BCNF comes down to the determinant: In BCNF, for every functional dependency X → Y, X MUST be a superkey. 3NF softens this condition: if Y is a prime attribute (part of any candidate key), X does not need to be a superkey.`;
     } else if (q.includes('page') || q.includes('deadlock') || q.includes('clock') || channelId.includes('sys_doubts')) {
       peer.name = 'David Kim';
+      peer.handle = '@david_kim';
       peer.avatarUrl = 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80';
       replyContent = `For the Clock page replacement algorithm: think of it as circular FIFO with a second chance. If the pointer inspects a page with reference bit = 1, it clears the bit to 0 and advances. It evicts the first page it finds with reference bit = 0.`;
     } else if (q.includes('dp') || q.includes('dynamic') || q.includes('knapsack') || channelId.includes('cs_exams')) {
       peer.name = 'Sarah Jenkins';
+      peer.handle = '@sarah_jenkins';
       peer.avatarUrl = 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80';
       replyContent = `For DP problems like 0/1 Knapsack, identify the state tuple (index i, remaining weight w). If items cannot be repeated, iterate weight backwards from W down to weight[i] to prevent reusing the same element in 1D array optimization!`;
     } else {
@@ -876,8 +1164,26 @@ class CommunityService {
     });
   }
 
+  public subscribeTyping(callback: (channelId: string, username: string | null) => void): () => void {
+    this.typingSubscribers.push(callback);
+    return () => {
+      this.typingSubscribers = this.typingSubscribers.filter((cb) => cb !== callback);
+    };
+  }
+
+  public notifyTyping(channelId: string, username: string | null): void {
+    this.typingSubscribers.forEach((cb) => {
+      try { cb(channelId, username); } catch (e) {}
+    });
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage({ type: 'typing', channelId, username });
+      } catch (e) {}
+    }
+  }
+
   // =========================================================================
-  // 3. INSTAGRAM-STYLE DIRECT MESSAGES (DMs)
+  // 3. INSTAGRAM-STYLE DIRECT MESSAGES (DMs) WITH UNIQUE HANDLES
   // =========================================================================
 
   public getDirectMessages(conversationId: string): DirectMessage[] {
@@ -909,7 +1215,8 @@ class CommunityService {
     senderName: string,
     content: string,
     senderAvatar?: string,
-    mediaUrl?: string
+    mediaUrl?: string,
+    senderHandle?: string
   ): DirectMessage {
     const existing = this.getDirectMessages(conversationId);
 
@@ -919,6 +1226,7 @@ class CommunityService {
       senderId,
       recipientId,
       senderName,
+      senderHandle,
       senderAvatar,
       content: content.trim(),
       mediaUrl,
@@ -928,6 +1236,16 @@ class CommunityService {
 
     const updated = [...existing, newDM];
     this.saveDirectMessages(conversationId, updated);
+
+    // Update conversation record with lastMessage
+    const convs = this.getConversations(senderId);
+    const targetConv = convs.find((c) => c.id === conversationId);
+    if (targetConv) {
+      targetConv.lastMessage = newDM;
+      try {
+        localStorage.setItem(`mba_dm_conversations_${senderId}`, JSON.stringify(convs));
+      } catch {}
+    }
 
     this.dmSubscribers.forEach((cb) => {
       try {
@@ -945,8 +1263,14 @@ class CommunityService {
       } catch (e) {}
     }
 
+    try {
+      window.dispatchEvent(new CustomEvent('mba_community_update', {
+        detail: { type: 'dm', conversationId, message: newDM }
+      }));
+    } catch {}
+
     // Schedule automated reply from peer if sent by user
-    if (!senderId.startsWith('peer_')) {
+    if (!senderId.startsWith('peer_') && !senderId.startsWith('user_')) {
       this.scheduleDirectMessageReply(conversationId, senderId, recipientId, content);
     }
 
@@ -962,13 +1286,14 @@ class CommunityService {
     const convs = this.getConversations(userId);
     const conv = convs.find((c) => c.id === conversationId || c.peerProfile.id === peerId);
     const peerName = conv ? conv.peerProfile.name : 'Study Peer';
+    const peerHandle = conv?.peerProfile.handle;
     const peerAvatar = conv ? conv.peerProfile.avatarUrl : undefined;
 
     setTimeout(() => {
       const replies = [
-        `Hey! Thanks for pinging me about this. I just checked my notes, and that approach aligns with the lecture slides!`,
+        `Hey! Thanks for pinging me on this. I just checked my lecture notes, and that completely matches what the professor covered!`,
         `Got your message! Let's definitely review this topic together before the upcoming mid-term session.`,
-        `Solid question! I found that tracing the example through a small dry-run made it super clear. Let me know if you want to hop into the Pomodoro Lounge!`,
+        `Solid question! I found that tracing through a small concrete example made it super intuitive. Let me know if you want to hop into the Pomodoro Lounge!`,
         `Agreed! Check out the DreamNotes module too—you can index our notes into the AI Tutor so it tests us on it.`
       ];
       const selectedReply = replies[Math.floor(Math.random() * replies.length)];
@@ -980,6 +1305,7 @@ class CommunityService {
         senderId: peerId,
         recipientId: userId,
         senderName: peerName,
+        senderHandle: peerHandle,
         senderAvatar: peerAvatar,
         content: selectedReply,
         createdAt: new Date().toISOString(),
@@ -1010,6 +1336,12 @@ class CommunityService {
           });
         } catch (e) {}
       }
+
+      try {
+        window.dispatchEvent(new CustomEvent('mba_community_update', {
+          detail: { type: 'dm', conversationId, message: peerDM }
+        }));
+      } catch {}
     }, 2000);
   }
 
@@ -1019,7 +1351,19 @@ class CommunityService {
     try {
       const stored = localStorage.getItem(key);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed: DMConversation[] = JSON.parse(stored);
+        let changed = false;
+        parsed.forEach((c) => {
+          if (!c.peerProfile.handle) {
+            const scholar = CAMPUS_DIRECTORY.find((s) => s.id === c.peerProfile.id || s.name === c.peerProfile.name);
+            c.peerProfile.handle = scholar ? scholar.handle : `@${c.peerProfile.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+            changed = true;
+          }
+        });
+        if (changed) {
+          try { localStorage.setItem(key, JSON.stringify(parsed)); } catch {}
+        }
+        return parsed;
       }
     } catch (e) {
       console.warn('Error reading conversations:', e);
@@ -1032,9 +1376,10 @@ class CommunityService {
         peerProfile: {
           id: 'peer_priya',
           name: 'Priya Sharma',
+          handle: '@priya_sharma',
           email: 'priya.sharma@iitb.ac.in',
           college: 'Indian Institute of Technology (IIT)',
-          course: 'B.Tech Computer Science',
+          course: 'B.Tech / B.E. Computer Science',
           avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
           online: true,
           level: 15
@@ -1045,6 +1390,7 @@ class CommunityService {
           senderId: 'peer_priya',
           recipientId: userId,
           senderName: 'Priya Sharma',
+          senderHandle: '@priya_sharma',
           content: 'Hey! Are you studying for the Computer Networks mid-term this week? We have a squad session.',
           createdAt: new Date(Date.now() - 3600000).toISOString(),
           read: true
@@ -1057,7 +1403,8 @@ class CommunityService {
         peerProfile: {
           id: 'peer_marcus',
           name: 'Marcus Vance',
-          email: 'marcus.v@mit.edu',
+          handle: '@marcus_vance',
+          email: 'marcus.vance@mit.edu',
           college: 'MIT',
           course: 'M.S. Computer Science',
           avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
@@ -1070,6 +1417,7 @@ class CommunityService {
           senderId: 'peer_marcus',
           recipientId: userId,
           senderName: 'Marcus Vance',
+          senderHandle: '@marcus_vance',
           content: 'Check out the B+ Tree doubly-linked pointer trick Alex posted. It shaved 20% off tree query times.',
           createdAt: new Date(Date.now() - 86400000).toISOString(),
           read: true
@@ -1086,14 +1434,26 @@ class CommunityService {
 
   public getOrCreateConversation(userId: string, peer: DMConversation['peerProfile']): string {
     const convs = this.getConversations(userId);
-    const existing = convs.find((c) => c.peerProfile.id === peer.id);
-    if (existing) return existing.id;
+    const existing = convs.find((c) => c.peerProfile.id === peer.id || (peer.handle && c.peerProfile.handle === peer.handle));
+    if (existing) {
+      if (!existing.peerProfile.handle && peer.handle) {
+        existing.peerProfile.handle = peer.handle;
+        try {
+          localStorage.setItem(`mba_dm_conversations_${userId}`, JSON.stringify(convs));
+        } catch {}
+      }
+      return existing.id;
+    }
 
-    const newConvId = `conv_${peer.id}`;
+    const handle = peer.handle || `@${peer.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+    const newConvId = `conv_${peer.id || handle.replace('@', '')}`;
     const newConv: DMConversation = {
       id: newConvId,
       participantIds: [userId, peer.id],
-      peerProfile: peer,
+      peerProfile: {
+        ...peer,
+        handle
+      },
       unreadCount: 0
     };
 
@@ -1112,11 +1472,53 @@ class CommunityService {
   }
 
   // =========================================================================
-  // 4. SNAPCHAT-STYLE FRIEND SUGGESTIONS & MATCHMAKER
+  // 4. CENTRAL SCHOLAR DIRECTORY & INSTA USERNAME SEARCH
+  // =========================================================================
+
+  public getAllScholars(): ScholarDirectoryUser[] {
+    return CAMPUS_DIRECTORY;
+  }
+
+  public searchScholars(query: string): ScholarDirectoryUser[] {
+    const q = query.toLowerCase().trim().replace(/^@/, '');
+    if (!q) return CAMPUS_DIRECTORY;
+    return CAMPUS_DIRECTORY.filter((s) =>
+      s.name.toLowerCase().includes(q) ||
+      s.handle.toLowerCase().includes(q) ||
+      (s.college && s.college.toLowerCase().includes(q)) ||
+      (s.course && s.course.toLowerCase().includes(q))
+    );
+  }
+
+  public getScholarByHandle(handle: string): ScholarDirectoryUser | null {
+    const clean = handle.toLowerCase().trim();
+    const formatted = clean.startsWith('@') ? clean : `@${clean}`;
+    return CAMPUS_DIRECTORY.find((s) => s.handle.toLowerCase() === formatted) || null;
+  }
+
+  public getScholarById(id: string): ScholarDirectoryUser | null {
+    return CAMPUS_DIRECTORY.find((s) => s.id === id) || null;
+  }
+
+  public getOrCreateConversationWithScholar(userId: string, scholar: ScholarDirectoryUser): string {
+    return this.getOrCreateConversation(userId, {
+      id: scholar.id,
+      name: scholar.name,
+      handle: scholar.handle,
+      email: scholar.email,
+      college: scholar.college,
+      course: scholar.course,
+      avatarUrl: scholar.avatarUrl,
+      online: scholar.online,
+      level: scholar.level
+    });
+  }
+
+  // =========================================================================
+  // 5. SNAPCHAT-STYLE FRIEND SUGGESTIONS & MATCHMAKER
   // =========================================================================
 
   public getFriendSuggestions(userProfile: StudentProfile, gaps: LearningGap[]): FriendSuggestion[] {
-    // Dynamic matching algorithm: assigns match affinity score based on mutual university, course, and learning gaps
     const userCollege = (userProfile.college || '').toLowerCase();
     const userCourse = (userProfile.course || userProfile.degree || '').toLowerCase();
     const userGaps = gaps.map((g) => g.topic.toLowerCase());
@@ -1153,6 +1555,7 @@ class CommunityService {
 
       return {
         ...peer,
+        handle: peer.handle || `@${peer.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
         matchScore: finalScore,
         matchReasons: reasons.length > 0 ? reasons : ['High academic study consistency']
       };

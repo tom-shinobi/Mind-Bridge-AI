@@ -13,6 +13,7 @@ import type {
 export const initialStudentProfile: StudentProfile = {
   id: 'std_sanjay_2026',
   name: 'J Sanjay Aron',
+  handle: '@sanjay_aron',
   email: 'sanjay.aron@spacecoders.edu',
   degree: 'B.Tech Computer Science & Engineering',
   department: 'School of Computing Sciences',

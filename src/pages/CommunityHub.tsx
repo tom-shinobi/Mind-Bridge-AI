@@ -24,7 +24,8 @@ import {
   X,
   ChevronRight,
   UserPlus,
-  UserCheck
+  UserCheck,
+  AtSign
 } from 'lucide-react';
 import { communityService } from '../services/communityService';
 import { sound } from '../services/soundService';
@@ -37,7 +38,8 @@ import type {
   DMConversation,
   FriendSuggestion,
   StudentProfile,
-  LearningGap
+  LearningGap,
+  ScholarDirectoryUser
 } from '../types';
 
 interface CommunityHubProps {
@@ -93,6 +95,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [activeDmMessages, setActiveDmMessages] = useState<DirectMessage[]>([]);
   const [dmInputText, setDmInputText] = useState('');
+  const [dmSearchQuery, setDmSearchQuery] = useState('');
   const dmBottomRef = useRef<HTMLDivElement | null>(null);
 
   // =========================================================================
@@ -103,11 +106,26 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   const [followingIds, setFollowingIds] = useState<string[]>([]);
 
   // =========================================================================
-  // INITIALIZATION & SUBSCRIPTIONS
+  // INITIALIZATION & REAL-TIME SUBSCRIPTIONS
   // =========================================================================
   useEffect(() => {
-    // Load Posts
+    // Load Posts & Subscribe to realtime updates
     setPosts(communityService.getPosts());
+    const unsubscribePosts = communityService.subscribeToPosts((updatedPosts) => {
+      setPosts(updatedPosts);
+    });
+
+    const handleCommunityUpdate = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail) return;
+      if (detail.type === 'posts' && Array.isArray(detail.posts)) {
+        setPosts(detail.posts);
+      } else if (detail.type === 'dm') {
+        const convs = communityService.getConversations(profile.id);
+        setConversations(convs);
+      }
+    };
+    window.addEventListener('mba_community_update', handleCommunityUpdate);
 
     // Load Discord Servers
     const allServers = communityService.getServers();
@@ -130,7 +148,12 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     // Load Friend Matches
     setSuggestions(communityService.getFriendSuggestions(profile, gaps));
     setFollowingIds(communityService.getFollowingUserIds());
-  }, [profile, gaps]);
+
+    return () => {
+      unsubscribePosts();
+      window.removeEventListener('mba_community_update', handleCommunityUpdate);
+    };
+  }, [profile.id, gaps]);
 
   // Sync Discord Channel Messages when Channel Changes
   useEffect(() => {
@@ -372,7 +395,9 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
       activeConv.peerProfile.id,
       profile.name,
       dmInputText,
-      profile.avatarUrl
+      profile.avatarUrl,
+      undefined,
+      profile.handle
     );
 
     setActiveDmMessages((prev) => [...prev, newMsg]);
@@ -384,11 +409,24 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
 
+  const startDmWithScholar = (scholar: ScholarDirectoryUser) => {
+    sound.playClick();
+    const convId = communityService.getOrCreateConversationWithScholar(profile.id, scholar);
+    const updatedConvs = communityService.getConversations(profile.id);
+    setConversations(updatedConvs);
+    setActiveConversationId(convId);
+    setActiveDmMessages(communityService.getDirectMessages(convId));
+    setDmSearchQuery('');
+    setActiveTab('dms');
+    setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  };
+
   const startDmWithPeer = (peer: FriendSuggestion) => {
     sound.playClick();
     const convId = communityService.getOrCreateConversation(profile.id, {
       id: peer.id,
       name: peer.name,
+      handle: peer.handle,
       email: peer.email,
       college: peer.college,
       course: peer.course,
@@ -399,7 +437,36 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     const updatedConvs = communityService.getConversations(profile.id);
     setConversations(updatedConvs);
     setActiveConversationId(convId);
+    setActiveDmMessages(communityService.getDirectMessages(convId));
     setActiveTab('dms');
+    setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  };
+
+  const startDmWithAuthor = (post: Post) => {
+    sound.playClick();
+    const scholar = (post.authorHandle ? communityService.getScholarByHandle(post.authorHandle) : null) ||
+      communityService.getScholarById(post.authorId);
+    if (scholar) {
+      startDmWithScholar(scholar);
+    } else {
+      const handle = post.authorHandle || `@${post.authorName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+      const convId = communityService.getOrCreateConversation(profile.id, {
+        id: post.authorId,
+        name: post.authorName,
+        handle,
+        email: `${post.authorName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@scholar.edu`,
+        college: post.authorCollege,
+        course: post.authorCourse,
+        avatarUrl: post.authorAvatar,
+        level: post.authorLevel || 1
+      });
+      const updatedConvs = communityService.getConversations(profile.id);
+      setConversations(updatedConvs);
+      setActiveConversationId(convId);
+      setActiveDmMessages(communityService.getDirectMessages(convId));
+      setActiveTab('dms');
+      setTimeout(() => dmBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    }
   };
 
   // =========================================================================
@@ -723,7 +790,11 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                     />
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+                      <AtSign className="w-3.5 h-3.5 text-[#E2F952]" />
+                      <span>Posting as <strong className="text-[#E2F952]">{profile.handle || `@${profile.name.toLowerCase().replace(/\s+/g, '_')}`}</strong></span>
+                    </div>
                     <span className="text-[11px] text-slate-400 font-mono">
                       {isPrivateAccount ? '🔒 Private' : '🌍 Public'}
                     </span>
@@ -838,6 +909,11 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                               <span className="text-sm font-bold text-white">
                                 {post.authorName}
                               </span>
+                              {post.authorHandle && (
+                                <span className="text-[11px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                                  {post.authorHandle}
+                                </span>
+                              )}
                               {post.authorLevel && (
                                 <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">
                                   Lv {post.authorLevel}
@@ -865,10 +941,20 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                         </div>
 
                         <div className="flex items-center gap-1">
+                          {!isAuthor && (
+                            <button
+                              onClick={() => startDmWithAuthor(post)}
+                              className="px-2.5 py-1 rounded-lg text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 transition-all flex items-center gap-1 text-xs cursor-pointer mr-1"
+                              title={`Direct Message ${post.authorHandle || post.authorName}`}
+                            >
+                              <MessageSquare className="w-3.5 h-3.5" />
+                              <span className="font-mono text-[10px]">DM</span>
+                            </button>
+                          )}
                           {isAuthor && (
                             <button
                               onClick={() => handleDeletePost(post.id)}
-                              className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 transition-colors"
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 transition-colors cursor-pointer"
                               title="Delete Post"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -876,7 +962,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                           )}
                           <button
                             onClick={() => handleFlagPost(post.id)}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-amber-400 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-amber-400 transition-colors cursor-pointer"
                             title="Report Post"
                           >
                             <Flag className="w-4 h-4" />
@@ -1025,9 +1111,16 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                                   )}
                                   <div className="flex-1">
                                     <div className="flex items-center justify-between">
-                                      <span className="font-semibold text-white">
-                                        {comment.authorName}
-                                      </span>
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="font-semibold text-white">
+                                          {comment.authorName}
+                                        </span>
+                                        {comment.authorHandle && (
+                                          <span className="text-[10px] font-mono text-cyan-400/90">
+                                            {comment.authorHandle}
+                                          </span>
+                                        )}
+                                      </div>
                                       <span className="text-[10px] text-slate-500">
                                         {new Date(comment.createdAt).toLocaleTimeString([], {
                                           hour: '2-digit',
@@ -1274,8 +1367,13 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                   )}
 
                   <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-white">{msg.senderName}</span>
+                      {msg.senderHandle && (
+                        <span className="text-[10px] font-mono text-cyan-300/80">
+                          {msg.senderHandle}
+                        </span>
+                      )}
                       {msg.senderRole && (
                         <span
                           className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
@@ -1438,74 +1536,153 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-12 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl overflow-hidden min-h-[600px]">
           {/* Conversations List (4 cols) */}
           <div className="md:col-span-4 bg-slate-950/60 border-r border-slate-800 p-4 space-y-3">
-            <h2 className="text-sm font-bold text-white flex items-center justify-between">
-              <span>Direct Messages</span>
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-white flex items-center gap-1.5">
+                <span>Direct Messages</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono">
+                  {profile.handle || `@${profile.name.toLowerCase().replace(/\s+/g, '_')}`}
+                </span>
+              </h2>
               <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-mono">
                 {conversations.length} Active
               </span>
-            </h2>
+            </div>
 
-            <div className="space-y-1.5 overflow-y-auto max-h-[500px]">
-              {conversations.length === 0 ? (
-                <div className="p-6 text-center text-xs text-slate-500">
-                  No active direct messages. Connect with classmates in Study Buddy Matchmaker!
-                </div>
-              ) : (
-                conversations.map((conv) => {
-                  const isSelected = conv.id === activeConversationId;
-                  return (
-                    <button
-                      key={conv.id}
-                      onClick={() => {
-                        sound.playClick();
-                        setActiveConversationId(conv.id);
-                      }}
-                      className={`w-full text-left p-3 rounded-2xl flex items-center gap-3 transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-indigo-600/25 border border-indigo-500/40'
-                          : 'hover:bg-slate-800/50 border border-transparent'
-                      }`}
-                    >
-                      <div className="relative">
-                        {conv.peerProfile.avatarUrl ? (
-                          <img
-                            src={conv.peerProfile.avatarUrl}
-                            alt={conv.peerProfile.name}
-                            className="w-10 h-10 rounded-full object-cover border border-slate-700"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white text-sm">
-                            {conv.peerProfile.name[0]}
-                          </div>
-                        )}
-                        {conv.peerProfile.online && (
-                          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-slate-950" />
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-bold text-white truncate">
-                            {conv.peerProfile.name}
-                          </p>
-                          {conv.lastMessage && (
-                            <span className="text-[10px] text-slate-500">
-                              {new Date(conv.lastMessage.createdAt).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-slate-400 truncate">
-                          {conv.lastMessage?.content || 'Started conversation'}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })
+            {/* Instagram-Style Directory Search by @handle or Name */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <input
+                type="text"
+                value={dmSearchQuery}
+                onChange={(e) => setDmSearchQuery(e.target.value)}
+                placeholder="Search scholars by @handle or name..."
+                className="w-full pl-9 pr-7 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 font-mono text-[11px]"
+              />
+              {dmSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setDmSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               )}
             </div>
+
+            {/* If searching, display Directory Search Results */}
+            {dmSearchQuery.trim() ? (
+              <div className="space-y-1.5 overflow-y-auto max-h-[460px]">
+                <div className="text-[10px] uppercase font-mono tracking-wider text-cyan-400 px-1 py-0.5">
+                  Campus Directory Results
+                </div>
+                {communityService.searchScholars(dmSearchQuery).length === 0 ? (
+                  <div className="p-4 text-center text-xs text-slate-500 italic">
+                    No scholars found matching "{dmSearchQuery}"
+                  </div>
+                ) : (
+                  communityService.searchScholars(dmSearchQuery).map((scholar) => (
+                    <div
+                      key={scholar.id}
+                      className="p-2.5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-cyan-500/40 flex items-center justify-between gap-2 transition-all"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {scholar.avatarUrl ? (
+                          <img
+                            src={scholar.avatarUrl}
+                            alt={scholar.name}
+                            className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-700"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-cyan-600/30 text-cyan-300 flex items-center justify-center text-xs font-bold shrink-0">
+                            {scholar.name[0]}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-white truncate">{scholar.name}</p>
+                          <p className="text-[10px] font-mono text-cyan-300 truncate">{scholar.handle}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => startDmWithScholar(scholar)}
+                        className="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[11px] font-medium transition-all shrink-0 cursor-pointer"
+                      >
+                        Message
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            ) : (
+              /* Regular Conversations List */
+              <div className="space-y-1.5 overflow-y-auto max-h-[460px]">
+                {conversations.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-slate-500">
+                    No active direct messages. Search a student by <span className="text-cyan-400 font-mono">@handle</span> above or connect in Matchmaker!
+                  </div>
+                ) : (
+                  conversations.map((conv) => {
+                    const isSelected = conv.id === activeConversationId;
+                    return (
+                      <button
+                        key={conv.id}
+                        onClick={() => {
+                          sound.playClick();
+                          setActiveConversationId(conv.id);
+                        }}
+                        className={`w-full text-left p-3 rounded-2xl flex items-center gap-3 transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-indigo-600/25 border border-indigo-500/40'
+                            : 'hover:bg-slate-800/50 border border-transparent'
+                        }`}
+                      >
+                        <div className="relative">
+                          {conv.peerProfile.avatarUrl ? (
+                            <img
+                              src={conv.peerProfile.avatarUrl}
+                              alt={conv.peerProfile.name}
+                              className="w-10 h-10 rounded-full object-cover border border-slate-700"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white text-sm">
+                              {conv.peerProfile.name[0]}
+                            </div>
+                          )}
+                          {conv.peerProfile.online && (
+                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-slate-950" />
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <p className="text-xs font-bold text-white truncate">
+                                {conv.peerProfile.name}
+                              </p>
+                              {conv.peerProfile.handle && (
+                                <span className="text-[10px] font-mono text-cyan-400 truncate">
+                                  {conv.peerProfile.handle}
+                                </span>
+                              )}
+                            </div>
+                            {conv.lastMessage && (
+                              <span className="text-[10px] text-slate-500 shrink-0 ml-1">
+                                {new Date(conv.lastMessage.createdAt).toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-slate-400 truncate">
+                            {conv.lastMessage?.content || 'Started conversation'}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            )}
           </div>
 
           {/* 1-on-1 Chat Area (8 cols) */}
@@ -1519,7 +1696,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                       <img
                         src={activeConv.peerProfile.avatarUrl}
                         alt={activeConv.peerProfile.name}
-                        className="w-9 h-9 rounded-full object-cover"
+                        className="w-9 h-9 rounded-full object-cover border border-slate-700"
                       />
                     ) : (
                       <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white text-xs">
@@ -1527,9 +1704,16 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                       </div>
                     )}
                     <div>
-                      <p className="text-xs font-bold text-white">
-                        {activeConv.peerProfile.name}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold text-white">
+                          {activeConv.peerProfile.name}
+                        </p>
+                        {activeConv.peerProfile.handle && (
+                          <span className="text-[10px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                            {activeConv.peerProfile.handle}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[10px] text-slate-400 font-mono">
                         {activeConv.peerProfile.college || 'Campus'} •{' '}
                         {activeConv.peerProfile.course || 'Scholar'}
@@ -1651,7 +1835,14 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                           </div>
                         )}
                         <div>
-                          <h3 className="text-sm font-bold text-white">{peer.name}</h3>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h3 className="text-sm font-bold text-white">{peer.name}</h3>
+                            {peer.handle && (
+                              <span className="text-[10px] font-mono text-cyan-300 bg-cyan-500/10 px-1.5 py-0.2 rounded border border-cyan-500/20">
+                                {peer.handle}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-[11px] text-slate-400">{peer.college}</p>
                           <p className="text-[10px] text-indigo-300 font-mono">
                             {peer.course} • Sem {peer.semester || 4}

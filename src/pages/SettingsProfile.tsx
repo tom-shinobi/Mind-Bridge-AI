@@ -46,6 +46,9 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
   onSignOut
 }) => {
   const [name, setName] = useState(profile.name);
+  const [handle, setHandle] = useState(
+    profile.handle || '@' + profile.name.toLowerCase().replace(/[^a-z0-9_]/g, '_').slice(0, 20)
+  );
   const [email, setEmail] = useState(profile.email);
   const [degree, setDegree] = useState(profile.degree);
   const [targetCgpa, setTargetCgpa] = useState(profile.targetCgpa);
@@ -141,9 +144,13 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     sound.playSuccess();
+    const sanitizedHandle = handle.trim().startsWith('@')
+      ? handle.trim().toLowerCase()
+      : `@${handle.trim().toLowerCase()}`;
     onUpdateProfile({
       ...profile,
       name,
+      handle: sanitizedHandle,
       email,
       degree,
       targetCgpa
@@ -316,6 +323,26 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl liquid-glass-input text-white focus:outline-none focus:border-purple-500/50"
               />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1 flex items-center justify-between">
+                <span>Unique Scholar Handle (Community & DMs)</span>
+                <span className="text-[9px] text-cyan-300 font-mono">like @instagram username</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-400 font-mono font-bold text-xs">@</span>
+                <input
+                  type="text"
+                  value={handle.replace(/^@/, '')}
+                  onChange={(e) => setHandle('@' + e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                  placeholder="username"
+                  className="w-full pl-8 pr-3.5 py-2.5 rounded-xl liquid-glass-input text-white font-mono text-xs focus:outline-none focus:border-cyan-500/50"
+                />
+              </div>
+              <p className="text-[10px] text-slate-400 mt-1 font-mono">
+                Your unique campus ID for Direct Messages, Campus Pulse tags, and study squads.
+              </p>
             </div>
 
             <div>
