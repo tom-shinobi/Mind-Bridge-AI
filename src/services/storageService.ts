@@ -232,9 +232,9 @@ class StorageService {
       this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
 
-    // Default model to gemini-2.0-flash (official Google AI Studio flash model)
+    // Default model to gemini-3.8-flash (official Google AI Studio primary model)
     if (!loaded.model || loaded.model.includes('gemini-2.5') || loaded.model === 'default') {
-      loaded.model = 'gemini-2.0-flash';
+      loaded.model = 'gemini-3.8-flash';
       this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
 

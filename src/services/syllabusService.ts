@@ -93,7 +93,7 @@ class SyllabusService {
    */
   public async structureSyllabusWithAI(rawText: string, contextSubject = ''): Promise<ExtractedSyllabus> {
     const settings = storageService.getAISettings();
-    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-2.0-flash';
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-3.8-flash';
     const model = activeModel;
     const apiKey = storageService.getApiKey();
 
@@ -132,9 +132,9 @@ You MUST return ONLY valid JSON matching this exact structure:
 
         if (apiKey.startsWith('AIzaSy')) {
           // Direct Google AI Studio Gemini Engine
-          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.5-flash' ? 'gemini-2.0-flash' : activeModel) : 'gemini-2.0-flash';
+          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.5-flash' ? 'gemini-3.8-flash' : activeModel) : 'gemini-3.8-flash';
           const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
-          const response = await fetch(geminiUrl, {
+          let response = await fetch(geminiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -154,6 +154,22 @@ You MUST return ONLY valid JSON matching this exact structure:
               }
             })
           });
+
+          if (!response.ok && geminiModel === 'gemini-3.8-flash') {
+            const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const fallbackRes = await fetch(fallbackUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                contents: [{ role: 'user', parts: [{ text: `Here is the syllabus text to parse (Subject hint: ${contextSubject}):\n\n${rawText.slice(0, 4500)}` }] }],
+                generationConfig: { responseMimeType: 'application/json', temperature: 0.2, maxOutputTokens: 2048 }
+              })
+            });
+            if (fallbackRes.ok) {
+              response = fallbackRes;
+            }
+          }
 
           if (response.ok) {
             const data = await response.json();

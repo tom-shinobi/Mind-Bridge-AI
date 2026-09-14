@@ -53,7 +53,7 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
   // AI settings
   const [provider, setProvider] = useState(aiSettings.provider);
   const [apiKey, setApiKey] = useState('');
-  const [model, setModel] = useState(aiSettings.model || 'gemini-2.5-flash');
+  const [model, setModel] = useState(aiSettings.model || 'gemini-3.8-flash');
   const [speechEnabled, setSpeechEnabled] = useState(aiSettings.speechEnabled);
   const [soundFxEnabled, setSoundFxEnabled] = useState(aiSettings.soundFxEnabled);
   const [theme, setTheme] = useState<AtmosphereTheme>(aiSettings.theme || 'dusk');
@@ -446,7 +446,9 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
                 onChange={(e) => setModel(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl liquid-glass-input text-white text-xs"
               >
-                <option value="gemini-2.5-flash">Google Gemini 2.5 Flash (Google AI Studio - Active Default)</option>
+                <option value="gemini-3.8-flash">Google Gemini 3.8 Flash (Google AI Studio - Primary Model)</option>
+                <option value="gemini-2.0-flash">Google Gemini 2.0 Flash</option>
+                <option value="gemini-1.5-flash">Google Gemini 1.5 Flash</option>
                 <option value="liquid/lfm-2.5-2.6b:free">LiquidAI: LFM 2.5 2.6B (Free)</option>
                 <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B Instruct</option>
                 <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku</option>

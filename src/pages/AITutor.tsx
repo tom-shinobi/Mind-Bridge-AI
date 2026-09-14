@@ -59,7 +59,7 @@ export const AITutor: React.FC<AITutorProps> = ({
   const [keyInput, setKeyInput] = useState<string>('');
   const [modelInput, setModelInput] = useState<string>(() => {
     const m = storageService.getAISettings().model;
-    return (m && m !== 'gemini-2.5-flash') ? m : 'gemini-2.0-flash';
+    return (m && m !== 'gemini-2.5-flash') ? m : 'gemini-3.8-flash';
   });
   const [testResult, setTestResult] = useState<{ success?: boolean; message?: string; testing?: boolean } | null>(null);
 
@@ -521,7 +521,8 @@ export const AITutor: React.FC<AITutorProps> = ({
               onChange={(e) => setModelInput(e.target.value)}
               className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-slate-100 focus:outline-none focus:border-purple-500"
             >
-              <option value="gemini-2.0-flash">Google Gemini 2.0 Flash (Recommended, Lightning Fast)</option>
+              <option value="gemini-3.8-flash">Google Gemini 3.8 Flash (Primary Model, 1M Context, Ultra Fast)</option>
+              <option value="gemini-2.0-flash">Google Gemini 2.0 Flash</option>
               <option value="gemini-1.5-flash">Google Gemini 1.5 Flash (Multimodal & Fast)</option>
               <option value="liquid/lfm-2.5-2.6b:free">LiquidAI: LFM 2.5 2.6B (Free Socratic)</option>
               <option value="meta-llama/llama-3.3-70b-instruct:free">Meta Llama 3.3 70B Instruct (High Depth)</option>

@@ -38,7 +38,7 @@ class AIService {
   public getApiStatus(): ApiStatus {
     const settings = storageService.getAISettings();
     const rawKey = (settings.openRouterApiKey || resolveEnvApiKey()).trim();
-    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-2.0-flash';
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-3.8-flash';
     return {
       ...this.apiStatus,
       model: activeModel,
@@ -191,7 +191,7 @@ ${notesContext}
   ): Promise<TutorResponse> {
     const settings = storageService.getAISettings();
     const studentContext = this.getStudentContext();
-    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-2.0-flash';
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-3.8-flash';
     const apiKey = (settings.openRouterApiKey || resolveEnvApiKey()).trim();
 
     // Try OpenRouter or Google AI Studio if API key is provided
@@ -251,7 +251,7 @@ YOUR INSTRUCTIONS:
 
         if (isGoogleGemini && apiKey.startsWith('AIzaSy')) {
           // Direct Google AI Studio Gemini Engine
-          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.5-flash' ? 'gemini-2.0-flash' : activeModel) : 'gemini-2.0-flash';
+          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.5-flash' ? 'gemini-3.8-flash' : activeModel) : 'gemini-3.8-flash';
           const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
 
           const geminiContents = [
@@ -262,7 +262,7 @@ YOUR INSTRUCTIONS:
             { role: 'user', parts: [{ text: userMessage }] }
           ];
 
-          const response = await fetch(geminiUrl, {
+          let response = await fetch(geminiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -277,6 +277,27 @@ YOUR INSTRUCTIONS:
               }
             })
           });
+
+          // Fallback if 3.8-flash endpoint returns non-200
+          if (!response.ok && geminiModel === 'gemini-3.8-flash') {
+            const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const fallbackRes = await fetch(fallbackUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                contents: geminiContents,
+                generationConfig: {
+                  responseMimeType: 'application/json',
+                  temperature: 0.7,
+                  maxOutputTokens: 2048
+                }
+              })
+            });
+            if (fallbackRes.ok) {
+              response = fallbackRes;
+            }
+          }
 
           if (response.ok) {
             const data = await response.json();
@@ -429,7 +450,7 @@ YOUR INSTRUCTIONS:
   public async testConnection(customKey?: string, customModel?: string): Promise<{ success: boolean; message: string; latencyMs?: number }> {
     const settings = storageService.getAISettings();
     const key = (customKey || settings.openRouterApiKey || resolveEnvApiKey()).trim();
-    const model = customModel || (settings.model && settings.model !== 'gemini-2.5-flash' ? settings.model : 'gemini-2.0-flash');
+    const model = customModel || (settings.model && settings.model !== 'gemini-2.5-flash' ? settings.model : 'gemini-3.8-flash');
 
     if (!key) {
       return { success: false, message: 'No API key configured.' };
@@ -439,15 +460,27 @@ YOUR INSTRUCTIONS:
     try {
       if (key.startsWith('AIzaSy')) {
         // Direct Google AI Studio Gemini Health Check
-        const geminiModel = model.includes('gemini') ? (model === 'gemini-2.5-flash' ? 'gemini-2.0-flash' : model) : 'gemini-2.0-flash';
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${key}`;
-        const res = await fetch(url, {
+        let geminiModel = model.includes('gemini') ? (model === 'gemini-2.5-flash' ? 'gemini-3.8-flash' : model) : 'gemini-3.8-flash';
+        let url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${key}`;
+        let res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ role: 'user', parts: [{ text: 'Ping' }] }]
           })
         });
+
+        if (!res.ok && geminiModel === 'gemini-3.8-flash') {
+          geminiModel = 'gemini-2.0-flash';
+          url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${key}`;
+          res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: 'Ping' }] }]
+            })
+          });
+        }
 
         const latencyMs = Date.now() - startTime;
         if (res.ok) {
