@@ -26,6 +26,15 @@ export interface ApiStatus {
 
 export type StreamChunkCallback = (chunk: string, accumulatedClean: string) => void;
 
+export const GEMINI_MODEL_CASCADE = [
+  'gemini-3.5-flash',
+  'gemini-3.7-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-3.6-flash',
+  'gemini-3.8-flash'
+];
+
 function parseBlockContent(block: string): NonNullable<TutorResponse['conceptCheck']> | null {
   const qMatch = block.match(/Question:\s*([\s\S]*?)(?=Option [A-D]:|Option [A-D]\)|[A-D]\)|[A-D]\.|$)/i);
   const optionsMatches = [...block.matchAll(/(?:Option\s*)?[A-D][:\.)]\s*([^\n]+)/gi)].map((m) => m[1].trim());
@@ -108,7 +117,7 @@ class AIService {
     isRateLimited: false,
     lastError: null,
     statusMessage: 'Ready (Local AI Active)',
-    model: 'gemini-3.8-flash',
+    model: 'gemini-3.5-flash',
     keyMasked: ''
   };
 
@@ -116,7 +125,7 @@ class AIService {
 
   public getApiStatus(): ApiStatus {
     const settings = storageService.getAISettings();
-    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.8-flash';
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.5-flash';
     const isGemini = activeModel.includes('gemini');
     const apiKey = storageService.getApiKey();
 
@@ -294,7 +303,7 @@ ${notesContext}
   ): Promise<TutorResponse> {
     const settings = storageService.getAISettings();
     const studentContext = this.getStudentContext();
-    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.6-flash';
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.5-flash';
     const envKey = resolveEnvApiKey();
     const apiKey = (isGoogleApiKey(envKey) ? envKey : settings.openRouterApiKey || envKey || '').trim();
 
@@ -344,11 +353,6 @@ Explanation: [Concise rationale explaining why this is correct]
         let fullRawText = '';
 
         if (isGoogleGemini && isGoogleApiKey(apiKey)) {
-          let geminiModel = activeModel.includes('gemini')
-            ? (activeModel === 'gemini-2.0-flash' || activeModel.includes('gemini-2.5') ? 'gemini-3.6-flash' : activeModel)
-            : 'gemini-3.6-flash';
-          let geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:streamGenerateContent?alt=sse&key=${apiKey}`;
-
           const userParts: any[] = [];
           if (imageContext?.base64) {
             const cleanBase64 = imageContext.base64.replace(/^data:[^;]+;base64,/, '');
@@ -410,37 +414,45 @@ Explanation: [Concise rationale explaining why this is correct]
             }
           }
 
-          let response = await fetch(geminiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              systemInstruction: { parts: [{ text: systemPrompt }] },
-              contents: geminiContents,
-              generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 8192
-              }
-            })
-          });
+          // Prioritize models via GEMINI_MODEL_CASCADE fallback
+          const candidateModels = [
+            activeModel.includes('gemini') ? activeModel : 'gemini-3.5-flash',
+            ...GEMINI_MODEL_CASCADE
+          ].filter((m, i, arr) => arr.indexOf(m) === i);
 
-          if (!response.ok && geminiModel !== 'gemini-3.6-flash') {
-            geminiModel = 'gemini-3.6-flash';
-            geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:streamGenerateContent?alt=sse&key=${apiKey}`;
-            response = await fetch(geminiUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                contents: geminiContents,
-                generationConfig: {
-                  temperature: 0.7,
-                  maxOutputTokens: 8192
-                }
-              })
-            });
+          let response: Response | null = null;
+          let geminiModel = candidateModels[0];
+
+          for (const candidate of candidateModels) {
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${candidate}:streamGenerateContent?alt=sse&key=${apiKey}`;
+            try {
+              const res = await fetch(geminiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  systemInstruction: { parts: [{ text: systemPrompt }] },
+                  contents: geminiContents,
+                  generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 8192
+                  }
+                })
+              });
+
+              if (res.ok) {
+                response = res;
+                geminiModel = candidate;
+                break;
+              } else {
+                console.warn(`[Horizon AI] Model ${candidate} returned status ${res.status}. Cascading to next candidate...`);
+                response = res;
+              }
+            } catch (err) {
+              console.warn(`[Horizon AI] Model ${candidate} request failed:`, err);
+            }
           }
 
-          if (response.ok && response.body) {
+          if (response && response.ok && response.body) {
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let buffer = '';
@@ -499,26 +511,26 @@ Explanation: [Concise rationale explaining why this is correct]
             };
             this.notify();
           } else {
-            const errBody = await response.text();
+            const errBody = response ? await response.text() : 'No response from Google AI Studio';
             let parsedErrMsg = errBody;
             try {
               const errJson = JSON.parse(errBody);
               parsedErrMsg = errJson.error?.message || errBody;
             } catch {}
 
-            const isLeakedOrRevoked = response.status === 403 || parsedErrMsg.toLowerCase().includes('leaked') || parsedErrMsg.toLowerCase().includes('permission_denied');
+            const isLeakedOrRevoked = response?.status === 403 || parsedErrMsg.toLowerCase().includes('leaked') || parsedErrMsg.toLowerCase().includes('permission_denied');
 
             this.apiStatus = {
               isLive: false,
-              isRateLimited: response.status === 429,
+              isRateLimited: response?.status === 429,
               lastError: isLeakedOrRevoked
                 ? 'Google AI key was revoked/leaked. Please paste your personal free key from Google AI Studio.'
-                : `Google AI Studio Error (${response.status}): ${parsedErrMsg}`,
+                : `Google AI Studio Error (${response?.status || 500}): ${parsedErrMsg}`,
               statusMessage: isLeakedOrRevoked
                 ? 'Key Revoked — Paste Personal Key'
-                : response.status === 429
+                : response?.status === 429
                 ? 'Google AI Studio Quota Exceeded'
-                : `Google AI Studio Error (${response.status})`,
+                : `Google AI Studio Error (${response?.status || 500})`,
               model: geminiModel,
               keyMasked: apiKey ? 'Active & Encrypted' : 'None'
             };
@@ -668,7 +680,7 @@ Explanation: [Concise rationale explaining why this is correct]
         key = (envKey || settings.openRouterApiKey || '').trim();
       }
     }
-    const model = customModel || (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash' ? settings.model : 'gemini-3.8-flash');
+    const model = customModel || (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.5-flash';
 
     const isGemini = model.includes('gemini');
 
@@ -707,31 +719,39 @@ Explanation: [Concise rationale explaining why this is correct]
     const startTime = Date.now();
     try {
       if (isGemini && isGoogleApiKey(key)) {
-        // Direct Google AI Studio Gemini Health Check
-        let geminiModel = (model === 'gemini-2.0-flash' || model.includes('gemini-2.5')) ? 'gemini-3.8-flash' : model;
-        let url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${key}`;
-        let res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: 'Ping' }] }]
-          })
-        });
+        // Direct Google AI Studio Gemini Health Check with Cascade Fallback
+        const candidateModels = [
+          (model && model.includes('gemini')) ? model : 'gemini-3.5-flash',
+          ...GEMINI_MODEL_CASCADE
+        ].filter((m, i, arr) => arr.indexOf(m) === i);
 
-        if (!res.ok && geminiModel === 'gemini-3.8-flash') {
-          geminiModel = 'gemini-3.6-flash';
-          url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${key}`;
-          res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: 'Ping' }] }]
-            })
-          });
+        let res: Response | null = null;
+        let geminiModel = candidateModels[0];
+
+        for (const candidate of candidateModels) {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${candidate}:generateContent?key=${key}`;
+          try {
+            const r = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: 'Ping' }] }]
+              })
+            });
+            if (r.ok) {
+              res = r;
+              geminiModel = candidate;
+              break;
+            } else {
+              res = r;
+            }
+          } catch {
+            // continue cascade
+          }
         }
 
         const latencyMs = Date.now() - startTime;
-        if (res.ok) {
+        if (res && res.ok) {
           this.apiStatus = {
             isLive: true,
             isRateLimited: false,
@@ -748,22 +768,22 @@ Explanation: [Concise rationale explaining why this is correct]
             latencyMs
           };
         } else {
-          const errText = await res.text();
+          const errText = res ? await res.text() : 'No response from Google AI Studio';
           let parsed = errText;
           try {
             const json = JSON.parse(errText);
             parsed = json.error?.message || errText;
           } catch {}
 
-          const isLeaked = res.status === 403 || parsed.toLowerCase().includes('leaked') || parsed.toLowerCase().includes('permission_denied');
+          const isLeaked = res?.status === 403 || parsed.toLowerCase().includes('leaked') || parsed.toLowerCase().includes('permission_denied');
 
           this.apiStatus = {
             isLive: false,
-            isRateLimited: res.status === 429,
+            isRateLimited: res?.status === 429,
             lastError: isLeaked
               ? 'Google API key was revoked/leaked. Please paste your personal free key from Google AI Studio.'
-              : `Google AI Studio Error (${res.status}): ${parsed}`,
-            statusMessage: isLeaked ? 'Key Revoked — New Key Needed' : res.status === 400 ? 'Invalid Gemini Key' : `Google Error (${res.status})`,
+              : `Google AI Studio Error (${res?.status || 500}): ${parsed}`,
+            statusMessage: isLeaked ? 'Key Revoked — New Key Needed' : res?.status === 400 ? 'Invalid Gemini Key' : res?.status === 429 ? 'Google AI Studio Quota Exceeded' : `Google Error (${res?.status || 500})`,
             model: geminiModel,
             keyMasked: 'Active & Encrypted'
           };
@@ -772,7 +792,7 @@ Explanation: [Concise rationale explaining why this is correct]
             success: false,
             message: isLeaked
               ? 'Your Google AI key was revoked by Google secret scanner. Please paste your free personal key from https://aistudio.google.com/app/apikey.'
-              : `Google AI Studio (${res.status}): ${parsed}`
+              : `Google AI Studio (${res?.status || 500}): ${parsed}`
           };
         }
       }

@@ -55,18 +55,19 @@ export const AITutor: React.FC<AITutorProps> = ({
 
   const profile = storageService.getProfile();
   const [apiStatus, setApiStatus] = useState<ApiStatus>(() => aiService.getApiStatus());
+  const [isNoticeDismissed, setIsNoticeDismissed] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [keyInput, setKeyInput] = useState<string>('');
   const [modelInput, setModelInput] = useState<string>(() => {
     const m = storageService.getAISettings().model;
-    return (m && m !== 'gemini-2.5-flash' && m !== 'gemini-2.0-flash') ? m : 'gemini-3.8-flash';
+    return (m && m !== 'gemini-2.5-flash' && m !== 'gemini-2.0-flash' && m !== 'gemini-3.8-flash' && m !== 'gemini-3.6-flash') ? m : 'gemini-3.5-flash';
   });
   const [testResult, setTestResult] = useState<{ success?: boolean; message?: string; testing?: boolean } | null>(null);
 
   useEffect(() => {
     if (isSettingsOpen) {
       const current = storageService.getAISettings();
-      const currentModel = (current.model && current.model !== 'gemini-2.5-flash' && current.model !== 'gemini-2.0-flash') ? current.model : 'gemini-3.8-flash';
+      const currentModel = (current.model && current.model !== 'gemini-2.5-flash' && current.model !== 'gemini-2.0-flash' && current.model !== 'gemini-3.8-flash' && current.model !== 'gemini-3.6-flash') ? current.model : 'gemini-3.5-flash';
       setModelInput(currentModel);
       setTestResult(null);
       // Auto-ping live API verification on modal open
@@ -308,22 +309,33 @@ export const AITutor: React.FC<AITutorProps> = ({
   const renderMessagesList = () => (
     <div className="space-y-4">
       {/* Notice Banner if OpenRouter had an issue or was rate limited */}
-      {apiStatus.lastError && (
+      {apiStatus.lastError && !isNoticeDismissed && (
         <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3 text-xs text-amber-200 backdrop-blur-xl animate-fade-in shadow-lg">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
             <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-            <div>
+            <div className="truncate">
               <span className="font-semibold text-amber-300">AI Notice: </span>
               <span className="text-slate-300">{apiStatus.statusMessage}</span>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsSettingsOpen(true)}
-            className="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-[11px] font-medium transition-all flex-shrink-0"
-          >
-            Configure Key
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsSettingsOpen(true)}
+              className="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-[11px] font-medium transition-all"
+            >
+              Configure Key
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsNoticeDismissed(true)}
+              className="p-1 rounded-lg hover:bg-amber-500/20 text-amber-300 hover:text-white transition-all"
+              title="Dismiss notice"
+              aria-label="Dismiss notice"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
       {messages.map((msg) => {
@@ -592,9 +604,12 @@ export const AITutor: React.FC<AITutorProps> = ({
               onChange={(e) => setModelInput(e.target.value)}
               className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-slate-100 focus:outline-none focus:border-purple-500"
             >
-              <option value="gemini-3.8-flash">Google Gemini 3.8 Flash (Primary Model • 1M Context • Ultra Fast)</option>
-              <option value="gemini-2.0-flash">Google Gemini 2.0 Flash (Stable Production)</option>
-              <option value="gemini-1.5-flash">Google Gemini 1.5 Flash (Multimodal & Fast)</option>
+              <option value="gemini-3.5-flash">Google Gemini 3.5 Flash (Recommended • High Quota • Fast)</option>
+              <option value="gemini-3.7-flash">Google Gemini 3.7 Flash (Next-Gen Reasoning • High Quota)</option>
+              <option value="gemini-3.5-flash-lite">Google Gemini 3.5 Flash-Lite (Ultra Fast)</option>
+              <option value="gemini-flash-lite-latest">Google Gemini Flash-Lite Latest</option>
+              <option value="gemini-3.8-flash">Google Gemini 3.8 Flash (Experimental)</option>
+              <option value="gemini-3.6-flash">Google Gemini 3.6 Flash (Experimental)</option>
               <option value="liquid/lfm-2.5-2.6b:free">LiquidAI: LFM 2.5 2.6B (Free Socratic Heuristic)</option>
               <option value="meta-llama/llama-3.3-70b-instruct:free">Meta Llama 3.3 70B Instruct (High Depth)</option>
               <option value="mistralai/mistral-small-3.1-24b-instruct:free">Mistral Small 3.1 24B</option>
@@ -694,7 +709,7 @@ export const AITutor: React.FC<AITutorProps> = ({
                 sound.playSuccess();
                 const current = storageService.getAISettings();
                 const newKey = keyInput.trim();
-                const targetModel = (modelInput && modelInput !== 'gemini-2.5-flash' && modelInput !== 'gemini-2.0-flash') ? modelInput : 'gemini-3.8-flash';
+                const targetModel = (modelInput && modelInput !== 'gemini-2.5-flash' && modelInput !== 'gemini-2.0-flash') ? modelInput : 'gemini-3.5-flash';
                 const provider = (newKey && !isGoogleApiKey(newKey)) ? 'openrouter' : 'google';
                 storageService.saveAISettings({
                   ...current,

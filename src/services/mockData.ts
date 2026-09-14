@@ -544,7 +544,7 @@ export const initialAuditLog: AdaptiveAuditEntry[] = [
 export const initialAISettings: AISettings = {
   provider: 'google',
   openRouterApiKey: '',
-  model: 'gemini-3.8-flash',
+  model: 'gemini-3.5-flash',
   speechEnabled: true,
   soundFxEnabled: true,
   theme: 'surrealist_editorial'

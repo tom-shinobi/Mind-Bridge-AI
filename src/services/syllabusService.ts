@@ -2,6 +2,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
 import { createWorker } from 'tesseract.js';
 import { storageService, isGoogleApiKey } from './storageService';
+import { GEMINI_MODEL_CASCADE } from './aiService';
 import type { ExtractedSyllabus, SyllabusTopic, LearningGap } from '../types';
 
 // Configure pdfjs worker if available
@@ -131,47 +132,46 @@ You MUST return ONLY valid JSON matching this exact structure:
         let rawContent: string | null = null;
 
         if (isGoogleApiKey(apiKey)) {
-          // Direct Google AI Studio Gemini Engine
-          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.0-flash' || activeModel.includes('gemini-2.5') ? 'gemini-3.8-flash' : activeModel) : 'gemini-3.8-flash';
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
-          let response = await fetch(geminiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              systemInstruction: {
-                parts: [{ text: systemPrompt }]
-              },
-              contents: [
-                {
-                  role: 'user',
-                  parts: [{ text: `Here is the syllabus text to parse (Subject hint: ${contextSubject}):\n\n${rawText.slice(0, 4500)}` }]
-                }
-              ],
-              generationConfig: {
-                responseMimeType: 'application/json',
-                temperature: 0.2,
-                maxOutputTokens: 2048
-              }
-            })
-          });
+          // Direct Google AI Studio Gemini Engine with Multi-Model Cascade
+          const candidateModels = [
+            activeModel.includes('gemini') ? activeModel : 'gemini-3.5-flash',
+            ...GEMINI_MODEL_CASCADE
+          ].filter((m, i, arr) => arr.indexOf(m) === i);
 
-          if (!response.ok && geminiModel === 'gemini-3.8-flash') {
-            const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-            const fallbackRes = await fetch(fallbackUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                contents: [{ role: 'user', parts: [{ text: `Here is the syllabus text to parse (Subject hint: ${contextSubject}):\n\n${rawText.slice(0, 4500)}` }] }],
-                generationConfig: { responseMimeType: 'application/json', temperature: 0.2, maxOutputTokens: 2048 }
-              })
-            });
-            if (fallbackRes.ok) {
-              response = fallbackRes;
+          let response: Response | null = null;
+          for (const candidate of candidateModels) {
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${candidate}:generateContent?key=${apiKey}`;
+            try {
+              const res = await fetch(geminiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                  },
+                  contents: [
+                    {
+                      role: 'user',
+                      parts: [{ text: `Here is the syllabus text to parse (Subject hint: ${contextSubject}):\n\n${rawText.slice(0, 4500)}` }]
+                    }
+                  ],
+                  generationConfig: {
+                    responseMimeType: 'application/json',
+                    temperature: 0.2,
+                    maxOutputTokens: 2048
+                  }
+                })
+              });
+              if (res.ok) {
+                response = res;
+                break;
+              }
+            } catch {
+              // continue cascade
             }
           }
 
-          if (response.ok) {
+          if (response && response.ok) {
             const data = await response.json();
             rawContent = data.candidates?.[0]?.content?.parts?.[0]?.text || null;
           }

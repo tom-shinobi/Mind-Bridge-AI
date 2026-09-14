@@ -21,7 +21,8 @@ import {
   BookOpen,
   Key,
   Maximize2,
-  Minimize2
+  Minimize2,
+  AlertTriangle
 } from 'lucide-react';
 import type { TutorMessage, LearningGap, SyllabusTopic, StudentProfile } from '../types';
 import { aiService, type ApiStatus } from '../services/aiService';
@@ -93,9 +94,13 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
 
   // Settings & connection state
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isNoticeDismissed, setIsNoticeDismissed] = useState<boolean>(false);
   const [apiStatus, setApiStatus] = useState<ApiStatus>(aiService.getApiStatus());
   const [keyInput, setKeyInput] = useState<string>('');
-  const [modelInput, setModelInput] = useState<string>(() => storageService.getAISettings().model || 'gemini-3.8-flash');
+  const [modelInput, setModelInput] = useState<string>(() => {
+    const m = storageService.getAISettings().model;
+    return (m && m !== 'gemini-2.5-flash' && m !== 'gemini-2.0-flash' && m !== 'gemini-3.8-flash' && m !== 'gemini-3.6-flash') ? m : 'gemini-3.5-flash';
+  });
   const [testResult, setTestResult] = useState<{ success: boolean; message: string; latencyMs?: number; testing?: boolean } | null>(null);
 
   // UI styling theme
@@ -570,6 +575,37 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
             Today {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
+
+        {/* Notice Banner if AI provider has an active error */}
+        {apiStatus.lastError && !isNoticeDismissed && (
+          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3 text-xs text-amber-200 backdrop-blur-xl animate-fade-in shadow-lg">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+              <div className="truncate">
+                <span className="font-semibold text-amber-300">AI Notice: </span>
+                <span className="text-slate-300">{apiStatus.statusMessage}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsSettingsOpen(true)}
+                className="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-[11px] font-medium transition-all"
+              >
+                Configure Key
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsNoticeDismissed(true)}
+                className="p-1 rounded-lg hover:bg-amber-500/20 text-amber-300 hover:text-white transition-all"
+                title="Dismiss notice"
+                aria-label="Dismiss notice"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {messages.map((msg, index) => {
           const isUser = msg.sender === 'student';
@@ -1147,9 +1183,12 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
                 onChange={(e) => setModelInput(e.target.value)}
                 className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-slate-100 focus:outline-none focus:border-purple-500 cursor-pointer"
               >
-                <option value="gemini-3.8-flash">Google Gemini 3.8 Flash (Primary Model • 1M Context • Vision Enabled)</option>
-                <option value="gemini-2.0-flash">Google Gemini 2.0 Flash (Stable Production)</option>
-                <option value="gemini-1.5-flash">Google Gemini 1.5 Flash (Multimodal & Fast)</option>
+                <option value="gemini-3.5-flash">Google Gemini 3.5 Flash (Recommended • High Quota • Fast)</option>
+                <option value="gemini-3.7-flash">Google Gemini 3.7 Flash (Next-Gen Reasoning • High Quota)</option>
+                <option value="gemini-3.5-flash-lite">Google Gemini 3.5 Flash-Lite (Ultra Fast)</option>
+                <option value="gemini-flash-lite-latest">Google Gemini Flash-Lite Latest</option>
+                <option value="gemini-3.8-flash">Google Gemini 3.8 Flash (Experimental)</option>
+                <option value="gemini-3.6-flash">Google Gemini 3.6 Flash (Experimental)</option>
                 <option value="liquid/lfm-2.5-2.6b:free">LiquidAI: LFM 2.5 2.6B (Free Socratic Heuristic)</option>
               </select>
             </div>
@@ -1249,7 +1288,7 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
                   sound.playSuccess();
                   const current = storageService.getAISettings();
                   const newKey = keyInput.trim();
-                  const targetModel = modelInput.trim() || 'gemini-3.8-flash';
+                  const targetModel = modelInput.trim() || 'gemini-3.5-flash';
                   const provider = targetModel.includes('gemini') ? 'google' : 'openrouter';
 
                   storageService.saveAISettings({

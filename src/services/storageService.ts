@@ -251,9 +251,9 @@ class StorageService {
       }
     }
 
-    // Force default model to gemini-3.8-flash (official Google AI Studio primary model)
-    if (!loaded.model || loaded.model === 'gemini-2.0-flash' || loaded.model.includes('gemini-2.5') || loaded.model === 'default') {
-      loaded.model = 'gemini-3.8-flash';
+    // Force default model to gemini-3.5-flash (official Google AI Studio high-quota primary model)
+    if (!loaded.model || loaded.model === 'gemini-2.0-flash' || loaded.model.includes('gemini-2.5') || loaded.model === 'default' || loaded.model === 'gemini-3.8-flash' || loaded.model === 'gemini-3.6-flash') {
+      loaded.model = 'gemini-3.5-flash';
       this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
 
