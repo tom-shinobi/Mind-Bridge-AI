@@ -657,6 +657,14 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
   const [isPlayingSong, setIsPlayingSong] = useState(false);
   const [songFilter, setSongFilter] = useState<'all' | 'bieber' | 'pop'>('bieber');
   const [activeCustomSearch, setActiveCustomSearch] = useState<string | null>(null);
+  const [customResolvedVideoId, setCustomResolvedVideoId] = useState<string | null>(null);
+  const [customResolvedMetadata, setCustomResolvedMetadata] = useState<{
+    title: string;
+    artist: string;
+    artwork?: string;
+  } | null>(null);
+  const [isMiniSearching, setIsMiniSearching] = useState(false);
+  const [miniSearchQuery, setMiniSearchQuery] = useState('');
   const [customInputText, setCustomInputText] = useState('');
 
   // Radio Player State
@@ -739,6 +747,8 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
       setIsPlayingRadio(false);
     }
     setActiveCustomSearch(null);
+    setCustomResolvedVideoId(null);
+    setCustomResolvedMetadata(null);
     setCurrentTrackIndex(index);
     setIsPlayingSong(true);
   };
@@ -763,6 +773,8 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
     if (e) e.stopPropagation();
     sound.playClick();
     setActiveCustomSearch(null);
+    setCustomResolvedVideoId(null);
+    setCustomResolvedMetadata(null);
     const next = (currentTrackIndex + 1) % CURATED_TRACKS.length;
     setCurrentTrackIndex(next);
     setIsPlayingSong(true);
@@ -772,31 +784,71 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
     if (e) e.stopPropagation();
     sound.playClick();
     setActiveCustomSearch(null);
+    setCustomResolvedVideoId(null);
+    setCustomResolvedMetadata(null);
     const prev = (currentTrackIndex - 1 + CURATED_TRACKS.length) % CURATED_TRACKS.length;
     setCurrentTrackIndex(prev);
     setIsPlayingSong(true);
   };
 
-  const handlePlayCustomSong = (query: string) => {
+  const handlePlaySearchQuery = async (query: string) => {
     if (!query.trim()) return;
     sound.playClick();
+    setActiveMode('songs');
     if (isPlayingRadio) {
       if (audioRef.current) audioRef.current.pause();
       stopSynth();
       setIsPlayingRadio(false);
     }
-    // Check if query matches a curated track
+
+    // 1. Check if query matches a curated track
     const matchIdx = CURATED_TRACKS.findIndex(
       (t) =>
         t.title.toLowerCase().includes(query.toLowerCase()) ||
         t.artist.toLowerCase().includes(query.toLowerCase())
     );
     if (matchIdx !== -1) {
-      handleSelectTrack(matchIdx);
-    } else {
-      setActiveCustomSearch(query.trim());
+      setCustomResolvedVideoId(null);
+      setCustomResolvedMetadata(null);
+      setActiveCustomSearch(null);
+      setCurrentTrackIndex(matchIdx);
       setIsPlayingSong(true);
+      return;
     }
+
+    // 2. Try resolving via server API for exact video ID & metadata
+    try {
+      const res = await fetch(`/api/music/resolve?q=${encodeURIComponent(query.trim())}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.videoId) {
+          setCustomResolvedVideoId(data.videoId);
+          setCustomResolvedMetadata({
+            title: data.title || query.trim(),
+            artist: data.artist || 'Web Music',
+            artwork: data.artwork
+          });
+          setActiveCustomSearch(query.trim());
+          setIsPlayingSong(true);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Music resolve fallback to direct search:', e);
+    }
+
+    // 3. Fallback to direct YouTube search query embed
+    setCustomResolvedVideoId(null);
+    setCustomResolvedMetadata({
+      title: query.trim(),
+      artist: 'Search Result'
+    });
+    setActiveCustomSearch(query.trim());
+    setIsPlayingSong(true);
+  };
+
+  const handlePlayCustomSong = (query: string) => {
+    handlePlaySearchQuery(query);
     setCustomInputText('');
   };
 
@@ -994,12 +1046,16 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
         <iframe
           ref={ytIframeRef}
           key={
-            activeCustomSearch
+            customResolvedVideoId
+              ? `resolved_${customResolvedVideoId}`
+              : activeCustomSearch
               ? `custom_${activeCustomSearch}`
               : currentTrack.youtubeId
           }
           src={
-            activeCustomSearch
+            customResolvedVideoId
+              ? `https://www.youtube-nocookie.com/embed/${customResolvedVideoId}?enablejsapi=1&autoplay=1`
+              : activeCustomSearch
               ? `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(
                   activeCustomSearch
                 )}&enablejsapi=1&autoplay=1`
@@ -1055,7 +1111,7 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
                 </span>
                 <p className="text-xs font-bold text-white leading-tight truncate">
                   {activeMode === 'songs'
-                    ? activeCustomSearch || currentTrack.title
+                    ? customResolvedMetadata?.title || activeCustomSearch || currentTrack.title
                     : currentStation.name}
                 </p>
               </div>
@@ -1503,106 +1559,156 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
       ) : (
         /* MINIMIZED FLOATING PILL - KEEPS PLAYING AUDIO CONTINUOUSLY */
         <div
-          className={`rounded-full p-1.5 pl-3 border-2 transition-all duration-300 backdrop-blur-2xl bg-black/90 flex items-center gap-2 sm:gap-2.5 shadow-2xl ${
+          className={`rounded-full p-1.5 pl-3 border-2 transition-all duration-300 backdrop-blur-2xl bg-black/90 flex items-center gap-1.5 sm:gap-2 shadow-2xl ${
             activeMode === 'songs'
               ? 'border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.35)]'
               : `${currentStation.borderClass} ${currentStation.glowClass}`
           }`}
         >
-          {/* Track / Station Indicator */}
-          <div
-            onClick={() => setIsExpanded(true)}
-            className="flex items-center gap-2 cursor-pointer group pr-1"
-          >
-            <span className="text-base">
-              {activeMode === 'songs'
-                ? activeCustomSearch
-                  ? '🔍'
-                  : currentTrack.emoji
-                : currentStation.emoji}
-            </span>
-            <div className="hidden sm:block text-left">
-              <p className="text-[9px] text-slate-400 uppercase tracking-wider leading-none truncate max-w-[120px]">
-                {activeMode === 'songs'
-                  ? activeCustomSearch
-                    ? 'CUSTOM SONG'
-                    : currentTrack.artist
-                  : currentStation.category}
-              </p>
-              <p className="text-xs font-bold text-white leading-tight max-w-[120px] truncate">
-                {activeMode === 'songs'
-                  ? activeCustomSearch || currentTrack.title
-                  : currentStation.name}
-              </p>
-            </div>
-          </div>
+          {isMiniSearching ? (
+            /* DIRECT MINI PLAYER SEARCH FORM */
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (miniSearchQuery.trim()) {
+                  handlePlaySearchQuery(miniSearchQuery);
+                  setIsMiniSearching(false);
+                }
+              }}
+              className="flex items-center gap-1.5 py-0.5 px-1"
+            >
+              <Search className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+              <input
+                type="text"
+                value={miniSearchQuery}
+                onChange={(e) => setMiniSearchQuery(e.target.value)}
+                placeholder="Search song or artist..."
+                autoFocus
+                className="w-36 sm:w-48 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-purple-400"
+              />
+              <button
+                type="submit"
+                className="px-2.5 py-1 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:opacity-90 text-white font-bold text-xs shrink-0 cursor-pointer shadow"
+              >
+                Play
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsMiniSearching(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer"
+                title="Cancel"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </form>
+          ) : (
+            <>
+              {/* Track / Station Indicator */}
+              <div
+                onClick={() => setIsExpanded(true)}
+                className="flex items-center gap-1.5 cursor-pointer group pr-1"
+              >
+                <span className="text-base">
+                  {activeMode === 'songs'
+                    ? activeCustomSearch
+                      ? '🎧'
+                      : currentTrack.emoji
+                    : currentStation.emoji}
+                </span>
+                <div className="text-left max-w-[80px] sm:max-w-[130px]">
+                  <p className="text-[9px] text-slate-400 uppercase tracking-wider leading-none truncate">
+                    {activeMode === 'songs'
+                      ? customResolvedMetadata?.artist || (activeCustomSearch ? 'SEARCH' : currentTrack.artist)
+                      : currentStation.category}
+                  </p>
+                  <p className="text-xs font-bold text-white leading-tight truncate">
+                    {activeMode === 'songs'
+                      ? customResolvedMetadata?.title || activeCustomSearch || currentTrack.title
+                      : currentStation.name}
+                  </p>
+                </div>
+              </div>
 
-          {/* Mini Waveform (when song or radio is playing) */}
-          {((activeMode === 'songs' && isPlayingSong) ||
-            (activeMode === 'radio' && isPlayingRadio)) && (
-            <div className="flex items-center gap-0.5 h-3 px-0.5">
-              {[0.4, 1, 0.6, 0.9].map((s, i) => (
-                <div
-                  key={i}
-                  className="w-0.5 rounded-full animate-pulse"
-                  style={{
-                    backgroundColor:
-                      activeMode === 'songs' ? '#C084FC' : currentStation.accentColor,
-                    height: `${s * 100}%`
-                  }}
-                />
-              ))}
-            </div>
+              {/* Mini Waveform (when song or radio is playing) */}
+              {((activeMode === 'songs' && isPlayingSong) ||
+                (activeMode === 'radio' && isPlayingRadio)) && (
+                <div className="hidden sm:flex items-center gap-0.5 h-3 px-0.5">
+                  {[0.4, 1, 0.6, 0.9].map((s, i) => (
+                    <div
+                      key={i}
+                      className="w-0.5 rounded-full animate-pulse"
+                      style={{
+                        backgroundColor:
+                          activeMode === 'songs' ? '#C084FC' : currentStation.accentColor,
+                        height: `${s * 100}%`
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Quick Search Button in Mini Player */}
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setIsMiniSearching(true);
+                }}
+                className="p-1.5 rounded-full text-purple-400 hover:text-white hover:bg-purple-500/20 transition-colors cursor-pointer"
+                title="Search any song to play directly"
+              >
+                <Search className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Quick Skip Back */}
+              <button
+                onClick={activeMode === 'songs' ? handlePrevTrack : handlePrevStation}
+                className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title="Previous track"
+              >
+                <SkipBack className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Quick Play/Pause button */}
+              <button
+                onClick={activeMode === 'songs' ? toggleSongPlay : toggleRadioPlay}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-105 shadow-md shrink-0"
+                style={{
+                  backgroundColor:
+                    activeMode === 'songs' ? '#C084FC' : currentStation.accentColor,
+                  color: '#000000'
+                }}
+                title={
+                  (activeMode === 'songs' ? isPlayingSong : isPlayingRadio)
+                    ? 'Pause'
+                    : 'Play'
+                }
+              >
+                {(activeMode === 'songs' ? isPlayingSong : isPlayingRadio) ? (
+                  <Pause className="w-3.5 h-3.5 fill-black" />
+                ) : (
+                  <Play className="w-3.5 h-3.5 fill-black ml-0.5" />
+                )}
+              </button>
+
+              {/* Quick Skip Forward */}
+              <button
+                onClick={activeMode === 'songs' ? handleNextTrack : handleNextStation}
+                className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title="Next track"
+              >
+                <SkipForward className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Expand toggle */}
+              <button
+                onClick={() => setIsExpanded(true)}
+                className="p-1 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer ml-0.5"
+                title="Open music player settings"
+              >
+                <ChevronUp className="w-4 h-4" />
+              </button>
+            </>
           )}
-
-          {/* Quick Skip Back */}
-          <button
-            onClick={activeMode === 'songs' ? handlePrevTrack : handlePrevStation}
-            className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-            title="Previous track"
-          >
-            <SkipBack className="w-3.5 h-3.5" />
-          </button>
-
-          {/* Quick Play/Pause button */}
-          <button
-            onClick={activeMode === 'songs' ? toggleSongPlay : toggleRadioPlay}
-            className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-105 shadow-md"
-            style={{
-              backgroundColor:
-                activeMode === 'songs' ? '#C084FC' : currentStation.accentColor,
-              color: '#000000'
-            }}
-            title={
-              (activeMode === 'songs' ? isPlayingSong : isPlayingRadio)
-                ? 'Pause'
-                : 'Play'
-            }
-          >
-            {(activeMode === 'songs' ? isPlayingSong : isPlayingRadio) ? (
-              <Pause className="w-3.5 h-3.5 fill-black" />
-            ) : (
-              <Play className="w-3.5 h-3.5 fill-black ml-0.5" />
-            )}
-          </button>
-
-          {/* Quick Skip Forward */}
-          <button
-            onClick={activeMode === 'songs' ? handleNextTrack : handleNextStation}
-            className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-            title="Next track"
-          >
-            <SkipForward className="w-3.5 h-3.5" />
-          </button>
-
-          {/* Expand toggle */}
-          <button
-            onClick={() => setIsExpanded(true)}
-            className="p-1 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer ml-0.5"
-            title="Open music player settings"
-          >
-            <ChevronUp className="w-4 h-4" />
-          </button>
         </div>
       )}
     </div>

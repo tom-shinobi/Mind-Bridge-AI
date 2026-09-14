@@ -28,6 +28,7 @@ import {
   AtSign
 } from 'lucide-react';
 import { communityService } from '../services/communityService';
+import { webSocketService } from '../services/webSocketService';
 import { sound } from '../services/soundService';
 import { SmileyBalloonSticker, ClayFlowerSticker, PixelCursorSticker, DoodleStarSticker } from '../components/editorial/AcidZineStickerPack';
 import type {
@@ -58,6 +59,8 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<HubTab>('pulse');
   const [isPrivateAccount, setIsPrivateAccount] = useState<boolean>(profile.isPrivateAccount || false);
+  const [wsStatus, setWsStatus] = useState(webSocketService.getStatus());
+  const [onlineCount, setOnlineCount] = useState(webSocketService.getOnlineCount());
 
   // =========================================================================
   // 1. CAMPUS PULSE (TWITTER/X FEED) STATE
@@ -109,6 +112,13 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   // INITIALIZATION & REAL-TIME SUBSCRIPTIONS
   // =========================================================================
   useEffect(() => {
+    // Register current scholar with WebSocket real-time server
+    webSocketService.identify(profile);
+    const unsubWs = webSocketService.onConnectionChange(({ status, onlineCount: count }) => {
+      setWsStatus(status);
+      setOnlineCount(count);
+    });
+
     // Load Posts & Subscribe to realtime updates
     setPosts(communityService.getPosts());
     const unsubscribePosts = communityService.subscribeToPosts((updatedPosts) => {
@@ -150,6 +160,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     setFollowingIds(communityService.getFollowingUserIds());
 
     return () => {
+      unsubWs();
       unsubscribePosts();
       window.removeEventListener('mba_community_update', handleCommunityUpdate);
     };
@@ -518,9 +529,29 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
               <DoodleStarSticker size={24} color="#E2F952" />
             </div>
 
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#E2F952] text-black font-woodblock tracking-widest text-[10px] uppercase mb-3 shadow-[2px_2px_0px_#000000]">
-              <Sparkles className="w-3.5 h-3.5 text-black" />
-              <span>COMMUNITY GAZETTE // PRIMA CHAT EDITION 2026</span>
+            <div className="flex items-center gap-2 flex-wrap mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#E2F952] text-black font-woodblock tracking-widest text-[10px] uppercase shadow-[2px_2px_0px_#000000]">
+                <Sparkles className="w-3.5 h-3.5 text-black" />
+                <span>COMMUNITY GAZETTE // PRIMA CHAT EDITION 2026</span>
+              </div>
+              <div
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono border backdrop-blur-md transition-all ${
+                  wsStatus === 'connected'
+                    ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-300'
+                    : 'bg-amber-500/15 border-amber-500/35 text-amber-300'
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    wsStatus === 'connected' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400 animate-ping'
+                  }`}
+                />
+                <span>
+                  {wsStatus === 'connected'
+                    ? `WebSocket Live (${onlineCount} peer${onlineCount !== 1 ? 's' : ''} online)`
+                    : 'Connecting to Campus WebSocket...'}
+                </span>
+              </div>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-woodblock text-white uppercase tracking-wider">
               CAMPUS SOCIAL PULSE & STUDY SQUADS<span className="text-[#E2F952]">*</span>

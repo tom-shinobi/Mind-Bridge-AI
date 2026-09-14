@@ -10,6 +10,8 @@ import type {
   DMConversation,
   ScholarDirectoryUser
 } from '../types';
+import { webSocketService } from './webSocketService';
+import { getSupabaseClient } from './supabaseClient';
 
 const STORAGE_KEY_POSTS = 'mba_community_posts';
 const STORAGE_KEY_MESSAGES = 'mba_channel_messages';
@@ -563,6 +565,97 @@ class CommunityService {
 
   constructor() {
     if (typeof window !== 'undefined') {
+      // 1. Production WebSocket Real-Time Listeners (Multi-Device Internet Sync)
+      webSocketService.onPostCreated((post) => {
+        const posts = this.getPosts();
+        if (!posts.some((p) => p.id === post.id)) {
+          const updated = [post, ...posts];
+          this.savePosts(updated, false);
+        }
+      });
+
+      webSocketService.onPostLiked(({ postId, likesCount, likedBy }) => {
+        const posts = this.getPosts();
+        const target = posts.find((p) => p.id === postId);
+        if (target) {
+          target.likesCount = likesCount;
+          target.likedBy = likedBy;
+          this.savePosts(posts, false);
+        }
+      });
+
+      webSocketService.onPostComment(({ postId, comment, commentsCount }) => {
+        const posts = this.getPosts();
+        const target = posts.find((p) => p.id === postId);
+        if (target) {
+          if (!target.comments.some((c) => c.id === comment.id)) {
+            target.comments.push(comment);
+            target.commentsCount = commentsCount ?? target.comments.length;
+            this.savePosts(posts, false);
+          }
+        }
+      });
+
+      webSocketService.onPostDeleted((postId) => {
+        const posts = this.getPosts();
+        if (posts.some((p) => p.id === postId)) {
+          this.savePosts(posts.filter((p) => p.id !== postId), false);
+        }
+      });
+
+      webSocketService.onChannelMessage(({ channelId, message }) => {
+        const currentMessages = this.getChannelMessages(channelId);
+        if (!currentMessages.some((m) => m.id === message.id)) {
+          const updated = [...currentMessages, message];
+          this.saveChannelMessages(channelId, updated);
+          this.messageSubscribers.forEach((cb) => {
+            try { cb(channelId, message); } catch (e) {}
+          });
+          try {
+            window.dispatchEvent(new CustomEvent('mba_community_update', {
+              detail: { type: 'channel_message', channelId, message }
+            }));
+          } catch {}
+        }
+      });
+
+      webSocketService.onDirectMessage(({ conversationId, message }) => {
+        const existing = this.getDirectMessages(conversationId);
+        if (!existing.some((m) => m.id === message.id)) {
+          const updated = [...existing, message];
+          this.saveDirectMessages(conversationId, updated);
+          this.dmSubscribers.forEach((cb) => {
+            try { cb(conversationId, message); } catch (e) {}
+          });
+          try {
+            window.dispatchEvent(new CustomEvent('mba_community_update', {
+              detail: { type: 'dm', conversationId, message }
+            }));
+          } catch {}
+        }
+      });
+
+      webSocketService.onTyping((info) => {
+        if (info && info.targetId) {
+          this.typingSubscribers.forEach((cb) => {
+            try { cb(info.targetId, info.isTyping ? info.userName : null); } catch (e) {}
+          });
+        }
+      });
+
+      // Synchronize latest posts from server on initial connection
+      webSocketService.on('sync', (data) => {
+        if (data && Array.isArray(data.posts) && data.posts.length > 0) {
+          const local = this.getPosts();
+          const localIds = new Set(local.map((p) => p.id));
+          const newRemote = data.posts.filter((p: Post) => !localIds.has(p.id));
+          if (newRemote.length > 0) {
+            this.savePosts([...newRemote, ...local], false);
+          }
+        }
+      });
+
+      // 2. Cross-tab BroadcastChannel fallback
       if ('BroadcastChannel' in window) {
         try {
           this.broadcastChannel = new BroadcastChannel('mba_community_realtime');
@@ -592,7 +685,7 @@ class CommunityService {
         }
       }
 
-      // Storage event listener fallback for cross-tab realtime sync
+      // 3. Storage event listener fallback for cross-tab realtime sync
       window.addEventListener('storage', (e) => {
         if (e.key === STORAGE_KEY_POSTS && e.newValue) {
           try {
@@ -603,6 +696,24 @@ class CommunityService {
           } catch {}
         }
       });
+
+      // 4. Supabase Realtime Broadcast fallback if configured
+      try {
+        const client = getSupabaseClient();
+        if (client) {
+          const channel = client.channel('community_hub_sync');
+          channel
+            .on('broadcast', { event: 'post_created' }, ({ payload }) => {
+              if (payload?.post) {
+                const posts = this.getPosts();
+                if (!posts.some((p) => p.id === payload.post.id)) {
+                  this.savePosts([payload.post, ...posts], false);
+                }
+              }
+            })
+            .subscribe();
+        }
+      } catch {}
     }
   }
 
@@ -644,7 +755,8 @@ class CommunityService {
     return INITIAL_POSTS;
   }
 
-  public savePosts(posts: Post[]): void {
+  public savePosts(posts: Post[], _broadcast: boolean = true): void {
+    void _broadcast;
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(posts));
@@ -709,6 +821,9 @@ class CommunityService {
 
     const updated = [newPost, ...posts];
     this.savePosts(updated);
+
+    // Broadcast across devices over WebSocket
+    webSocketService.sendPostCreate(newPost);
 
     // If post is created by student, schedule realistic peer likes & comments in real-time
     if (!author.id.startsWith('user_') && !author.id.startsWith('peer_')) {
@@ -787,6 +902,7 @@ class CommunityService {
     }
 
     this.savePosts(posts);
+    webSocketService.sendPostLike(postId, userId);
     return target;
   }
 
@@ -850,6 +966,9 @@ class CommunityService {
     target.commentsCount = target.comments.length;
     this.savePosts(posts);
 
+    // Broadcast comment across devices over WebSocket
+    webSocketService.sendPostComment(postId, comment);
+
     // If user commented on someone else's post, schedule quick peer response
     if (target.authorId !== author.id && !author.id.startsWith('user_') && !author.id.startsWith('peer_')) {
       setTimeout(() => {
@@ -882,6 +1001,7 @@ class CommunityService {
     const filtered = posts.filter((p) => p.id !== postId);
     if (filtered.length !== posts.length) {
       this.savePosts(filtered);
+      webSocketService.sendPostDelete(postId);
       return true;
     }
     return false;
@@ -990,6 +1110,9 @@ class CommunityService {
         console.warn('Subscriber error:', err);
       }
     });
+
+    // Broadcast across devices over WebSocket
+    webSocketService.sendChannelMessage(serverId, channelId, newMessage);
 
     // Broadcast across tabs
     if (this.broadcastChannel) {
@@ -1252,6 +1375,9 @@ class CommunityService {
         cb(conversationId, newDM);
       } catch (err) {}
     });
+
+    // Broadcast across devices over WebSocket
+    webSocketService.sendDirectMessage(conversationId, newDM);
 
     if (this.broadcastChannel) {
       try {
