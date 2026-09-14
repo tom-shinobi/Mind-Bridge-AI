@@ -257,28 +257,32 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       <header className="sticky top-2 z-40 w-full px-2.5 sm:px-4 md:px-6 pointer-events-none mb-3 pt-[max(0.25rem,env(safe-area-inset-top,0px))]">
         <div className={`pointer-events-auto max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center justify-between gap-2 sm:gap-3 select-none transition-all relative ${
           currentTheme === 'surrealist_editorial'
-            ? 'bg-[#0B0F17]/95 border-2 border-[#E2F952]/40 shadow-[4px_4px_0px_#000000] rounded-2xl bg-notebook-grid-subtle'
+            ? 'bg-[#0B0F17]/90 border border-white/20 shadow-[0_16px_40px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.3)] rounded-full backdrop-blur-2xl'
             : 'apple-liquid-glass rounded-full shadow-[0_16px_50px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.7)] border border-white/20 backdrop-blur-3xl'
         }`}>
-          {currentTheme === 'surrealist_editorial' && <div className="masking-tape-corner-tr" />}
           
           {/* Brand Logo & Name */}
           <div
             onClick={() => handleSelectTab('dashboard')}
-            className="flex items-center gap-2 cursor-pointer group select-none flex-shrink-0 touch-press"
+            className="flex items-center gap-2.5 cursor-pointer group select-none flex-shrink-0 touch-press"
           >
-            <div className="relative w-8 h-8 rounded-xl bg-white/[0.08] border border-white/30 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_4px_16px_rgba(0,0,0,0.4)] flex items-center justify-center transition-transform group-hover:scale-105">
+            <div className="relative w-8 h-8 rounded-xl bg-white/[0.08] border border-white/25 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.7)] flex items-center justify-center transition-transform group-hover:scale-105">
               <Sparkles className="w-4 h-4 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
               <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34D399]" />
             </div>
 
             {currentTheme === 'surrealist_editorial' ? (
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-base sm:text-lg font-woodblock tracking-wider uppercase text-[#F7F4EB]">
-                  mindbridge<span className="text-[#E2F952]">*</span>
-                </span>
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#E2F952] text-black font-woodblock font-bold tracking-widest uppercase shadow-[1px_1px_0px_#000000]">
-                  VOL. IV
+              <div className="flex flex-col">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-sm sm:text-base font-extrabold tracking-wider uppercase text-white font-mono">
+                    MINDBRIDGE<span className="text-[#E2F952]">*</span>
+                  </span>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#E2F952] text-black font-mono font-black tracking-widest uppercase shadow-[1px_1px_0px_#000000]">
+                    VOL. IV
+                  </span>
+                </div>
+                <span className="text-[8.5px] font-mono tracking-widest text-slate-400 uppercase hidden lg:inline">
+                  STUDY BEYOND LIMITS
                 </span>
               </div>
             ) : (
@@ -294,22 +298,22 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
           </div>
 
           {/* Desktop Navigation Strip with Auto-Centering & Scroll Chevrons */}
-          <div className="hidden md:flex items-center relative flex-1 max-w-3xl mx-2 overflow-hidden">
+          <div className="hidden md:flex items-center relative flex-1 max-w-2xl mx-3 overflow-hidden">
             {canScrollLeft && (
               <button
                 type="button"
                 onClick={() => handleScroll('left')}
-                className="absolute left-0 z-10 w-7 h-7 rounded-full bg-black/70 hover:bg-black/90 border border-white/20 text-white flex items-center justify-center shadow-lg backdrop-blur-md transition-transform hover:scale-110 cursor-pointer"
+                className="absolute left-0 z-10 w-6 h-6 rounded-full bg-black/80 hover:bg-black border border-white/20 text-white flex items-center justify-center shadow-lg backdrop-blur-md transition-transform hover:scale-110 cursor-pointer"
                 title="Scroll left"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5" />
               </button>
             )}
 
             <div
               ref={scrollContainerRef}
               onScroll={checkScroll}
-              className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 px-1 scroll-smooth w-full justify-start lg:justify-center"
+              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-1 scroll-smooth w-full justify-start lg:justify-center"
             >
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -324,8 +328,8 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
                     className={`px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all duration-200 flex-shrink-0 cursor-pointer ${
                       currentTheme === 'surrealist_editorial'
                         ? isActive
-                          ? 'bg-[#E2F952] text-black font-woodblock tracking-wider uppercase shadow-[2px_2px_0px_#000000] border border-black scale-[1.02]'
-                          : 'text-[#F7F4EB]/75 hover:text-white hover:bg-white/[0.08] font-woodblock tracking-wider uppercase text-[11px] border border-transparent'
+                          ? 'bg-[#E2F952] text-black font-mono font-bold tracking-wide uppercase shadow-[0_0_12px_rgba(226,249,82,0.35)] scale-[1.02]'
+                          : 'bg-white/[0.05] hover:bg-white/[0.12] text-slate-300 hover:text-white border border-white/10 font-mono tracking-wide text-[11px]'
                         : isActive
                           ? 'bg-gradient-to-r from-white/[0.24] via-white/[0.16] to-white/[0.08] text-white border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_4px_16px_rgba(0,0,0,0.35)] font-semibold scale-[1.02]'
                           : 'text-slate-400 hover:text-white hover:bg-white/[0.08] border border-transparent'
@@ -335,7 +339,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
                     <Icon
                       className={`w-3.5 h-3.5 transition-transform ${
                         currentTheme === 'surrealist_editorial'
-                          ? isActive ? 'text-black scale-110' : 'text-[#E2F952]/80'
+                          ? isActive ? 'text-black scale-110' : 'text-slate-400'
                           : isActive ? 'text-white scale-110' : 'text-slate-400'
                       }`}
                     />
@@ -344,7 +348,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
                     </span>
 
                     {item.badge !== undefined && (
-                      <span className="w-4 h-4 rounded-full bg-pink-500/40 text-pink-200 border border-pink-400/50 text-[9px] font-mono font-bold flex items-center justify-center flex-shrink-0">
+                      <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-mono font-bold flex items-center justify-center flex-shrink-0">
                         {item.badge}
                       </span>
                     )}
@@ -365,10 +369,10 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               <button
                 type="button"
                 onClick={() => handleScroll('right')}
-                className="absolute right-0 z-10 w-7 h-7 rounded-full bg-black/70 hover:bg-black/90 border border-white/20 text-white flex items-center justify-center shadow-lg backdrop-blur-md transition-transform hover:scale-110 cursor-pointer"
+                className="absolute right-0 z-10 w-6 h-6 rounded-full bg-black/80 hover:bg-black border border-white/20 text-white flex items-center justify-center shadow-lg backdrop-blur-md transition-transform hover:scale-110 cursor-pointer"
                 title="Scroll right"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -405,7 +409,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               }}
               className={`px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium flex items-center gap-1 cursor-pointer transition-all touch-press ${
                 currentTheme === 'surrealist_editorial'
-                  ? 'bg-[#E2F952] text-black font-woodblock tracking-wider uppercase shadow-[2px_2px_0px_#000000] border border-black hover:scale-105'
+                  ? 'bg-[#E2F952] text-black font-mono font-bold tracking-wider uppercase shadow-[0_0_10px_rgba(226,249,82,0.3)] border border-black hover:scale-105'
                   : 'bg-white/[0.06] hover:bg-white/[0.14] border border-white/15 text-white'
               }`}
               title="Open Study Motivation Board (Quotes & Planner)"
@@ -587,20 +591,16 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       </header>
 
       {/* =========================================================================
-          2. MOBILE FLOATING BOTTOM DOCK (iOS Dynamic Style — Adapts Like Butter)
+          2. MOBILE FLOATING BOTTOM DOCK (Clean iOS Dynamic Style matching Mobile Images 4 & 5)
           ========================================================================= */}
       <div className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom,0px))] inset-x-3 z-40 max-w-md mx-auto md:hidden pointer-events-auto">
-        <nav className={`px-2 py-1.5 flex items-center justify-around select-none transition-all ${
-          currentTheme === 'surrealist_editorial'
-            ? 'bg-[#0B0F17]/95 border-2 border-[#E2F952]/40 shadow-[4px_4px_0px_#000000] rounded-2xl bg-notebook-grid-subtle'
-            : 'apple-liquid-glass rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.5)] border border-white/20 backdrop-blur-3xl'
-        }`}>
+        <nav className="px-2 py-1 flex items-center justify-around select-none transition-all apple-liquid-glass rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/20 backdrop-blur-3xl bg-black/85">
           
           {/* 1. Dashboard */}
           <button
             type="button"
             onClick={() => handleSelectTab('dashboard')}
-            className={`flex flex-col items-center justify-center min-h-[46px] min-w-[46px] py-1 px-3 rounded-2xl transition-all touch-press active:scale-95 ${
+            className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] py-1 px-2.5 rounded-2xl transition-all touch-press active:scale-95 ${
               activeTab === 'dashboard'
                 ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(56,189,248,0.25)] font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -610,64 +610,66 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
             <span className="text-[9px] mt-0.5 tracking-tight font-medium">Home</span>
           </button>
 
-          {/* 2. Horizon AI */}
+          {/* 2. Horizon AI Chat */}
           <button
             type="button"
             onClick={() => handleSelectTab('chat')}
-            className={`flex flex-col items-center justify-center min-h-[46px] min-w-[46px] py-1 px-3 rounded-2xl transition-all touch-press active:scale-95 ${
+            className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] py-1 px-2.5 rounded-2xl transition-all touch-press active:scale-95 ${
               activeTab === 'chat'
                 ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(56,189,248,0.25)] font-bold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <Sparkles className={`w-4 h-4 ${activeTab === 'chat' ? 'text-cyan-300 drop-shadow-[0_0_8px_#38BDF8]' : ''}`} />
-            <span className="text-[9px] mt-0.5 tracking-tight font-medium">Horizon</span>
+            <span className="text-[9px] mt-0.5 tracking-tight font-medium">Chat</span>
           </button>
 
-          {/* 3. Tests */}
+          {/* 3. Center Elevated Floating Star Action Button (Study Motivation & Fuel) */}
+          <div className="relative -top-2 flex flex-col items-center justify-center">
+            <button
+              type="button"
+              onClick={() => {
+                sound.playClick();
+                setIsMotivationModalOpen(true);
+              }}
+              className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#E2F952] to-[#38BDF8] text-black flex items-center justify-center shadow-[0_0_20px_rgba(226,249,82,0.6)] border-2 border-black active:scale-90 transition-transform cursor-pointer"
+              title="Study Motivation & Fuel"
+            >
+              <Flame className="w-5 h-5 fill-current animate-pulse" />
+            </button>
+            <span className="text-[8px] mt-0.5 text-[#E2F952] font-mono font-bold tracking-tight">FUEL</span>
+          </div>
+
+          {/* 4. Notes & Library */}
           <button
             type="button"
-            onClick={() => handleSelectTab('tests')}
-            className={`flex flex-col items-center justify-center min-h-[46px] min-w-[46px] py-1 px-3 rounded-2xl transition-all touch-press active:scale-95 ${
-              activeTab === 'tests'
-                ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(96,165,250,0.25)] font-bold'
+            onClick={() => handleSelectTab('dreamnotes')}
+            className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] py-1 px-2.5 rounded-2xl transition-all touch-press active:scale-95 ${
+              activeTab === 'dreamnotes' || activeTab === 'syllabus'
+                ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(244,114,182,0.25)] font-bold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <FileCheck2 className={`w-4 h-4 ${activeTab === 'tests' ? 'text-blue-300 drop-shadow-[0_0_8px_#60A5FA]' : ''}`} />
-            <span className="text-[9px] mt-0.5 tracking-tight font-medium">Tests</span>
+            <BookMarked className={`w-4 h-4 ${activeTab === 'dreamnotes' || activeTab === 'syllabus' ? 'text-pink-300 drop-shadow-[0_0_8px_#F472B6]' : ''}`} />
+            <span className="text-[9px] mt-0.5 tracking-tight font-medium">Notes</span>
           </button>
 
-          {/* 4. Syllabus */}
-          <button
-            type="button"
-            onClick={() => handleSelectTab('syllabus')}
-            className={`flex flex-col items-center justify-center min-h-[46px] min-w-[46px] py-1 px-3 rounded-2xl transition-all touch-press active:scale-95 ${
-              activeTab === 'syllabus'
-                ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(52,211,153,0.25)] font-bold'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <BookOpen className={`w-4 h-4 ${activeTab === 'syllabus' ? 'text-emerald-300 drop-shadow-[0_0_8px_#34D399]' : ''}`} />
-            <span className="text-[9px] mt-0.5 tracking-tight font-medium">Syllabus</span>
-          </button>
-
-          {/* 5. All Apps / More Drawer */}
+          {/* 5. Profile & All Apps */}
           <button
             type="button"
             onClick={() => {
               sound.playClick();
               setIsDrawerOpen(true);
             }}
-            className="relative flex flex-col items-center justify-center min-h-[46px] min-w-[46px] py-1 px-3 rounded-2xl text-slate-400 hover:text-white transition-all cursor-pointer touch-press active:scale-95"
+            className="relative flex flex-col items-center justify-center min-h-[44px] min-w-[44px] py-1 px-2.5 rounded-2xl text-slate-400 hover:text-white transition-all cursor-pointer touch-press active:scale-95"
           >
             <div className="relative">
-              <LayoutGrid className="w-4 h-4 text-pink-300 drop-shadow-[0_0_8px_#F472B6]" />
+              <LayoutGrid className="w-4 h-4 text-slate-300" />
               {activeGapsCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_6px_#EC4899]" />
               )}
             </div>
-            <span className="text-[9px] mt-0.5 text-pink-300 font-semibold tracking-tight">More ✦</span>
+            <span className="text-[9px] mt-0.5 text-slate-300 font-medium tracking-tight">Apps</span>
           </button>
 
         </nav>

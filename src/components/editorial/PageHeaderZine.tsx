@@ -23,10 +23,7 @@ export const PageHeaderZine: React.FC<PageHeaderZineProps> = ({
   const sprayClass = `airbrush-spray-${sprayColor}`;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-[#090D14] border-2 border-[#E2F952]/30 p-6 sm:p-8 shadow-2xl mb-8">
-      {/* 1. Masking Tape Corners */}
-      <div className="masking-tape-corner-tl z-20" />
-      <div className="masking-tape-corner-tr z-20" />
+    <div className="relative overflow-hidden rounded-3xl bg-black/60 backdrop-blur-2xl border border-white/20 p-6 sm:p-8 shadow-2xl mb-6">
 
       {/* 2. Authentic Paper Grain & Notebook Graph Grid Background */}
       <div className="editorial-paper-grain absolute inset-0 pointer-events-none z-0 opacity-40" />

@@ -159,6 +159,30 @@ Module 2: Cloud Fault Tolerance & Replication
         subtitle="Unlike static university syllabi that treat all scholars identically, Mind Bridge AI dynamically restructures your curriculum sequence based on verified test deficiencies and retention models."
         sticker="cursor"
         sprayColor="cyan"
+        rightElement={
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <button
+              onClick={() => {
+                sound.playLevelUp();
+                setIsImportModalOpen(true);
+              }}
+              className="px-4 py-2.5 rounded-full bg-[#E2F952] text-black font-mono font-bold text-xs uppercase tracking-wide shadow-[0_0_15px_rgba(226,249,82,0.4)] hover:scale-105 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Generate Study Path</span>
+            </button>
+            <button
+              onClick={() => {
+                sound.playClick();
+                setIsImportModalOpen(true);
+              }}
+              className="px-3.5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-mono text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Custom Course</span>
+            </button>
+          </div>
+        }
       />
 
       {/* Success Notification Alert */}

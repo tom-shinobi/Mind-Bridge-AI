@@ -520,28 +520,53 @@ export function App() {
 
   const currentTheme: AtmosphereTheme = (aiSettings.theme && aiSettings.theme !== 'dusk') ? aiSettings.theme : 'surrealist_editorial';
 
-  // Shared Dynamic Atmospheric Background Component for Auth, Onboarding, Upload & Workspace
+  // Shared Dynamic Atmospheric Background Component with Surrealism Wallpapers & Contrast
   const renderAtmosphereBackground = () => {
+    // Context-aware ethereal fantasy wallpaper routing matching user reference art
+    const getSurrealistWallpaper = () => {
+      if (activeTab === 'chat' || activeTab === 'tutor') {
+        return '/backgrounds/ethereal-library-chat.jpg';
+      }
+      if (activeTab === 'syllabus' || activeTab === 'dreamnotes' || activeTab === 'gaps' || activeTab === 'tests') {
+        return '/backgrounds/ethereal-river-tunnel.jpg';
+      }
+      return '/backgrounds/ethereal-twilight-desktop.jpg';
+    };
+
     const renderThemeOrbs = () => {
       switch (currentTheme) {
         case 'surrealist_editorial':
           return (
             <>
-              {/* Architectural Blueprint & Notebook Graph Grid across the entire background */}
-              <div className="absolute inset-0 bg-notebook-grid opacity-75 pointer-events-none" />
-              <div className="absolute inset-0 bg-notebook-grid-subtle opacity-45 pointer-events-none" />
+              {/* Authentic High-Resolution Ethereal Twilight Wallpaper */}
+              <div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 pointer-events-none scale-[1.01]"
+                style={{ backgroundImage: `url('${getSurrealistWallpaper()}')` }}
+              />
 
-              {/* Dynamic Animated Airbrush Aerosol Spray Paint Halos (Cyan, Magenta, Acid Lime, Solar Orange) */}
-              <div className="absolute -top-24 -left-24 w-[540px] h-[540px] airbrush-spray-cyan opacity-50 animate-spray-pulse pointer-events-none" />
-              <div className="absolute top-[18%] -right-28 w-[640px] h-[640px] airbrush-spray-magenta opacity-45 animate-spray-pulse pointer-events-none" style={{ animationDelay: '1.8s' }} />
-              <div className="absolute -bottom-28 left-[20%] w-[580px] h-[580px] airbrush-spray-lime opacity-45 animate-spray-pulse pointer-events-none" style={{ animationDelay: '3.2s' }} />
-              <div className="absolute top-[52%] -left-20 w-[460px] h-[460px] airbrush-spray-orange opacity-35 animate-spray-pulse pointer-events-none" style={{ animationDelay: '2.5s' }} />
+              {/* Atmospheric Contrast Overlay: Ensures 100% Crisp Legibility across all cards */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/80 pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_25%,rgba(5,8,15,0.45)_65%,rgba(2,4,9,0.90)_100%)] pointer-events-none" />
 
-              {/* Surreal Chromatic Mesh */}
-              <div className="surreal-chromatic-mesh absolute inset-0 opacity-80 pointer-events-none" />
+              {/* Architectural Blueprint & Notebook Graph Grid subtle overlay */}
+              <div className="absolute inset-0 bg-notebook-grid opacity-25 pointer-events-none" />
+
+              {/* Margin Handwritten Cursive Annotations (Caveat font, glowing subtle quotes) */}
+              <div className="hidden xl:block absolute left-6 top-36 font-['Caveat',cursive] text-xl text-white/50 select-none pointer-events-none drop-shadow-[0_0_10px_rgba(255,255,255,0.4)] rotate-[-4deg] tracking-wide">
+                Same Student. A Brighter You. ☆
+              </div>
+              <div className="hidden xl:block absolute right-8 top-44 font-['Caveat',cursive] text-xl text-[#E2F952]/65 select-none pointer-events-none drop-shadow-[0_0_10px_rgba(226,249,82,0.4)] rotate-[3deg] tracking-wide">
+                Different Path Same Dream // ☆
+              </div>
+              <div className="hidden 2xl:block absolute left-8 bottom-36 font-['Caveat',cursive] text-lg text-cyan-200/45 select-none pointer-events-none drop-shadow-[0_0_10px_rgba(56,189,248,0.35)] rotate-[2deg] tracking-wide">
+                Curiosity takes you further. ✦
+              </div>
+              <div className="hidden 2xl:block absolute right-10 bottom-32 font-['Caveat',cursive] text-lg text-pink-200/50 select-none pointer-events-none drop-shadow-[0_0_10px_rgba(244,114,182,0.35)] rotate-[-3deg] tracking-wide">
+                You&apos;re not behind. You&apos;re becoming. ☆
+              </div>
 
               {/* Kinetic Drifting Star Motifs */}
-              <div className="absolute top-28 right-[12%] text-2xl text-[#E2F952]/40 animate-float-bobbing pointer-events-none select-none">
+              <div className="absolute top-28 right-[14%] text-2xl text-[#E2F952]/40 animate-float-bobbing pointer-events-none select-none">
                 ✦
               </div>
               <div className="absolute top-[40%] left-[8%] text-xl text-[#FF85A1]/40 animate-float-reverse pointer-events-none select-none">
@@ -662,19 +687,7 @@ export function App() {
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-700">
         {renderThemeOrbs()}
 
-        {/* Atmospheric Contrast Vignette (Preserves Deep Contrast for Razor-Sharp Text while letting bright colors glow) */}
-        <div className={`absolute inset-0 pointer-events-none ${
-          currentTheme === 'surrealist_editorial'
-            ? 'bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(9,12,19,0.30)_80%,rgba(9,12,19,0.65)_100%)]'
-            : 'bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(2,4,9,0.30)_75%,rgba(2,4,9,0.72)_100%)]'
-        }`} />
-
-        {/* Authentic Vintage Paper Grain Texture for Surrealist Editorial Theme */}
-        {currentTheme === 'surrealist_editorial' && (
-          <div className="editorial-paper-grain absolute inset-0 pointer-events-none z-10 opacity-55" />
-        )}
-
-        {/* Luminous Interactive Dynamic Particles with Matching Theme Palette Floating On Top */}
+        {/* Dynamic Interactive Particles with Matching Theme Palette Floating On Top */}
         <ParticleBackground theme={currentTheme} />
       </div>
     );

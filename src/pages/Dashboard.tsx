@@ -24,11 +24,9 @@ import type {
 import { RotaryKnob } from '../components/hardware/RotaryKnob';
 import { StudyTimerWidget } from '../components/StudyTimerWidget';
 import { RefractiveLens } from '../components/RefractiveLens';
-import { SurrealPortalHero } from '../components/SurrealPortalHero';
 import { SmileyBalloonSticker, PixelCursorSticker, ClayFlowerSticker } from '../components/editorial/AcidZineStickerPack';
 import { FloatingCloudVanHero } from '../components/editorial/FloatingCloudVanHero';
 import {
-  MotivationalPosterHero,
   StudyPlannerZineBoard,
   StudyMotivationStickyCard
 } from '../components/editorial/StudyMotivationQuotes';
@@ -75,31 +73,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="space-y-10 animate-fade-in pb-20 max-w-6xl mx-auto">
-      {/* 1. Cosmic Cloud Camper Van Hero (Image 1 Reference) */}
+      {/* 1. Flagship Surrealism Cloud Van Expedition Hero */}
       <FloatingCloudVanHero
         onCtaClick={() => {
           sound.playClick();
           onNavigate('tutor', { topic: criticalGap?.topic });
         }}
         ctaText="LAUNCH EXPEDITION // EXPLORE COGNITION"
-      />
-
-      {/* 2. Surrealist Light Vortex & Tyler Zine Flagship Portal Hero */}
-      <SurrealPortalHero
-        onCtaClick={() => {
-          sound.playClick();
-          onNavigate('tests', { topic: criticalGap?.topic });
-        }}
-        ctaText="CHASE YOUR CURIOSITY // TAKE DIAGNOSTIC"
-      />
-
-      {/* 2.5 Bold Typographic Motivational Manifesto Poster (Image 2 Reference) */}
-      <MotivationalPosterHero
-        onExplore={() => {
-          sound.playClick();
-          const el = document.getElementById('study-planner-board-section');
-          el?.scrollIntoView({ behavior: 'smooth' });
-        }}
       />
 
       {/* ==========================================================================

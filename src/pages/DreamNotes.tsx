@@ -367,9 +367,6 @@ export const DreamNotes: React.FC<DreamNotesProps> = ({ profile, syllabus, onNav
                 key={note.id}
                 className={`relative rounded-3xl border bg-gradient-to-b ${theme.bg} ${theme.border} p-5 space-y-4 shadow-xl backdrop-blur-xl transition-all hover:scale-[1.01] flex flex-col justify-between overflow-hidden group`}
               >
-                {/* Visual Acid Tape Ribbon */}
-                <div className="absolute -top-3 left-8 w-16 h-6 bg-white/15 border border-white/20 backdrop-blur-md rotate-2 rounded pointer-events-none shadow-sm" />
-
                 {/* Card Top Header */}
                 <div className="space-y-2 pt-1">
                   <div className="flex items-start justify-between gap-2">

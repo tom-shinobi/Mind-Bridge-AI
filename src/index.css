@@ -1998,35 +1998,10 @@
   transform: rotate(-2deg);
 }
 
-/* Tactile Masking Tape Corners on Cards */
-.masking-tape-corner-tr {
-  position: absolute;
-  top: -8px;
-  right: 14px;
-  width: 52px;
-  height: 18px;
-  background: rgba(230, 222, 196, 0.65);
-  backdrop-filter: blur(2px);
-  border: 1px dashed rgba(255, 255, 255, 0.25);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  transform: rotate(12deg);
-  z-index: 10;
-  pointer-events: none;
-}
-
+/* Tactile Masking Tape Corners on Cards (Hidden for Clean Modern UI) */
+.masking-tape-corner-tr,
 .masking-tape-corner-tl {
-  position: absolute;
-  top: -8px;
-  left: 14px;
-  width: 52px;
-  height: 18px;
-  background: rgba(230, 222, 196, 0.65);
-  backdrop-filter: blur(2px);
-  border: 1px dashed rgba(255, 255, 255, 0.25);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  transform: rotate(-14deg);
-  z-index: 10;
-  pointer-events: none;
+  display: none !important;
 }
 
 /* Editorial Archival Passport / Boarding Pass Stamp */
