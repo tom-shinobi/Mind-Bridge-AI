@@ -211,14 +211,8 @@ class StorageService {
     
     // Prioritize Gemini / OpenRouter environment key
     const envKey = (import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
-    const isLeakedKey = (k?: string) => k === 'AIzaSyC_7GwAKor3ZIFj9uvq1trZHYcHctOiQcU';
 
-    if (isLeakedKey(loaded.openRouterApiKey)) {
-      loaded.openRouterApiKey = '';
-      this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
-    }
-
-    if (envKey && !isLeakedKey(envKey) && !loaded.openRouterApiKey) {
+    if (envKey && !loaded.openRouterApiKey) {
       loaded.openRouterApiKey = envKey;
       this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
