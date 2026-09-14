@@ -5,7 +5,7 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
+  envPrefix: ['VITE_', 'NEXT_PUBLIC_', 'GEMINI_', 'GOOGLE_'],
   server: {
     host: true,
     allowedHosts: true

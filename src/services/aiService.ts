@@ -1,5 +1,5 @@
 import type { Test, TutorMessage } from '../types';
-import { storageService } from './storageService';
+import { storageService, resolveEnvApiKey } from './storageService';
 import { calendarService } from './calendarService';
 import { noteService } from './noteService';
 
@@ -37,7 +37,7 @@ class AIService {
 
   public getApiStatus(): ApiStatus {
     const settings = storageService.getAISettings();
-    const rawKey = (settings.openRouterApiKey || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
+    const rawKey = (settings.openRouterApiKey || resolveEnvApiKey()).trim();
     const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-2.0-flash';
     return {
       ...this.apiStatus,
@@ -192,7 +192,7 @@ ${notesContext}
     const settings = storageService.getAISettings();
     const studentContext = this.getStudentContext();
     const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-2.0-flash';
-    const apiKey = (settings.openRouterApiKey || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
+    const apiKey = (settings.openRouterApiKey || resolveEnvApiKey()).trim();
 
     // Try OpenRouter or Google AI Studio if API key is provided
     if (apiKey) {
@@ -428,7 +428,7 @@ YOUR INSTRUCTIONS:
    */
   public async testConnection(customKey?: string, customModel?: string): Promise<{ success: boolean; message: string; latencyMs?: number }> {
     const settings = storageService.getAISettings();
-    const key = (customKey || settings.openRouterApiKey || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
+    const key = (customKey || settings.openRouterApiKey || resolveEnvApiKey()).trim();
     const model = customModel || (settings.model && settings.model !== 'gemini-2.5-flash' ? settings.model : 'gemini-2.0-flash');
 
     if (!key) {

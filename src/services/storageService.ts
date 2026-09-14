@@ -38,6 +38,21 @@ const STORAGE_KEYS = {
   STUDY_SECONDS_TODAY: 'mba_study_seconds_today'
 };
 
+export function resolveEnvApiKey(): string {
+  const env = (import.meta as any).env || {};
+  return (
+    env.VITE_GEMINI_API_KEY ||
+    env.GEMINI_API_KEY ||
+    env.VITE_GOOGLE_API_KEY ||
+    env.GOOGLE_API_KEY ||
+    env.VITE_GOOGLE_AI_KEY ||
+    env.NEXT_PUBLIC_GEMINI_API_KEY ||
+    env.NEXT_PUBLIC_GOOGLE_API_KEY ||
+    env.VITE_OPENROUTER_API_KEY ||
+    ''
+  ).trim();
+}
+
 class StorageService {
   public setCookie(name: string, value: string, days = 365): void {
     if (typeof document === 'undefined') return;
@@ -210,7 +225,7 @@ class StorageService {
     const loaded = this.load<AISettings>(STORAGE_KEYS.AI_SETTINGS, initialAISettings);
     
     // Prioritize Gemini / OpenRouter environment key
-    const envKey = (import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '').trim();
+    const envKey = resolveEnvApiKey();
 
     if (envKey && !loaded.openRouterApiKey) {
       loaded.openRouterApiKey = envKey;
@@ -237,7 +252,7 @@ class StorageService {
 
   public getApiKey(): string {
     const settings = this.getAISettings();
-    return (settings.openRouterApiKey || (import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '')).trim();
+    return (settings.openRouterApiKey || resolveEnvApiKey()).trim();
   }
 
   public getTodayStudySeconds(): number {
