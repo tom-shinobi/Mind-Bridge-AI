@@ -19,7 +19,9 @@ import {
   Layers,
   Sparkles,
   BookOpen,
-  Key
+  Key,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import type { TutorMessage, LearningGap, SyllabusTopic, StudentProfile } from '../types';
 import { aiService, type ApiStatus } from '../services/aiService';
@@ -95,8 +97,20 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
 
   // UI styling theme
   const [chatWallpaper, setChatWallpaper] = useState<'sky' | 'obsidian'>('sky');
+  const [isImmersionMode, setIsImmersionMode] = useState<boolean>(false);
 
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
+
+  // Keyboard shortcut to exit immersion mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isImmersionMode) {
+        setIsImmersionMode(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isImmersionMode]);
 
   // Listen to AI service status updates
   useEffect(() => {
@@ -128,7 +142,7 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
     const initialMsg: TutorMessage = {
       id: `welcome-${Date.now()}`,
       sender: 'ai',
-      text: `Hey **${profile.name || 'there'}**! 👋 I'm your **Socrates AI Tutor**.\n\nWe're tuned into **${selectedTopic}** (CGPA: ${profile.cgpa || '8.4'} • ${gaps.length} active gaps).\n\nAsk me any concept question, tap **+** to send a photo of your handwritten notes or diagrams, or tap the **microphone** to voice-chat! 🚀`,
+      text: `Hey **${profile.name || 'there'}**! 👋 I'm **Horizon AI**, your personal academic tutor.\n\nWe're tuned into **${selectedTopic}** (CGPA: ${profile.cgpa || '8.4'} • ${gaps.length} active gaps).\n\nAsk me any concept question, tap **+** to send a photo of your handwritten notes or diagrams, or tap the **microphone** to voice-chat! 🚀`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     setMessages([initialMsg]);
@@ -349,10 +363,14 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
     <div
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
-      className={`relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden transition-colors duration-500 font-sans ${
+      className={`${
+        isImmersionMode
+          ? 'fixed inset-0 z-50'
+          : 'relative w-full h-full flex-1'
+      } flex flex-col justify-between overflow-hidden transition-colors duration-500 font-sans ${
         chatWallpaper === 'sky'
-          ? 'bg-gradient-to-b from-[#60a5fa]/30 via-[#93c5fd]/15 to-[#0f172a] text-slate-100'
-          : 'bg-[#090d16] text-slate-100'
+          ? 'bg-gradient-to-b from-[#60a5fa]/25 via-[#93c5fd]/15 to-[#0b1120] text-slate-100'
+          : 'bg-[#080c14] text-slate-100'
       }`}
     >
       {/* Visual Dynamic Background: Clouds & Fluid Lighting (matching Image 1) */}
@@ -374,18 +392,22 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
       {/* ========================================================================= */}
       {/* APPLE iMESSAGE TOP HEADER BAR */}
       {/* ========================================================================= */}
-      <header className="relative z-20 backdrop-blur-2xl bg-black/40 border-b border-white/10 px-4 py-3 flex items-center justify-between shadow-lg">
+      <header className="relative z-20 backdrop-blur-2xl bg-black/50 border-b border-white/10 px-4 sm:px-8 py-3 flex items-center justify-between shadow-lg">
         {/* Left: Back Button & Topic Selector */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
               sound.playClick();
-              onNavigate('tutor', { topic: selectedTopic });
+              if (isImmersionMode) {
+                setIsImmersionMode(false);
+              } else {
+                onNavigate('dashboard');
+              }
             }}
             className="flex items-center gap-1 text-[#007AFF] hover:text-blue-300 transition-colors font-medium text-sm"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
-            <span className="hidden sm:inline">Tutor</span>
+            <span className="hidden sm:inline">{isImmersionMode ? 'Back' : 'Home'}</span>
           </button>
 
           {/* Topic Scope Capsule Picker */}
@@ -422,10 +444,10 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
           </div>
         </div>
 
-        {/* Center: Contact Info (Socrates AI Tutor) */}
+        {/* Center: Contact Info (Horizon AI Tutor) */}
         <div className="flex flex-col items-center cursor-pointer select-none" onClick={() => setIsSettingsOpen(true)}>
           <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 p-[2px] shadow-[0_0_15px_rgba(0,122,255,0.4)]">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 p-[2px] shadow-[0_0_18px_rgba(56,189,248,0.45)]">
               <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-white">
                 <Bot className="w-5 h-5 text-cyan-300 animate-pulse" />
               </div>
@@ -435,15 +457,15 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
           </div>
 
           <div className="flex items-center gap-1 mt-0.5">
-            <span className="text-xs font-semibold text-white tracking-tight">Socrates AI</span>
-            <span className="text-[10px] text-slate-400">›</span>
+            <span className="text-xs font-bold text-white tracking-tight">Horizon AI</span>
+            <span className="text-[10px] text-cyan-400 font-bold">›</span>
           </div>
           <span className="text-[10px] font-mono text-cyan-400/90 tracking-wide">
-            {apiStatus.isLive ? `Gemini 3.8 Flash (${apiStatus.latencyMs || 180}ms)` : 'Socratic Local AI'}
+            {apiStatus.isLive ? `${apiStatus.model || 'Google Gemini 3.6 Flash'} (${apiStatus.latencyMs || 180}ms)` : 'Horizon Local AI'}
           </span>
         </div>
 
-        {/* Right: Actions (Voice Call, Wallpaper, AI Config) */}
+        {/* Right: Actions (Voice Call, Wallpaper, Fullscreen, AI Config) */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Voice Speech Toggle */}
           <button
@@ -479,6 +501,22 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
             <Sparkles className="w-4 h-4 text-amber-300" />
           </button>
 
+          {/* Fullscreen / Immersion Toggle */}
+          <button
+            onClick={() => {
+              sound.playClick();
+              setIsImmersionMode(!isImmersionMode);
+            }}
+            className={`p-2 rounded-full border transition-all ${
+              isImmersionMode
+                ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.4)]'
+                : 'bg-white/10 border-white/15 text-slate-300 hover:text-white'
+            }`}
+            title={isImmersionMode ? 'Exit Borderless Fullscreen (Esc)' : 'Enter Borderless Fullscreen'}
+          >
+            {isImmersionMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+
           {/* AI Settings / Model Diagnostics Modal Trigger */}
           <button
             onClick={() => {
@@ -498,7 +536,7 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
       {/* ========================================================================= */}
       <div
         ref={chatScrollRef}
-        className="relative z-10 flex-1 overflow-y-auto px-3 sm:px-6 py-6 space-y-4 max-w-4xl w-full mx-auto custom-scrollbar"
+        className="relative z-10 flex-1 overflow-y-auto px-3 sm:px-6 md:px-8 py-6 space-y-4 max-w-5xl w-full mx-auto custom-scrollbar"
       >
         {/* Date separator pill */}
         <div className="flex justify-center my-2">
@@ -517,7 +555,7 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
               className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} group relative transition-all animate-fade-in`}
             >
               {/* Message Bubble Container */}
-              <div className="relative max-w-[85%] sm:max-w-[75%]">
+              <div className="relative max-w-[85%] sm:max-w-[78%]">
                 {/* User Bubble (Apple vibrant blue #007AFF) */}
                 {isUser ? (
                   <div
@@ -591,12 +629,12 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
                     <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-1.5 text-[11px] font-mono text-cyan-300">
                       <div className="flex items-center gap-1.5">
                         <Sparkles className="w-3 h-3 text-cyan-400" />
-                        <span className="font-semibold">Socrates</span>
+                        <span className="font-semibold">Horizon AI</span>
                       </div>
                       <button
                         onClick={() => aiService.speak(msg.text)}
                         className="text-slate-400 hover:text-white p-0.5 transition-colors"
-                        title="Listen to Socrates read this answer"
+                        title="Listen to Horizon AI read this answer"
                       >
                         <Volume2 className="w-3.5 h-3.5" />
                       </button>
@@ -829,8 +867,33 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
       {/* ========================================================================= */}
       {/* APPLE CAPSULE BOTTOM INPUT DOCK */}
       {/* ========================================================================= */}
-      <footer className="relative z-20 backdrop-blur-3xl bg-black/40 border-t border-white/10 px-3 sm:px-6 py-3">
-        <div className="max-w-4xl mx-auto space-y-2">
+      <footer className="relative z-20 backdrop-blur-3xl bg-black/60 border-t border-white/10 px-3 sm:px-6 md:px-8 py-3">
+        <div className="max-w-5xl mx-auto space-y-2.5">
+          {/* Quick Concept Prompt Chips */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+            <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider flex items-center gap-1 flex-shrink-0 mr-1 select-none">
+              <Sparkles className="w-3 h-3 text-cyan-400 animate-pulse" /> Prompts:
+            </span>
+            {[
+              'Explain B-Trees from first principles',
+              'Check my active learning gaps & CGPA',
+              'Analyze sample Binary Molecular Compounds notes (S2Cl2)',
+              'Quiz me with a concept check'
+            ].map((prompt, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setInputMessage(prompt);
+                }}
+                className="px-2.5 py-1 rounded-full text-xs bg-white/[0.06] hover:bg-white/[0.14] border border-white/15 text-slate-200 hover:text-white transition-all whitespace-nowrap flex-shrink-0"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+
           {/* Image Attachment Preview Pill */}
           {attachedImage && (
             <div className="flex items-center justify-between p-2 rounded-2xl bg-white/10 border border-blue-400/40 backdrop-blur-xl animate-fade-in">
@@ -906,7 +969,7 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
                     handleSendMessage();
                   }
                 }}
-                placeholder="iMessage"
+                placeholder="Message Horizon AI... (Press Enter to send)"
                 className="flex-1 bg-transparent text-sm text-white placeholder-slate-400 focus:outline-none"
               />
 

@@ -222,7 +222,7 @@ ${notesContext}
     // Try OpenRouter or Google AI Studio if API key is provided
     if (apiKey) {
       try {
-        const systemPrompt = `You are Mind Bridge AI, the personal AI academic tutor and learning assistant for the student described below.
+        const systemPrompt = `You are Horizon AI, the personal AI academic tutor and learning assistant for the student described below.
 You have direct, authenticated access to the student's real academic record, exam marks, diagnosed learning gaps, personalized syllabus, daily timetable, and personal study notes.
 
 ${studentContext}
@@ -277,8 +277,10 @@ YOUR INSTRUCTIONS:
 
         if (isGoogleGemini && isGoogleApiKey(apiKey)) {
           // Direct Google AI Studio Gemini Engine
-          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.0-flash' || activeModel.includes('gemini-2.5') ? 'gemini-3.8-flash' : activeModel) : 'gemini-3.8-flash';
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
+          let geminiModel = activeModel.includes('gemini')
+            ? (activeModel === 'gemini-2.0-flash' || activeModel.includes('gemini-2.5') ? 'gemini-3.6-flash' : activeModel)
+            : 'gemini-3.6-flash';
+          let geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
 
           const userParts: any[] = [];
           if (imageContext?.base64) {
@@ -294,27 +296,55 @@ YOUR INSTRUCTIONS:
             text: userMessage || (imageContext ? 'Please analyze this diagram/image in the context of our study topic.' : 'Hello')
           });
 
-          const geminiContents = [
-            ...history.slice(-8).map((m) => {
-              const parts: any[] = [{ text: m.text }];
-              if (m.imageUrl && m.imageUrl.startsWith('data:')) {
-                const mimeMatch = m.imageUrl.match(/^data:([^;]+);base64,/);
-                const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-                const data = m.imageUrl.replace(/^data:[^;]+;base64,/, '');
-                parts.unshift({
-                  inline_data: {
-                    mime_type: mime,
-                    data
-                  }
-                });
+          // Trim duplicate user message from history if caller already pushed it
+          const historyCopy = [...history];
+          if (
+            historyCopy.length > 0 &&
+            historyCopy[historyCopy.length - 1].sender === 'student' &&
+            historyCopy[historyCopy.length - 1].text === userMessage
+          ) {
+            historyCopy.pop();
+          }
+
+          const rawTurns = historyCopy.slice(-8).map((m) => {
+            const parts: any[] = [{ text: m.text }];
+            if (m.imageUrl && m.imageUrl.startsWith('data:')) {
+              const mimeMatch = m.imageUrl.match(/^data:([^;]+);base64,/);
+              const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+              const data = m.imageUrl.replace(/^data:[^;]+;base64,/, '');
+              parts.unshift({
+                inline_data: {
+                  mime_type: mime,
+                  data
+                }
+              });
+            }
+            return {
+              role: m.sender === 'ai' ? 'model' : 'user',
+              parts
+            };
+          });
+
+          // Append current user turn
+          rawTurns.push({ role: 'user', parts: userParts });
+
+          // Normalize turns so that roles strictly alternate and start with 'user'
+          const geminiContents: { role: string; parts: any[] }[] = [];
+          for (const turn of rawTurns) {
+            if (geminiContents.length === 0) {
+              if (turn.role === 'model') {
+                geminiContents.push({ role: 'user', parts: [{ text: 'Hello, let us continue our study session.' }] });
               }
-              return {
-                role: m.sender === 'ai' ? 'model' : 'user',
-                parts
-              };
-            }),
-            { role: 'user', parts: userParts }
-          ];
+              geminiContents.push(turn);
+            } else {
+              const prevTurn = geminiContents[geminiContents.length - 1];
+              if (prevTurn.role === turn.role) {
+                prevTurn.parts.push(...turn.parts);
+              } else {
+                geminiContents.push(turn);
+              }
+            }
+          }
 
           let response = await fetch(geminiUrl, {
             method: 'POST',
@@ -332,9 +362,10 @@ YOUR INSTRUCTIONS:
             })
           });
 
-          // Fallback if 3.8-flash endpoint returns non-200
-          if (!response.ok && geminiModel === 'gemini-3.8-flash') {
-            const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+          // Fallback if selected model returns non-200 (e.g. 503 high demand spike)
+          if (!response.ok && geminiModel !== 'gemini-3.6-flash') {
+            const fallbackModel = 'gemini-3.6-flash';
+            const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent?key=${apiKey}`;
             const fallbackRes = await fetch(fallbackUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -350,6 +381,7 @@ YOUR INSTRUCTIONS:
             });
             if (fallbackRes.ok) {
               response = fallbackRes;
+              geminiModel = fallbackModel;
             }
           }
 
@@ -530,7 +562,7 @@ YOUR INSTRUCTIONS:
       this.notify();
       return {
         success: false,
-        message: 'No Google API key configured yet. MindBridge is operating on local Socratic AI. Paste your Google AI Studio key below to enable cloud inference.'
+        message: 'No Google API key configured yet. Horizon AI is operating on local Socratic AI. Paste your Google AI Studio key below to enable cloud inference.'
       };
     }
 
@@ -732,7 +764,7 @@ Let's test your comprehension of this material with a quick Socratic check:`;
     if (lowerUser.includes('paris') || lowerUser.includes('france') || lowerUser.includes('capital of france')) {
       const msg = `**Paris** is the capital and most populous city of France, situated along the Seine River. Famous worldwide as the "City of Light" (*La Ville Lumière*), it is celebrated for landmarks like the Eiffel Tower, the Louvre Museum, and Notre-Dame Cathedral, as well as its rich heritage in philosophy, art, and cuisine!
       
-*(Note: I am currently responding using my offline Socratic backup engine. Connect your free Google Gemini API key to unlock full cloud inference).*`;
+*(Note: Horizon AI is currently responding using the offline Socratic backup engine. Connect your free Google Gemini API key to unlock full cloud inference).*`;
       this.speak(msg);
       return {
         message: msg,

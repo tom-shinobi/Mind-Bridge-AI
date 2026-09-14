@@ -18,8 +18,7 @@ import {
   AlertTriangle,
   Check,
   RefreshCw,
-  X,
-  MessageCircle
+  X
 } from 'lucide-react';
 import type { TutorMessage, LearningGap, SyllabusTopic } from '../types';
 import { aiService, type ApiStatus } from '../services/aiService';
@@ -189,12 +188,23 @@ export const AITutor: React.FC<AITutorProps> = ({
             }
           : undefined
       };
-      setMessages([...newHistory, aiMsg]);
+      setMessages((prev) => [...prev, aiMsg]);
       if (res.masteryDelta) {
         setMasteryScore((prev) => Math.min(100, prev + res.masteryDelta!));
       }
-    } catch {
-      // Fallback
+    } catch (err) {
+      console.error('AITutor error:', err);
+      const fallback = (aiService as any).getLocalTutorResponse
+        ? (aiService as any).getLocalTutorResponse(selectedTopic, text, newHistory.length)
+        : null;
+      const aiMsg: TutorMessage = {
+        id: `msg_ai_${Date.now()}`,
+        sender: 'ai',
+        text: fallback?.message || "I had a moment reconnecting to Google AI Studio. Let's refocus on the key concepts of " + selectedTopic + "!",
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        conceptCheck: fallback?.conceptCheck || undefined
+      };
+      setMessages((prev) => [...prev, aiMsg]);
     } finally {
       setIsThinking(false);
     }
@@ -301,7 +311,7 @@ export const AITutor: React.FC<AITutorProps> = ({
               {/* Message Header */}
               <div className="flex items-center justify-between gap-3 text-[10px] text-slate-400 font-mono pb-1 border-b border-white/[0.06]">
                 <span className={isAi ? 'text-purple-300 font-bold' : 'text-white font-bold'}>
-                  {isAi ? 'Mind Bridge AI Tutor' : 'You (Sanjay Aron)'}
+                  {isAi ? 'Horizon AI Tutor' : 'You (Sanjay Aron)'}
                 </span>
                 <span>{msg.timestamp}</span>
               </div>
@@ -423,7 +433,7 @@ export const AITutor: React.FC<AITutorProps> = ({
           <div className="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-300">
             <Bot className="w-4 h-4" />
           </div>
-          <span>Mind Bridge AI is formulating Socratic response...</span>
+          <span>Horizon AI is formulating Socratic response...</span>
         </div>
       )}
 
@@ -690,7 +700,7 @@ export const AITutor: React.FC<AITutorProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-white tracking-tight">
-                  Mind Bridge AI Tutor Room
+                  Horizon AI Socratic Room
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-pink-500/20 text-pink-300 border border-pink-500/30">
                   Socratic Mode
@@ -864,7 +874,7 @@ export const AITutor: React.FC<AITutorProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-white leading-tight">
-                  Interactive AI Tutor Room
+                  Horizon AI Socratic Room
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-pink-500/20 text-pink-300 border border-pink-500/30">
                   Socratic Mode
@@ -931,17 +941,17 @@ export const AITutor: React.FC<AITutorProps> = ({
               <span>Fullscreen</span>
             </button>
 
-            {/* Dedicated iMessage Chat Button */}
+            {/* Dedicated Horizon AI Fullscreen Chat Button */}
             <button
               onClick={() => {
                 sound.playClick();
                 onNavigate('chat', { topic: selectedTopic });
               }}
-              className="btn-apple-primary py-1.5 px-3 text-xs flex items-center gap-1.5 bg-[#007AFF] hover:bg-[#0071E3] text-white shadow-[0_0_15px_rgba(0,122,255,0.4)]"
-              title="Open Dedicated Apple iMessage AI Chat with Multimodal Vision & Voice Typing"
+              className="btn-apple-primary py-1.5 px-3.5 text-xs flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white shadow-[0_0_15px_rgba(0,122,255,0.4)]"
+              title="Open Fullscreen Horizon AI with Multimodal Vision & Voice Dictation"
             >
-              <MessageCircle className="w-3.5 h-3.5" />
-              <span>iMessage UI</span>
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Horizon AI Fullscreen ↗</span>
             </button>
           </div>
 
@@ -1042,11 +1052,11 @@ export const AITutor: React.FC<AITutorProps> = ({
                 sound.playClick();
                 onNavigate('chat', { topic: selectedTopic });
               }}
-              className="btn-apple-primary py-1 px-3 text-[11px] flex items-center gap-1.5 bg-[#007AFF] hover:bg-[#0071E3] text-white shadow-[0_0_12px_rgba(0,122,255,0.3)]"
-              title="Open Dedicated Apple iMessage AI Chat with Multimodal Vision & Voice Typing"
+              className="btn-apple-primary py-1 px-3 text-[11px] flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white shadow-[0_0_12px_rgba(0,122,255,0.3)]"
+              title="Open Fullscreen Horizon AI with Multimodal Vision & Voice Typing"
             >
-              <MessageCircle className="w-3 h-3" />
-              <span>Open in iMessage UI</span>
+              <Sparkles className="w-3 h-3" />
+              <span>Open Horizon AI Fullscreen ↗</span>
             </button>
             <button
               onClick={() => {

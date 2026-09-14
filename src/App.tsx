@@ -785,98 +785,100 @@ export function App() {
         onOpenAuth={() => setIsDemoMode(false)}
       />
 
-      {/* Symmetrical Centered Viewport Container (Phone-Friendly Spacing) */}
-      <div className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10 pb-[calc(env(safe-area-inset-bottom,0px)+6.5rem)] md:pb-16">
-        
-        {/* Continuous Study Motivation Fuel Marquee Ticker */}
-        <StudyMotivationTicker onOpenBoard={() => setIsMotivationBoardOpen(true)} />
+      {/* Dynamic Viewport Container: Edge-to-Edge Fullscreen for Horizon AI Chat */}
+      {activeTab === 'chat' ? (
+        <main className="flex-1 w-full h-[calc(100dvh-4.25rem)] flex flex-col relative z-10 overflow-hidden">
+          <AIChatApp
+            initialTopic={targetTopic}
+            gaps={gaps}
+            syllabus={syllabus}
+            profile={profile}
+            onNavigate={handleNavigate}
+          />
+        </main>
+      ) : (
+        /* Symmetrical Centered Viewport Container (Phone-Friendly Spacing for standard modules) */
+        <div className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10 pb-[calc(env(safe-area-inset-bottom,0px)+6.5rem)] md:pb-16">
+          
+          {/* Continuous Study Motivation Fuel Marquee Ticker */}
+          <StudyMotivationTicker onOpenBoard={() => setIsMotivationBoardOpen(true)} />
 
-        <main className="w-full">
-          {activeTab === 'dashboard' && (
-            <Dashboard
-              profile={profile}
-              gaps={gaps}
-              syllabus={syllabus}
-              timetable={timetable}
-              achievements={achievements}
-              onNavigate={handleNavigate}
-              onOpenWorkloadModal={() => setIsWorkloadModalOpen(true)}
-              onToggleBlockComplete={handleToggleBlockComplete}
-            />
-          )}
+          <main className="w-full">
+            {activeTab === 'dashboard' && (
+              <Dashboard
+                profile={profile}
+                gaps={gaps}
+                syllabus={syllabus}
+                timetable={timetable}
+                achievements={achievements}
+                onNavigate={handleNavigate}
+                onOpenWorkloadModal={() => setIsWorkloadModalOpen(true)}
+                onToggleBlockComplete={handleToggleBlockComplete}
+              />
+            )}
 
-          {activeTab === 'history' && (
-            <AcademicHistory
-              records={academicRecords}
-              profile={profile}
-              onAddRecord={handleAddAcademicRecord}
-              onNavigate={handleNavigate}
-            />
-          )}
+            {activeTab === 'history' && (
+              <AcademicHistory
+                records={academicRecords}
+                profile={profile}
+                onAddRecord={handleAddAcademicRecord}
+                onNavigate={handleNavigate}
+              />
+            )}
 
-          {activeTab === 'gaps' && (
-            <LearningGaps gaps={gaps} onNavigate={handleNavigate} />
-          )}
+            {activeTab === 'gaps' && (
+              <LearningGaps gaps={gaps} onNavigate={handleNavigate} />
+            )}
 
-          {activeTab === 'syllabus' && (
-            <PersonalizedSyllabus
-              syllabus={syllabus}
-              onNavigate={handleNavigate}
-              onAddTopics={handleAddSyllabusTopics}
-            />
-          )}
+            {activeTab === 'syllabus' && (
+              <PersonalizedSyllabus
+                syllabus={syllabus}
+                onNavigate={handleNavigate}
+                onAddTopics={handleAddSyllabusTopics}
+              />
+            )}
 
-          {activeTab === 'dreamnotes' && (
-            <DreamNotes
-              profile={profile}
-              syllabus={syllabus}
-              onNavigate={handleNavigate}
-            />
-          )}
+            {activeTab === 'dreamnotes' && (
+              <DreamNotes
+                profile={profile}
+                syllabus={syllabus}
+                onNavigate={handleNavigate}
+              />
+            )}
 
-          {activeTab === 'timetable' && (
-            <SmartTimetable
-              timetable={timetable}
-              onToggleBlockComplete={handleToggleBlockComplete}
-              onOpenWorkloadModal={() => setIsWorkloadModalOpen(true)}
-              onNavigate={handleNavigate}
-            />
-          )}
+            {activeTab === 'timetable' && (
+              <SmartTimetable
+                timetable={timetable}
+                onToggleBlockComplete={handleToggleBlockComplete}
+                onOpenWorkloadModal={() => setIsWorkloadModalOpen(true)}
+                onNavigate={handleNavigate}
+              />
+            )}
 
-          {activeTab === 'calendar' && (
-            <AcademicCalendar
-              profile={profile}
-              onNavigate={handleNavigate}
-            />
-          )}
+            {activeTab === 'calendar' && (
+              <AcademicCalendar
+                profile={profile}
+                onNavigate={handleNavigate}
+              />
+            )}
 
-          {activeTab === 'community' && (
-            <CommunityHub
-              profile={profile}
-              gaps={gaps}
-              onNavigate={handleNavigate}
-              onUpdateProfile={handleUpdateProfile}
-            />
-          )}
+            {activeTab === 'community' && (
+              <CommunityHub
+                profile={profile}
+                gaps={gaps}
+                onNavigate={handleNavigate}
+                onUpdateProfile={handleUpdateProfile}
+              />
+            )}
 
-          {activeTab === 'tutor' && (
-            <AITutor
-              initialTopic={targetTopic}
-              gaps={gaps}
-              syllabus={syllabus}
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {activeTab === 'chat' && (
-            <AIChatApp
-              initialTopic={targetTopic}
-              gaps={gaps}
-              syllabus={syllabus}
-              profile={profile}
-              onNavigate={handleNavigate}
-            />
-          )}
+            {activeTab === 'tutor' && (
+              <AITutor
+                initialTopic={targetTopic}
+                gaps={gaps}
+                syllabus={syllabus}
+                onNavigate={handleNavigate}
+              />
+            )}
 
           {activeTab === 'tests' && (
             <PersonalizedTests
@@ -919,6 +921,7 @@ export function App() {
           )}
         </main>
       </div>
+      )}
 
       {/* Daily Workload Modal */}
       <DailyWorkloadModal

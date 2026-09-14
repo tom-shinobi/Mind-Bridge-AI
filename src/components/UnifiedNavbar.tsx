@@ -25,8 +25,7 @@ import {
   X,
   Users,
   CalendarDays,
-  BookMarked,
-  MessageCircle
+  BookMarked
 } from 'lucide-react';
 import type { StudentProfile, LearningGap, AISettings } from '../types';
 import { THEME_CONFIGS } from '../types';
@@ -101,20 +100,20 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       gradient: 'from-blue-500/30 to-indigo-500/20'
     },
     {
-      id: 'tutor',
-      label: 'AI Tutor',
-      shortLabel: 'Tutor',
-      description: 'Socratic Concept Deep-Dive',
-      icon: Bot,
-      gradient: 'from-purple-500/30 to-pink-500/20'
+      id: 'chat',
+      label: 'Horizon AI',
+      shortLabel: 'Horizon',
+      description: 'Fullscreen Multimodal Chat & Vision',
+      icon: Sparkles,
+      gradient: 'from-blue-500/30 to-cyan-500/20'
     },
     {
-      id: 'chat',
-      label: 'AI Chat',
-      shortLabel: 'iMessage',
-      description: 'iMessage Dialogue & Vision',
-      icon: MessageCircle,
-      gradient: 'from-blue-500/30 to-cyan-500/20'
+      id: 'tutor',
+      label: 'Socratic Room',
+      shortLabel: 'Tutor',
+      description: 'Guided Concept Checks & Retention',
+      icon: Bot,
+      gradient: 'from-purple-500/30 to-pink-500/20'
     },
     {
       id: 'tests',
@@ -611,18 +610,18 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
             <span className="text-[9px] mt-0.5 tracking-tight font-medium">Home</span>
           </button>
 
-          {/* 2. AI Tutor */}
+          {/* 2. Horizon AI */}
           <button
             type="button"
-            onClick={() => handleSelectTab('tutor')}
+            onClick={() => handleSelectTab('chat')}
             className={`flex flex-col items-center justify-center min-h-[46px] min-w-[46px] py-1 px-3 rounded-2xl transition-all touch-press active:scale-95 ${
-              activeTab === 'tutor'
-                ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(168,85,247,0.25)] font-bold'
+              activeTab === 'chat'
+                ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(56,189,248,0.25)] font-bold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Bot className={`w-4 h-4 ${activeTab === 'tutor' ? 'text-purple-300 drop-shadow-[0_0_8px_#C084FC]' : ''}`} />
-            <span className="text-[9px] mt-0.5 tracking-tight font-medium">Tutor</span>
+            <Sparkles className={`w-4 h-4 ${activeTab === 'chat' ? 'text-cyan-300 drop-shadow-[0_0_8px_#38BDF8]' : ''}`} />
+            <span className="text-[9px] mt-0.5 tracking-tight font-medium">Horizon</span>
           </button>
 
           {/* 3. Tests */}
