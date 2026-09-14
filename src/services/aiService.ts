@@ -1,4 +1,4 @@
-import type { Test, TutorMessage } from '../types';
+import type { Test, TutorMessage, SyllabusTopic } from '../types';
 import { storageService, resolveEnvApiKey, isGoogleApiKey } from './storageService';
 import { calendarService } from './calendarService';
 import { noteService } from './noteService';
@@ -12,6 +12,7 @@ export interface TutorResponse {
     explanation?: string;
   } | null;
   masteryDelta?: number; // e.g. +5% or +10%
+  addedTopics?: SyllabusTopic[];
 }
 
 export interface ApiStatus {
@@ -109,6 +110,68 @@ export function parseConceptCheckBlock(rawText: string): { cleanText: string; co
   const cleanText = (rawText.slice(0, match.index) + rawText.slice(match.index! + match[0].length)).trim();
   const parsed = parseBlockContent(block);
   return { cleanText, conceptCheck: parsed };
+}
+
+export function parseAddTopicsBlock(rawText: string): { cleanText: string; addedTopics: SyllabusTopic[] | null } {
+  const match = rawText.match(/:::add-topics\s*([\s\S]*?):::/);
+  let block = '';
+  let cleanText = rawText;
+
+  if (match) {
+    block = match[1].trim();
+    cleanText = (rawText.slice(0, match.index) + rawText.slice(match.index! + match[0].length)).trim();
+  } else {
+    const partialMatch = rawText.match(/:::add-topics\s*([\s\S]*)$/);
+    if (partialMatch) {
+      block = partialMatch[1].trim();
+      cleanText = rawText.slice(0, partialMatch.index).trim();
+    }
+  }
+
+  if (!block) {
+    return { cleanText, addedTopics: null };
+  }
+
+  try {
+    let jsonStr = block;
+    if (jsonStr.startsWith('```json')) {
+      jsonStr = jsonStr.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (jsonStr.startsWith('```')) {
+      jsonStr = jsonStr.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    jsonStr = jsonStr.trim();
+
+    const parsed = JSON.parse(jsonStr);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      const topics: SyllabusTopic[] = parsed.map((item: any, idx: number) => ({
+        id: `topic-ai-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
+        subject: String(item.subject || 'General Study').trim(),
+        moduleName: String(item.moduleName || 'Module 1: Core Foundations').trim(),
+        topic: String(item.topic || item.name || 'Core Concept').trim(),
+        priority: (['high', 'medium', 'low'].includes(item.priority) ? item.priority : 'medium') as 'high' | 'medium' | 'low',
+        status: 'pending',
+        estimatedHours: typeof item.estimatedHours === 'number' ? item.estimatedHours : 4,
+        completedHours: 0,
+        masteryPercentage: 0,
+        isGapRemediation: false,
+        orderIndex: Date.now() + idx
+      }));
+      return { cleanText, addedTopics: topics };
+    }
+  } catch (err) {
+    console.warn('Failed to parse :::add-topics JSON block:', err, block);
+  }
+
+  return { cleanText, addedTopics: null };
+}
+
+export function cleanStreamingText(raw: string): string {
+  let clean = raw;
+  const aIdx = clean.indexOf(':::add-topics');
+  if (aIdx !== -1) clean = clean.slice(0, aIdx);
+  const cIdx = clean.indexOf(':::concept-check');
+  if (cIdx !== -1) clean = clean.slice(0, cIdx);
+  return clean.trim();
 }
 
 class AIService {
@@ -347,7 +410,24 @@ Explanation: [Concise rationale explaining why this is correct]
    - If the student asks a casual greeting, administrative question, or general query where testing is unnecessary, do not include the :::concept-check block.
 
 5. OUTPUT FORMAT:
-   - Provide your explanation and response directly in natural, beautiful Markdown. Do NOT wrap your whole response in JSON.`;
+   - Provide your explanation and response directly in natural, beautiful Markdown. Do NOT wrap your whole response in JSON.
+
+6. ADDING SUBJECTS AND TOPICS TO SYLLABUS:
+   - If the student shares subjects, courses, topics, or modules they are studying, or asks you to add them to their syllabus or modules (e.g. "I'm learning Data Structures: AVL Trees, Graphs", "Add Web Development with React and Node.js", "I didn't upload my syllabus, I have X, Y", "Add this topic to my modules"):
+   - Enthusiastically acknowledge that you have organized and configured these topics into their academic modules.
+   - At the very bottom of your response, output a machine-readable JSON block with this exact delimiter format:
+:::add-topics
+[
+  {
+    "subject": "Subject or Course Name",
+    "moduleName": "Module 1: Foundations",
+    "topic": "Topic Name",
+    "priority": "high",
+    "estimatedHours": 4
+  }
+]
+:::
+   - Always provide valid JSON inside the block with realistic module names and realistic estimated hours (2-6 hours).`;
 
         const isGoogleGemini = isGoogleApiKey(apiKey) || activeModel.includes('gemini');
         let fullRawText = '';
@@ -468,8 +548,7 @@ Explanation: [Concise rationale explaining why this is correct]
                       const part = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
                       if (part) {
                         fullRawText += part;
-                        const dIdx = fullRawText.indexOf(':::concept-check');
-                        const clean = dIdx !== -1 ? fullRawText.slice(0, dIdx).trim() : fullRawText;
+                        const clean = cleanStreamingText(fullRawText);
                         onChunk(part, clean);
                       }
                     } catch {}
@@ -492,8 +571,7 @@ Explanation: [Concise rationale explaining why this is correct]
                     const part = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
                     if (part) {
                       fullRawText += part;
-                      const dIdx = fullRawText.indexOf(':::concept-check');
-                      const clean = dIdx !== -1 ? fullRawText.slice(0, dIdx).trim() : fullRawText;
+                      const clean = cleanStreamingText(fullRawText);
                       onChunk(part, clean);
                     }
                   } catch {}
@@ -585,8 +663,7 @@ Explanation: [Concise rationale explaining why this is correct]
                     const part = parsed.choices?.[0]?.delta?.content || '';
                     if (part) {
                       fullRawText += part;
-                      const dIdx = fullRawText.indexOf(':::concept-check');
-                      const clean = dIdx !== -1 ? fullRawText.slice(0, dIdx).trim() : fullRawText;
+                      const clean = cleanStreamingText(fullRawText);
                       onChunk(part, clean);
                     }
                   } catch {}
@@ -624,12 +701,14 @@ Explanation: [Concise rationale explaining why this is correct]
         }
 
         if (fullRawText) {
-          const { cleanText, conceptCheck } = parseConceptCheckBlock(fullRawText);
+          const { cleanText: textAfterTopics, addedTopics } = parseAddTopicsBlock(fullRawText);
+          const { cleanText, conceptCheck } = parseConceptCheckBlock(textAfterTopics);
           onChunk('', cleanText);
           return {
             message: cleanText,
             conceptCheck,
-            masteryDelta: 5
+            masteryDelta: 5,
+            addedTopics: addedTopics || undefined
           };
         }
       } catch (err: unknown) {
@@ -899,6 +978,81 @@ Let's test your comprehension of this material with a quick Socratic check:`;
           explanation: 'Whether chemical bonds, binary compounds, or balanced trees, diagrams illustrate structured conservation and relational balance.'
         },
         masteryDelta: 5
+      };
+    }
+
+    // Dynamic Syllabus Topic & Subject Configuration Handler (Matches User Request)
+    const isAddingTopicsIntent =
+      (lowerUser.includes('add') || lowerUser.includes('learn') || lowerUser.includes('studying') || lowerUser.includes('have') || lowerUser.includes('taking') || lowerUser.includes('take') || lowerUser.includes('upload') || lowerUser.includes('configure') || lowerUser.includes('include')) &&
+      (lowerUser.includes('subject') || lowerUser.includes('topic') || lowerUser.includes('module') || lowerUser.includes('syllabus') || lowerUser.includes('chapter') || lowerUser.includes('course') || lowerUser.includes(':') || lowerUser.includes('didn\'t upload') || lowerUser.includes('did not upload'));
+
+    if (isAddingTopicsIntent) {
+      let detectedSubject = 'General Engineering';
+      let rawTopicsString = userMessage;
+
+      // Check if user provided a colon pattern (e.g. "Data Structures: Trees, Graphs, Sorting")
+      if (userMessage.includes(':')) {
+        const parts = userMessage.split(':');
+        const candidateSubj = parts[0]
+          .replace(/^(i have|i'm learning|i am learning|i study|i am studying|add|please add|configure|my subjects are|my topics are|subject|topics for)\s*/i, '')
+          .trim();
+        if (candidateSubj.length > 1 && candidateSubj.length < 40) {
+          detectedSubject = candidateSubj;
+        }
+        rawTopicsString = parts.slice(1).join(':');
+      } else {
+        // Look for "to <Subject>" or "in <Subject>"
+        const toMatch = userMessage.match(/(?:to|in|for)\s+(?:the\s+)?([A-Za-z0-9\s&+-]{3,30})(?:\s+module|\s+subject|\s+course|$)/i);
+        if (toMatch && toMatch[1]) {
+          detectedSubject = toMatch[1].trim();
+        } else if (topic && topic !== 'General Academic Advisor & Learning Gaps') {
+          detectedSubject = topic;
+        }
+      }
+
+      // Split raw topics string by commas, 'and', semicolons, or newlines
+      let parsedTopicNames = rawTopicsString
+        .replace(/(?:i have|i'm learning|i am learning|add|please add|topics?|subjects?|modules?|to|in|for|these|my|the)\s+/gi, ' ')
+        .split(/[,;\n]+|\band\b/i)
+        .map((t) => t.trim().replace(/^[-•*]\s*/, ''))
+        .filter((t) => t.length > 2 && !/^(and|the|for|with|also|have|subject|module|topics)$/i.test(t));
+
+      // Fallback if parsing resulted in too few items
+      if (parsedTopicNames.length === 0) {
+        parsedTopicNames = [rawTopicsString.trim().slice(0, 50) || 'Core Concepts'];
+      }
+
+      const generatedTopics: SyllabusTopic[] = parsedTopicNames.map((topName, idx) => ({
+        id: `topic-ai-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
+        subject: detectedSubject,
+        moduleName: `Module ${Math.floor(idx / 3) + 1}: ${detectedSubject} Topics`,
+        topic: topName,
+        priority: idx === 0 ? 'high' : 'medium',
+        status: 'pending',
+        estimatedHours: 4,
+        completedHours: 0,
+        masteryPercentage: 0,
+        isGapRemediation: false,
+        orderIndex: Date.now() + idx
+      }));
+
+      const listMarkdown = generatedTopics
+        .map((t) => `• **${t.topic}** → Assigned to *${t.moduleName}* (~${t.estimatedHours} hrs study target)`)
+        .join('\n');
+
+      const msg = `Awesome, ${profile.name}! 🚀 I've configured and added **${generatedTopics.length} new topics** under **${detectedSubject}** directly into your syllabus modules:
+
+${listMarkdown}
+
+These topics are now configured into your personalized curriculum, daily adaptive timetable, and diagnostic knowledge map. Would you like a conceptual breakdown or intuition check on **${generatedTopics[0].topic}** right now?`;
+
+      this.speak(`I've configured and added ${generatedTopics.length} topics under ${detectedSubject} into your modules!`);
+
+      return {
+        message: msg,
+        conceptCheck: null,
+        masteryDelta: 5,
+        addedTopics: generatedTopics
       };
     }
 

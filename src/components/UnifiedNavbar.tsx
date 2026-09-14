@@ -598,13 +598,13 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
       <div className={`fixed bottom-[max(0.75rem,env(safe-area-inset-bottom,0px))] inset-x-3 z-40 max-w-md mx-auto md:hidden pointer-events-auto ${
         activeTab === 'chat' ? 'hidden' : ''
       }`}>
-        <nav className="px-2 py-1 flex items-center justify-around select-none transition-all apple-liquid-glass rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/20 backdrop-blur-3xl bg-black/85">
+        <nav className="grid grid-cols-5 items-center w-full px-1.5 py-1.5 select-none transition-all apple-liquid-glass rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/20 backdrop-blur-3xl bg-black/90">
           
           {/* 1. Dashboard */}
           <button
             type="button"
             onClick={() => handleSelectTab('dashboard')}
-            className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] py-1 px-2.5 rounded-2xl transition-all touch-press active:scale-95 ${
+            className={`w-full flex flex-col items-center justify-center min-h-[44px] py-1 rounded-2xl transition-all touch-press active:scale-95 ${
               activeTab === 'dashboard'
                 ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(56,189,248,0.25)] font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -618,7 +618,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
           <button
             type="button"
             onClick={() => handleSelectTab('chat')}
-            className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] py-1 px-2.5 rounded-2xl transition-all touch-press active:scale-95 ${
+            className={`w-full flex flex-col items-center justify-center min-h-[44px] py-1 rounded-2xl transition-all touch-press active:scale-95 ${
               activeTab === 'chat'
                 ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(56,189,248,0.25)] font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -629,7 +629,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
           </button>
 
           {/* 3. Center Elevated Floating Star Action Button (Study Motivation & Fuel) */}
-          <div className="relative -top-2 flex flex-col items-center justify-center">
+          <div className="w-full flex flex-col items-center justify-center -mt-3.5 mb-0.5">
             <button
               type="button"
               onClick={() => {
@@ -641,14 +641,14 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
             >
               <Flame className="w-5 h-5 fill-current animate-pulse" />
             </button>
-            <span className="text-[8px] mt-0.5 text-[#E2F952] font-mono font-bold tracking-tight">FUEL</span>
+            <span className="text-[8px] mt-0.5 text-[#E2F952] font-mono font-bold tracking-tight leading-none">FUEL</span>
           </div>
 
           {/* 4. Notes & Library */}
           <button
             type="button"
             onClick={() => handleSelectTab('dreamnotes')}
-            className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] py-1 px-2.5 rounded-2xl transition-all touch-press active:scale-95 ${
+            className={`w-full flex flex-col items-center justify-center min-h-[44px] py-1 rounded-2xl transition-all touch-press active:scale-95 ${
               activeTab === 'dreamnotes' || activeTab === 'syllabus'
                 ? 'text-white bg-white/[0.18] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_0_14px_rgba(244,114,182,0.25)] font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -665,7 +665,7 @@ export const UnifiedNavbar: React.FC<UnifiedNavbarProps> = ({
               sound.playClick();
               setIsDrawerOpen(true);
             }}
-            className="relative flex flex-col items-center justify-center min-h-[44px] min-w-[44px] py-1 px-2.5 rounded-2xl text-slate-400 hover:text-white transition-all cursor-pointer touch-press active:scale-95"
+            className="w-full relative flex flex-col items-center justify-center min-h-[44px] py-1 rounded-2xl text-slate-400 hover:text-white transition-all cursor-pointer touch-press active:scale-95"
           >
             <div className="relative">
               <LayoutGrid className="w-4 h-4 text-slate-300" />

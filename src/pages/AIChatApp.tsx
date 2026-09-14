@@ -37,6 +37,7 @@ interface AIChatAppProps {
   syllabus: SyllabusTopic[];
   profile?: StudentProfile;
   onNavigate: (tab: string, extra?: { topic?: string }) => void;
+  onAddSyllabusTopics?: (topics: SyllabusTopic[]) => void;
 }
 
 // Sample educational diagrams for quick multimodal vision testing (matches reference Image 2)
@@ -60,7 +61,8 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
   gaps,
   syllabus,
   profile = storageService.getProfile(),
-  onNavigate
+  onNavigate,
+  onAddSyllabusTopics
 }) => {
   // Topic selection
   const defaultTopic =
@@ -312,11 +314,24 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
             ? {
                 ...m,
                 text: response.message,
-                conceptCheck: response.conceptCheck || undefined
+                conceptCheck: response.conceptCheck || undefined,
+                addedTopics: response.addedTopics || undefined
               }
             : m
         )
       );
+
+      // If AI configured and added new syllabus topics, propagate to global state & storage
+      if (response.addedTopics && response.addedTopics.length > 0) {
+        onAddSyllabusTopics?.(response.addedTopics);
+        const existingSyllabus = storageService.getSyllabus();
+        const combined = [...existingSyllabus, ...response.addedTopics];
+        storageService.saveSyllabus(combined);
+        if (response.addedTopics[0]?.topic) {
+          setSelectedTopic(response.addedTopics[0].topic);
+        }
+      }
+
       sound.playSuccess();
 
       // Read out aloud if voice mode is enabled
@@ -786,6 +801,63 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
                             <FormattedContent inline content={msg.conceptCheck.explanation} className="text-[11px]" />
                           </div>
                         )}
+                      </div>
+                    )}
+
+                    {/* Interactive Syllabus Modules Added Card */}
+                    {msg.addedTopics && msg.addedTopics.length > 0 && (
+                      <div className="mt-3 p-3.5 rounded-2xl bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-cyan-500/20 border border-emerald-500/35 space-y-2.5 shadow-lg animate-fade-in text-white">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-xl bg-emerald-500/30 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shadow-sm">
+                              <Sparkles className="w-3.5 h-3.5" />
+                            </div>
+                            <div>
+                              <span className="text-xs font-bold text-emerald-200 block">
+                                Configured into Syllabus Modules
+                              </span>
+                              <span className="text-[10px] text-slate-300 font-mono">
+                                {msg.addedTopics.length} topic{msg.addedTopics.length > 1 ? 's' : ''} added across your curriculum
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            Live Sync ✓
+                          </span>
+                        </div>
+
+                        <div className="space-y-1.5 pt-1">
+                          {msg.addedTopics.map((top, tIdx) => (
+                            <div
+                              key={tIdx}
+                              className="p-2 rounded-xl bg-black/30 border border-white/10 flex items-center justify-between gap-2"
+                            >
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold text-white truncate">{top.topic}</p>
+                                <p className="text-[10px] text-slate-300 font-mono truncate">
+                                  {top.subject} • {top.moduleName}
+                                </p>
+                              </div>
+                              <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30 flex-shrink-0">
+                                ~{top.estimatedHours}h
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="pt-1 flex items-center justify-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              sound.playClick();
+                              onNavigate('syllabus');
+                            }}
+                            className="text-xs font-semibold text-cyan-300 hover:text-white flex items-center gap-1.5 transition-colors py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 cursor-pointer touch-manipulation active:scale-95"
+                          >
+                            <span>Open in Syllabus</span>
+                            <ArrowUp className="w-3.5 h-3.5 rotate-45" />
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

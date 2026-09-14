@@ -16,7 +16,7 @@ export interface MemorySummary {
 
 export interface OnboardingAnswers {
   name: string;
-  educationLevel?: 'school' | 'college';
+  educationLevel?: 'school' | 'college' | 'diploma';
   board?: string;
   grade?: string;
   college: string;
@@ -60,7 +60,7 @@ export interface StudentProfile {
   id: string;
   name: string;
   email: string;
-  educationLevel?: 'school' | 'college';
+  educationLevel?: 'school' | 'college' | 'diploma';
   board?: string;
   grade?: string;
   degree: string;
@@ -205,6 +205,7 @@ export interface TutorMessage {
     isCorrect?: boolean;
     explanation?: string;
   };
+  addedTopics?: SyllabusTopic[];
 }
 
 export interface DailyCheckIn {

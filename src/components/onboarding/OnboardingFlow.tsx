@@ -23,7 +23,8 @@ import {
   User,
   Activity,
   ShieldCheck,
-  Loader2
+  Loader2,
+  Wrench
 } from 'lucide-react';
 import { sound } from '../../services/soundService';
 import { supabaseDataService } from '../../services/supabaseDataService';
@@ -47,6 +48,15 @@ const COMMON_COLLEGES = [
   { name: 'Carnegie Mellon University (CMU)', emoji: '🤖', tag: 'Pittsburgh, PA' },
   { name: 'University of Washington', emoji: '🌊', tag: 'Seattle, WA' },
   { name: 'Anna University', emoji: '📚', tag: 'Chennai, India' }
+];
+
+export const COMMON_POLYTECHNICS = [
+  { name: 'Government Polytechnic College', emoji: '🏛️', tag: 'State Board of Tech Ed' },
+  { name: 'PSG Polytechnic College', emoji: '⚡', tag: 'Coimbatore, India' },
+  { name: 'Cusrow Wadia Institute of Technology', emoji: '🔬', tag: 'Pune, India' },
+  { name: 'Pusa Institute of Technology', emoji: '📐', tag: 'New Delhi, India' },
+  { name: 'NTTF (Technical Training Foundation)', emoji: '🤖', tag: 'Precision & Tech' },
+  { name: 'Veermata Jijabai Polytechnic / VJTI', emoji: '🎓', tag: 'Mumbai, India' }
 ];
 
 export const SCHOOL_BOARDS = [
@@ -103,6 +113,55 @@ export const SCHOOL_TERMS = [
   { term: 2, label: 'Term 2 / Pre-Boards', period: 'Second Half', desc: 'Mock tests, full-syllabus preparation & revision drills' },
   { term: 3, label: 'Annual / Board Finals', period: 'Final Sprint', desc: 'Final comprehensive examinations and milestone assessment' },
   { term: 4, label: 'Periodic / Monthly Test', period: 'Ongoing', desc: 'Weekly & monthly internal chapter mastery assessments' }
+];
+
+export const DIPLOMA_COURSES = [
+  { name: 'Diploma in Computer Engineering / IT', code: 'DCSE', icon: Code2, desc: 'C, C++, Data Structures, Web Systems & Hardware Interfacing' },
+  { name: 'Diploma in Mechanical Engineering', code: 'DME', icon: Wrench, desc: 'Thermodynamics, Strength of Materials, CAD/CAM & Fluid Power' },
+  { name: 'Diploma in Electrical & Electronics Engineering', code: 'DEEE', icon: Zap, desc: 'Electrical Machines, Power Systems, Circuits & Solar Tech' },
+  { name: 'Diploma in Electronics & Communication', code: 'DECE', icon: Cpu, desc: 'Microcontrollers (8051/ARM), Digital Logic & Signals' },
+  { name: 'Diploma in Civil Engineering', code: 'DCE', icon: Layers, desc: 'Surveying, Structural Design, Concrete Tech & Mechanics' },
+  { name: 'Diploma in Automobile / Mechatronics', code: 'DMT', icon: Activity, desc: 'Robotics, PLC Automation, Hydraulics & Sensor Networks' }
+];
+
+export const DIPLOMA_SPECIALIZATIONS = [
+  { name: 'Industrial Automation & Robotics', icon: Cpu, badge: 'High Demand', desc: 'PLCs, SCADA, sensor integration & industrial control' },
+  { name: 'Embedded Systems & IoT Interfacing', icon: Layers, badge: 'Tech Core', desc: '8051, Arduino, microcontrollers & hardware-level coding' },
+  { name: 'Full-Stack Web & Python Development', icon: Code2, badge: 'Software', desc: 'Web design, Python scripting, databases & APIs' },
+  { name: 'CAD/CAM & Precision Manufacturing', icon: BookOpen, badge: 'Industry 4.0', desc: 'AutoCAD, SolidWorks, CNC machining & 3D prototyping' },
+  { name: 'Power Distribution & Renewable Systems', icon: Zap, badge: 'Core Energy', desc: 'Transformers, switchgear, solar PV & sub-station design' },
+  { name: 'Network Administration & PC Maintenance', icon: Activity, badge: 'Hardware/IT', desc: 'LAN configuration, routing, OS installation & troubleshooting' }
+];
+
+export const DIPLOMA_SEMESTERS = [
+  { sem: 1, roman: 'I', year: '1st Year', term: 'Year 1' },
+  { sem: 2, roman: 'II', year: '1st Year', term: 'Year 1' },
+  { sem: 3, roman: 'III', year: '2nd Year', term: 'Year 2' },
+  { sem: 4, roman: 'IV', year: '2nd Year', term: 'Year 2' },
+  { sem: 5, roman: 'V', year: '3rd Year', term: 'Year 3' },
+  { sem: 6, roman: 'VI', year: '3rd Year', term: 'Year 3' }
+];
+
+export const DIPLOMA_SUBJECTS = [
+  { name: 'Applied Mathematics', icon: '📐', category: 'Math' },
+  { name: 'Applied Science (Physics & Chem)', icon: '⚡', category: 'Science' },
+  { name: 'Programming in C & C++', icon: '💻', category: 'Tech' },
+  { name: 'Digital Electronics & Microprocessors', icon: '🔌', category: 'Electronics' },
+  { name: 'Engineering Graphics & CAD', icon: '📏', category: 'Design' },
+  { name: 'Electrical Circuits & Machines', icon: '⚙️', category: 'Electrical' },
+  { name: 'Fluid Mechanics & Thermodynamics', icon: '🌊', category: 'Mechanical' },
+  { name: 'Data Structures & DBMS', icon: '🗄️', category: 'Tech' }
+];
+
+export const DIPLOMA_DIFFICULT_TOPICS = [
+  { name: 'Laplace Transforms & Differential Equations', category: 'Math', tag: 'Formula Heavy' },
+  { name: '8051 Microcontroller Architecture & Pinout', category: 'Electronics', tag: 'Hardware Invariants' },
+  { name: 'Boolean Algebra & Karnaugh Maps (K-Maps)', category: 'Digital Logic', tag: 'Logic Minimization' },
+  { name: 'Strength of Materials & Bending Moment Diagrams', category: 'Mechanics', tag: 'Shear & Moment' },
+  { name: 'Three-Phase AC Circuits & Transformer Tests', category: 'Electrical', tag: 'Phasor Diagrams' },
+  { name: 'Pointer Arithmetic & Dynamic Memory in C', category: 'Programming', tag: 'Memory & Arrays' },
+  { name: 'Carnot Cycle & Second Law of Thermodynamics', category: 'Thermal', tag: 'Entropy & Work' },
+  { name: 'Relational Database Normalization & SQL Queries', category: 'DBMS', tag: 'Schema Rules' }
 ];
 
 const COURSES = [
@@ -250,17 +309,22 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       // Completed onboarding!
       setIsSaving(true);
       const isSchool = answers.educationLevel === 'school';
+      const isDiploma = answers.educationLevel === 'diploma';
       const memorySummary: MemorySummary = {
         learningStyle: answers.explanationStyle,
         currentFocus: answers.difficultTopics[0] || `${answers.subjects[0] || 'Core Modules'} Diagnostics`,
         academicGoal: isSchool
           ? `Target ${answers.targetCgpa.toFixed(0)}% in ${answers.grade || 'School'} (${answers.board || 'CBSE'} Board)`
+          : isDiploma
+          ? `Target ${answers.targetCgpa.toFixed(0)}% in ${answers.course} (Semester ${answers.semester})`
           : `Target ${answers.targetCgpa.toFixed(2)} CGPA in ${answers.course} (Semester ${answers.semester})`,
         studyPreferences: `${answers.dailyStudyHours} hrs daily, preferring ${answers.preferredStudyTime}`,
         difficultTopics: answers.difficultTopics,
         strengths: answers.subjects.filter((s) => !answers.difficultTopics.includes(s)),
         notes: isSchool
           ? `School Student in ${answers.grade || 'Grade 10'} under ${answers.board || 'CBSE'} Board focusing on ${answers.specialization}.`
+          : isDiploma
+          ? `Diploma Student at ${answers.college || 'Polytechnic Institute'} pursuing ${answers.course} (Semester ${answers.semester}) with focus in ${answers.specialization}.`
           : `Student at ${answers.college || 'University'} pursuing ${answers.specialization}.`,
         lastUpdated: new Date().toISOString().slice(0, 10)
       };
@@ -327,9 +391,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   // Phase categorization
   const getPhaseInfo = () => {
     const isSchool = answers.educationLevel === 'school';
-    if (currentStep <= 2) return { number: '1/5', name: isSchool ? 'Student & Education Level' : 'Student Persona & Campus', icon: User, color: 'text-amber-400 border-amber-500/30 bg-amber-500/10' };
-    if (currentStep <= 5) return { number: '2/5', name: isSchool ? 'Board, Grade & Stream' : 'Degree & Specialization', icon: GraduationCap, color: 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10' };
-    if (currentStep <= 8) return { number: '3/5', name: isSchool ? 'Scores, Targets & Subjects' : 'Semester & CGPA Goals', icon: Award, color: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' };
+    const isDiploma = answers.educationLevel === 'diploma';
+    if (currentStep <= 2) return { number: '1/5', name: isSchool ? 'Student & Education Level' : isDiploma ? 'Student & Polytechnic Level' : 'Student Persona & Campus', icon: User, color: 'text-amber-400 border-amber-500/30 bg-amber-500/10' };
+    if (currentStep <= 5) return { number: '2/5', name: isSchool ? 'Board, Grade & Stream' : isDiploma ? 'Institute, Branch & Specialization' : 'Degree & Specialization', icon: GraduationCap, color: 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10' };
+    if (currentStep <= 8) return { number: '3/5', name: isSchool ? 'Scores, Targets & Subjects' : isDiploma ? 'Semester, Marks & Subjects' : 'Semester & CGPA Goals', icon: Award, color: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' };
     if (currentStep <= 10) return { number: '4/5', name: 'Study Habit & Pacing', icon: Brain, color: 'text-rose-400 border-rose-500/30 bg-rose-500/10' };
     return { number: '5/5', name: 'Friction Areas & Pedagogy', icon: Sparkles, color: 'text-purple-400 border-purple-500/30 bg-purple-500/10' };
   };
@@ -338,8 +403,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
   // CGPA / Marks Tier evaluator
   const getCgpaBadge = (val: number) => {
-    const isSchool = answers.educationLevel === 'school';
-    if (isSchool) {
+    const isPercentage = answers.educationLevel === 'school' || answers.educationLevel === 'diploma';
+    if (isPercentage) {
       if (val >= 90) return { label: '🌟 Distinction (90%+)', color: 'text-amber-300 bg-amber-500/15 border-amber-500/30' };
       if (val >= 80) return { label: '🚀 First Class (80%+)', color: 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30' };
       if (val >= 70) return { label: '📈 Solid Baseline (70%+)', color: 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30' };
@@ -475,6 +540,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
                   {answers.educationLevel === 'school'
                     ? 'Which school education board are you studying under?'
+                    : answers.educationLevel === 'diploma'
+                    ? 'What polytechnic or technical institute do you attend?'
                     : 'What university or college do you study at?'}
                 </h3>
               )}
@@ -482,6 +549,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
                   {answers.educationLevel === 'school'
                     ? 'Which grade or standard are you in?'
+                    : answers.educationLevel === 'diploma'
+                    ? 'What diploma engineering branch are you pursuing?'
                     : 'What degree or academic program are you pursuing?'}
                 </h3>
               )}
@@ -489,6 +558,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
                   {answers.educationLevel === 'school'
                     ? 'What is your primary academic stream or focus?'
+                    : answers.educationLevel === 'diploma'
+                    ? 'What is your primary technical specialization or lab focus?'
                     : 'What is your primary academic specialization?'}
                 </h3>
               )}
@@ -501,14 +572,14 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               )}
               {currentStep === 7 && (
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  {answers.educationLevel === 'school'
+                  {answers.educationLevel === 'school' || answers.educationLevel === 'diploma'
                     ? 'What is your current overall marks percentage?'
                     : 'What is your current cumulative CGPA?'}
                 </h3>
               )}
               {currentStep === 8 && (
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  {answers.educationLevel === 'school'
+                  {answers.educationLevel === 'school' || answers.educationLevel === 'diploma'
                     ? 'What is your target percentage or exam goal?'
                     : 'What is your target CGPA this semester?'}
                 </h3>
@@ -517,6 +588,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
                   {answers.educationLevel === 'school'
                     ? 'What school subjects are you taking right now?'
+                    : answers.educationLevel === 'diploma'
+                    ? 'What diploma subjects / labs are you taking right now?'
                     : 'What subjects are you taking right now?'}
                 </h3>
               )}
@@ -577,7 +650,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             {/* Step 2: Education Level */}
             {currentStep === 2 && (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                   {/* Option A: School */}
                   <div
                     onClick={() => {
@@ -593,7 +666,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                         targetCgpa: prev.targetCgpa <= 10 ? 92 : prev.targetCgpa
                       }));
                     }}
-                    className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-4 ${
+                    className={`p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-4 ${
                       answers.educationLevel === 'school'
                         ? 'bg-gradient-to-br from-amber-500/25 via-pink-600/20 to-purple-900/30 border-amber-400 text-white shadow-[0_0_25px_rgba(245,158,11,0.3)]'
                         : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/25 hover:bg-white/[0.08]'
@@ -607,18 +680,60 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h4 className="text-base font-bold text-white">School Student (K-12)</h4>
+                        <h4 className="text-base font-bold text-white">School Student</h4>
                         <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
                           Grades 6–12
                         </span>
                       </div>
                       <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                        Personalized for school boards (CBSE, ICSE, State Boards, IB, Cambridge). We never ask for your school's name or location!
+                        Personalized for school boards (CBSE, ICSE, State Boards, IB, Cambridge). Zero school location tracking!
                       </p>
                     </div>
                   </div>
 
-                  {/* Option B: College */}
+                  {/* Option B: Polytechnic / Diploma */}
+                  <div
+                    onClick={() => {
+                      sound.playClick();
+                      setAnswers((prev) => ({
+                        ...prev,
+                        educationLevel: 'diploma',
+                        college: prev.college || '',
+                        course: DIPLOMA_COURSES[0].name,
+                        specialization: DIPLOMA_SPECIALIZATIONS[0].name,
+                        semester: 3,
+                        subjects: prev.educationLevel === 'diploma' && prev.subjects?.length ? prev.subjects : DIPLOMA_SUBJECTS.slice(0, 4).map(s => s.name),
+                        difficultTopics: prev.educationLevel === 'diploma' && prev.difficultTopics?.length ? prev.difficultTopics : [DIPLOMA_DIFFICULT_TOPICS[0].name],
+                        cgpa: prev.cgpa <= 10 ? 78 : prev.cgpa,
+                        targetCgpa: prev.targetCgpa <= 10 ? 88 : prev.targetCgpa
+                      }));
+                    }}
+                    className={`p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-4 ${
+                      answers.educationLevel === 'diploma'
+                        ? 'bg-gradient-to-br from-emerald-500/25 via-teal-600/20 to-cyan-900/30 border-emerald-400 text-white shadow-[0_0_25px_rgba(16,185,129,0.3)]'
+                        : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/25 hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-2xl">
+                        🛠️
+                      </div>
+                      {answers.educationLevel === 'diploma' && <Check className="w-5 h-5 text-emerald-300" />}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-base font-bold text-white">Polytechnic / Diploma</h4>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          3-Yr Diploma
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+                        Tailored for technical diploma programs (Computer, Mechanical, EEE, ECE, Civil, Mechatronics).
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Option C: College */}
                   <div
                     onClick={() => {
                       sound.playClick();
@@ -631,8 +746,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                         targetCgpa: prev.targetCgpa > 10 ? 9.0 : prev.targetCgpa
                       }));
                     }}
-                    className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-4 ${
-                      answers.educationLevel !== 'school'
+                    className={`p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-4 ${
+                      answers.educationLevel === 'college'
                         ? 'bg-gradient-to-br from-purple-600/30 via-pink-600/20 to-purple-900/30 border-purple-400 text-white shadow-[0_0_25px_rgba(168,85,247,0.3)]'
                         : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/25 hover:bg-white/[0.08]'
                     }`}
@@ -641,7 +756,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                       <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-2xl">
                         🎓
                       </div>
-                      {answers.educationLevel !== 'school' && <Check className="w-5 h-5 text-purple-300" />}
+                      {answers.educationLevel === 'college' && <Check className="w-5 h-5 text-purple-300" />}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -651,7 +766,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                         </span>
                       </div>
                       <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                        Tailored for undergraduate & postgraduate engineering, computing, sciences, and professional degree programs.
+                        Tailored for undergraduate & postgraduate engineering, computing, sciences, and degree programs.
                       </p>
                     </div>
                   </div>
@@ -659,7 +774,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               </div>
             )}
 
-            {/* Step 3: School Board (if school) vs College / University (if college) */}
+            {/* Step 3: School Board (if school) vs Polytechnic (if diploma) vs College / University (if college) */}
             {currentStep === 3 && (
               answers.educationLevel === 'school' ? (
                 <div className="space-y-4">
@@ -698,6 +813,63 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+              ) : answers.educationLevel === 'diploma' ? (
+                <div className="space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
+                      <Wrench className="w-5 h-5" />
+                    </div>
+                    <input
+                      type="text"
+                      autoFocus
+                      value={answers.college}
+                      onChange={(e) => setAnswers({ ...answers, college: e.target.value })}
+                      onKeyDown={(e) => e.key === 'Enter' && answers.college.trim() && handleNext()}
+                      placeholder="Enter your polytechnic or technical institute name..."
+                      className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/[0.06] border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 text-base sm:text-sm font-medium shadow-inner transition-all backdrop-blur-md"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-mono text-slate-300 uppercase tracking-wider font-semibold">
+                        Popular Technical Institutes (Click to auto-select):
+                      </span>
+                      {answers.college && (
+                        <span className="text-[11px] font-mono text-emerald-300">Selected</span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {COMMON_POLYTECHNICS.map((c, i) => {
+                        const isSelected = answers.college === c.name;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => {
+                              sound.playClick();
+                              setAnswers({ ...answers, college: c.name });
+                            }}
+                            className={`text-left p-3 rounded-xl border transition-all flex items-center justify-between gap-2 ${
+                              isSelected
+                                ? 'bg-emerald-500/20 border-emerald-400 text-white shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                                : 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08] hover:border-white/20'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span className="text-base flex-shrink-0">{c.emoji}</span>
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold truncate">{c.name}</p>
+                                <p className="text-[10px] text-slate-400 font-mono truncate">{c.tag}</p>
+                              </div>
+                            </div>
+                            {isSelected && <Check className="w-4 h-4 text-emerald-300 flex-shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -760,7 +932,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               )
             )}
 
-            {/* Step 4: Grade (if school) vs Course / Degree (if college) */}
+            {/* Step 4: Grade (if school) vs Diploma Branch (if diploma) vs Course / Degree (if college) */}
             {currentStep === 4 && (
               answers.educationLevel === 'school' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
@@ -787,6 +959,43 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                           </div>
                         </div>
                         {isSelected && <Check className="w-4 h-4 text-amber-300 flex-shrink-0" />}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : answers.educationLevel === 'diploma' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {DIPLOMA_COURSES.map((c, i) => {
+                    const Icon = c.icon;
+                    const isSelected = answers.course === c.name;
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => {
+                          sound.playClick();
+                          setAnswers({ ...answers, course: c.name });
+                        }}
+                        className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-3 ${
+                          isSelected
+                            ? 'bg-gradient-to-br from-emerald-600/30 via-teal-600/20 to-cyan-900/30 border-emerald-400 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                            : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/25 hover:bg-white/[0.08]'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2.5">
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isSelected ? 'bg-emerald-500/30 text-emerald-200 border border-emerald-400/40' : 'bg-white/[0.08] text-slate-300'}`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/10 text-slate-300 border border-white/10">
+                              {c.code}
+                            </span>
+                          </div>
+                          {isSelected && <Check className="w-4 h-4 text-emerald-300" />}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">{c.name}</p>
+                          <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">{c.desc}</p>
+                        </div>
                       </div>
                     );
                   })}
@@ -831,7 +1040,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               )
             )}
 
-            {/* Step 5: Stream (if school) vs Specialization (if college) */}
+            {/* Step 5: Stream (if school) vs Specialization (if diploma / college) */}
             {currentStep === 5 && (
               answers.educationLevel === 'school' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -860,6 +1069,43 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                           <p className="text-[11px] text-slate-300 leading-snug">{s.desc}</p>
                         </div>
                         {isSelected && <Check className="w-4 h-4 text-amber-300 flex-shrink-0 mt-0.5" />}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : answers.educationLevel === 'diploma' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {DIPLOMA_SPECIALIZATIONS.map((s, i) => {
+                    const Icon = s.icon;
+                    const isSelected = answers.specialization === s.name;
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => {
+                          sound.playClick();
+                          setAnswers({ ...answers, specialization: s.name });
+                        }}
+                        className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-start justify-between gap-3 ${
+                          isSelected
+                            ? 'bg-emerald-600/25 border-emerald-400 text-white shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                            : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.08]'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${isSelected ? 'bg-emerald-500/30 text-emerald-200' : 'bg-white/[0.08] text-slate-300'}`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-white truncate">{s.name}</p>
+                              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex-shrink-0">
+                                {s.badge}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-300 mt-0.5 leading-snug">{s.desc}</p>
+                          </div>
+                        </div>
+                        {isSelected && <Check className="w-4 h-4 text-emerald-300 flex-shrink-0 mt-1" />}
                       </div>
                     );
                   })}
@@ -904,7 +1150,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               )
             )}
 
-            {/* Step 6: Term / Exam Cycle (if school) vs Semester (if college) */}
+            {/* Step 6: Term / Exam Cycle (if school) vs Semester (if diploma / college) */}
             {currentStep === 6 && (
               answers.educationLevel === 'school' ? (
                 <div className="space-y-4">
@@ -938,6 +1184,38 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   </div>
                   <p className="text-xs text-slate-300 text-center font-mono">
                     Active target: <span className="text-amber-300 font-bold">{SCHOOL_TERMS.find(t => t.term === answers.semester)?.label || 'Term 1'}</span>
+                  </p>
+                </div>
+              ) : answers.educationLevel === 'diploma' ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    {DIPLOMA_SEMESTERS.map((item) => {
+                      const isSelected = answers.semester === item.sem;
+                      return (
+                        <button
+                          key={item.sem}
+                          type="button"
+                          onClick={() => {
+                            sound.playClick();
+                            setAnswers({ ...answers, semester: item.sem });
+                          }}
+                          className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-gradient-to-b from-emerald-600/30 to-teal-600/30 border-emerald-400 text-white shadow-[0_0_20px_rgba(16,185,129,0.35)]'
+                              : 'bg-white/[0.04] border-white/10 text-slate-300 hover:border-white/25 hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-semibold">{item.year}</span>
+                          <span className="text-xl font-bold font-heading text-white">Sem {item.roman}</span>
+                          <span className="text-[10px] text-emerald-300 font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30">
+                            {item.term}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-slate-300 text-center font-mono">
+                    Currently selected: <span className="text-emerald-300 font-bold">Diploma Semester {answers.semester}</span>
                   </p>
                 </div>
               ) : (
@@ -975,21 +1253,31 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               )
             )}
 
-            {/* Step 7: Current % (if school) vs Current CGPA (if college) */}
+            {/* Step 7: Current % (if school / diploma) vs Current CGPA (if college) */}
             {currentStep === 7 && (
               <div className="space-y-5">
                 <div className="p-4 rounded-2xl bg-white/[0.05] border border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
                   <div>
                     <span className="text-xs font-mono text-slate-300 block">
-                      {answers.educationLevel === 'school' ? 'Current Overall Marks Percentage' : 'Current Cumulative CGPA'}
+                      {answers.educationLevel === 'school'
+                        ? 'Current Overall Marks Percentage'
+                        : answers.educationLevel === 'diploma'
+                        ? 'Current Diploma Aggregate Percentage'
+                        : 'Current Cumulative CGPA'}
                     </span>
                     <span className="text-[11px] text-slate-400">
-                      {answers.educationLevel === 'school' ? 'Based on your latest term or unit tests' : 'Measured on standard 10.0 scale'}
+                      {answers.educationLevel === 'school'
+                        ? 'Based on your latest term or unit tests'
+                        : answers.educationLevel === 'diploma'
+                        ? 'Based on polytechnic board exams & lab internals'
+                        : 'Measured on standard 10.0 scale'}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-bold font-mono text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-300">
-                      {answers.educationLevel === 'school' ? `${answers.cgpa.toFixed(0)}%` : answers.cgpa.toFixed(2)}
+                      {answers.educationLevel === 'school' || answers.educationLevel === 'diploma'
+                        ? `${answers.cgpa.toFixed(0)}%`
+                        : answers.cgpa.toFixed(2)}
                     </span>
                     <span className={`text-[10px] font-mono px-2.5 py-1 rounded-xl border ${getCgpaBadge(answers.cgpa).color}`}>
                       {getCgpaBadge(answers.cgpa).label}
@@ -1000,15 +1288,15 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <div className="space-y-2">
                   <input
                     type="range"
-                    min={answers.educationLevel === 'school' ? "40" : "4.0"}
-                    max={answers.educationLevel === 'school' ? "100" : "10.0"}
-                    step={answers.educationLevel === 'school' ? "1" : "0.05"}
+                    min={answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? "40" : "4.0"}
+                    max={answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? "100" : "10.0"}
+                    step={answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? "1" : "0.05"}
                     value={answers.cgpa}
                     onChange={(e) => setAnswers({ ...answers, cgpa: parseFloat(e.target.value) })}
                     className="w-full accent-pink-500 cursor-pointer h-2 bg-white/10 rounded-lg"
                   />
                   <div className="flex justify-between text-[11px] font-mono text-slate-400">
-                    {answers.educationLevel === 'school' ? (
+                    {answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? (
                       <>
                         <span>40%</span>
                         <span>60%</span>
@@ -1029,7 +1317,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 {/* Quick Presets */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[10px] font-mono text-slate-400 uppercase">Quick Jump:</span>
-                  {(answers.educationLevel === 'school' ? [65, 75, 80, 85, 90, 95] : [7.0, 7.5, 8.0, 8.5, 9.0, 9.5]).map((val) => (
+                  {(answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? [65, 75, 80, 85, 90, 95] : [7.0, 7.5, 8.0, 8.5, 9.0, 9.5]).map((val) => (
                     <button
                       key={val}
                       type="button"
@@ -1040,31 +1328,39 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                           : 'bg-white/[0.04] border-white/10 text-slate-400 hover:text-white'
                       }`}
                     >
-                      {answers.educationLevel === 'school' ? `${val}%` : val.toFixed(2)}
+                      {answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? `${val}%` : val.toFixed(2)}
                     </button>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Step 8: Target % (if school) vs Target CGPA (if college) */}
+            {/* Step 8: Target % (if school / diploma) vs Target CGPA (if college) */}
             {currentStep === 8 && (
               <div className="space-y-5">
                 <div className="p-4 rounded-2xl bg-white/[0.05] border border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
                   <div>
                     <span className="text-xs font-mono text-slate-300 block">
-                      {answers.educationLevel === 'school' ? 'Target Percentage Goal' : 'Target CGPA Goal'}
+                      {answers.educationLevel === 'school' || answers.educationLevel === 'diploma'
+                        ? 'Target Percentage Goal'
+                        : 'Target CGPA Goal'}
                     </span>
                     <span className="text-[11px] text-slate-400">
-                      {answers.educationLevel === 'school' ? `Target for ${answers.grade || 'this year'}` : `Target for Semester ${answers.semester}`}
+                      {answers.educationLevel === 'school'
+                        ? `Target for ${answers.grade || 'this year'}`
+                        : `Target for Semester ${answers.semester}`}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-bold font-mono text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.4)]">
-                      {answers.educationLevel === 'school' ? `${answers.targetCgpa.toFixed(0)}%` : answers.targetCgpa.toFixed(2)}
+                      {answers.educationLevel === 'school' || answers.educationLevel === 'diploma'
+                        ? `${answers.targetCgpa.toFixed(0)}%`
+                        : answers.targetCgpa.toFixed(2)}
                     </span>
                     <span className="text-[10px] font-mono px-2.5 py-1 rounded-xl border bg-emerald-500/15 border-emerald-500/30 text-emerald-300">
-                      {cgpaDelta >= 0 ? `+${cgpaDelta.toFixed(answers.educationLevel === 'school' ? 0 : 2)}${answers.educationLevel === 'school' ? '%' : ''} Delta Elevation` : 'Baseline'}
+                      {cgpaDelta >= 0
+                        ? `+${cgpaDelta.toFixed(answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? 0 : 2)}${answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? '%' : ''} Delta Elevation`
+                        : 'Baseline'}
                     </span>
                   </div>
                 </div>
@@ -1072,15 +1368,15 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <div className="space-y-2">
                   <input
                     type="range"
-                    min={answers.educationLevel === 'school' ? "50" : "6.0"}
-                    max={answers.educationLevel === 'school' ? "100" : "10.0"}
-                    step={answers.educationLevel === 'school' ? "1" : "0.05"}
+                    min={answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? "50" : "6.0"}
+                    max={answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? "100" : "10.0"}
+                    step={answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? "1" : "0.05"}
                     value={answers.targetCgpa}
                     onChange={(e) => setAnswers({ ...answers, targetCgpa: parseFloat(e.target.value) })}
                     className="w-full accent-emerald-500 cursor-pointer h-2 bg-white/10 rounded-lg"
                   />
                   <div className="flex justify-between text-[11px] font-mono text-slate-400">
-                    {answers.educationLevel === 'school' ? (
+                    {answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? (
                       <>
                         <span>50%</span>
                         <span>70%</span>
@@ -1101,7 +1397,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-3">
                   <Target className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-emerald-200/90 leading-relaxed">
-                    MindBridge calculates optimal timetable study blocks, spaced repetition intervals, and high-frequency diagnostic test schedules to bridge the gap between your current <span className="font-bold text-white">{answers.educationLevel === 'school' ? `${answers.cgpa.toFixed(0)}%` : answers.cgpa.toFixed(2)}</span> and target <span className="font-bold text-white">{answers.educationLevel === 'school' ? `${answers.targetCgpa.toFixed(0)}%` : answers.targetCgpa.toFixed(2)}</span>.
+                    MindBridge calculates optimal timetable study blocks, spaced repetition intervals, and practical lab revision schedules to bridge the gap between your current <span className="font-bold text-white">{answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? `${answers.cgpa.toFixed(0)}%` : answers.cgpa.toFixed(2)}</span> and target <span className="font-bold text-white">{answers.educationLevel === 'school' || answers.educationLevel === 'diploma' ? `${answers.targetCgpa.toFixed(0)}%` : answers.targetCgpa.toFixed(2)}</span>.
                   </p>
                 </div>
               </div>
@@ -1119,7 +1415,11 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {(answers.educationLevel === 'school' ? SCHOOL_SUBJECTS : COMMON_SUBJECTS).map((sub, i) => {
+                  {(answers.educationLevel === 'school'
+                    ? SCHOOL_SUBJECTS
+                    : answers.educationLevel === 'diploma'
+                    ? DIPLOMA_SUBJECTS
+                    : COMMON_SUBJECTS).map((sub, i) => {
                     const isSelected = answers.subjects.includes(sub.name);
                     return (
                       <button
@@ -1147,7 +1447,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     value={customSubjectInput}
                     onChange={(e) => setCustomSubjectInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addCustomSubject()}
-                    placeholder={answers.educationLevel === 'school' ? "Add any other school subject..." : "Add any other course or elective code..."}
+                    placeholder={
+                      answers.educationLevel === 'school'
+                        ? "Add any other school subject..."
+                        : answers.educationLevel === 'diploma'
+                        ? "Add any diploma subject or lab (e.g., Microcontrollers Lab, CAD)..."
+                        : "Add any other course or elective code..."
+                    }
                     className="flex-1 text-xs px-4 py-3 rounded-xl bg-white/[0.06] border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-purple-400"
                   />
                   <button
@@ -1264,7 +1570,11 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {(answers.educationLevel === 'school' ? SCHOOL_DIFFICULT_TOPICS : COMMON_DIFFICULT_TOPICS).map((topic, i) => {
+                  {(answers.educationLevel === 'school'
+                    ? SCHOOL_DIFFICULT_TOPICS
+                    : answers.educationLevel === 'diploma'
+                    ? DIPLOMA_DIFFICULT_TOPICS
+                    : COMMON_DIFFICULT_TOPICS).map((topic, i) => {
                     const isSelected = answers.difficultTopics.includes(topic.name);
                     return (
                       <button
@@ -1292,7 +1602,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     value={customDifficultInput}
                     onChange={(e) => setCustomDifficultInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addCustomDifficultTopic()}
-                    placeholder={answers.educationLevel === 'school' ? "Add any other difficult chapter, formula, or topic..." : "Add any other difficult chapter, algorithm, or theorem..."}
+                    placeholder={
+                      answers.educationLevel === 'school'
+                        ? "Add any other difficult chapter, formula, or topic..."
+                        : answers.educationLevel === 'diploma'
+                        ? "Add any difficult lab module, circuit, or engineering topic..."
+                        : "Add any other difficult chapter, algorithm, or theorem..."
+                    }
                     className="flex-1 text-xs px-4 py-3 rounded-xl bg-white/[0.06] border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-rose-400"
                   />
                   <button

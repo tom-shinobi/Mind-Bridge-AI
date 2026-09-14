@@ -810,6 +810,7 @@ export function App() {
             syllabus={syllabus}
             profile={profile}
             onNavigate={handleNavigate}
+            onAddSyllabusTopics={handleAddSyllabusTopics}
           />
         </main>
       ) : (
