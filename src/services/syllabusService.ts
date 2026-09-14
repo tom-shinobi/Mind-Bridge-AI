@@ -93,7 +93,7 @@ class SyllabusService {
    */
   public async structureSyllabusWithAI(rawText: string, contextSubject = ''): Promise<ExtractedSyllabus> {
     const settings = storageService.getAISettings();
-    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-3.8-flash';
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.8-flash';
     const model = activeModel;
     const apiKey = storageService.getApiKey();
 

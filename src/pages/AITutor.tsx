@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import type { TutorMessage, LearningGap, SyllabusTopic } from '../types';
 import { aiService, type ApiStatus } from '../services/aiService';
-import { storageService } from '../services/storageService';
+import { storageService, resolveEnvApiKey } from '../services/storageService';
 import { sound } from '../services/soundService';
 import { RotaryKnob } from '../components/hardware/RotaryKnob';
 import { FormattedContent } from '../components/FormattedContent';
@@ -59,9 +59,18 @@ export const AITutor: React.FC<AITutorProps> = ({
   const [keyInput, setKeyInput] = useState<string>('');
   const [modelInput, setModelInput] = useState<string>(() => {
     const m = storageService.getAISettings().model;
-    return (m && m !== 'gemini-2.5-flash') ? m : 'gemini-3.8-flash';
+    return (m && m !== 'gemini-2.5-flash' && m !== 'gemini-2.0-flash') ? m : 'gemini-3.8-flash';
   });
   const [testResult, setTestResult] = useState<{ success?: boolean; message?: string; testing?: boolean } | null>(null);
+
+  useEffect(() => {
+    if (isSettingsOpen) {
+      const current = storageService.getAISettings();
+      const currentModel = (current.model && current.model !== 'gemini-2.5-flash' && current.model !== 'gemini-2.0-flash') ? current.model : 'gemini-3.8-flash';
+      setModelInput(currentModel);
+      setTestResult(null);
+    }
+  }, [isSettingsOpen]);
 
   useEffect(() => {
     return aiService.subscribe((status) => {
@@ -479,8 +488,8 @@ export const AITutor: React.FC<AITutorProps> = ({
                 <Key className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">OpenRouter AI Configuration</h3>
-                <p className="text-xs text-slate-400">Direct cloud inference & rate limit status</p>
+                <h3 className="text-base font-bold text-white">Google Gemini AI Configuration</h3>
+                <p className="text-xs text-slate-400">Google AI Studio direct inference & rate limit status</p>
               </div>
             </div>
             <button
@@ -533,16 +542,16 @@ export const AITutor: React.FC<AITutorProps> = ({
           {/* API Key Input */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono flex items-center justify-between">
-              <span>Update API Key</span>
+              <span>Google Gemini API Key</span>
               <span className="text-[10px] text-emerald-400 normal-case font-normal">
-                Encrypted & Hidden
+                {resolveEnvApiKey() ? '✓ Active from Hosting' : (storageService.getApiKey() ? '✓ Encrypted & Active' : 'Enter Gemini Key')}
               </span>
             </label>
             <input
               type="password"
               value={keyInput}
               onChange={(e) => setKeyInput(e.target.value)}
-              placeholder="Paste Google AI Studio or OpenRouter key (e.g. AIzaSy...)"
+              placeholder="Paste Google AI Studio key (starts with AIzaSy...)"
               className="w-full text-xs font-mono px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
             <p className="text-[11px] text-slate-400 leading-relaxed">
@@ -593,12 +602,15 @@ export const AITutor: React.FC<AITutorProps> = ({
                 sound.playSuccess();
                 const current = storageService.getAISettings();
                 const newKey = keyInput.trim();
+                const targetModel = (modelInput && modelInput !== 'gemini-2.5-flash' && modelInput !== 'gemini-2.0-flash') ? modelInput : 'gemini-3.8-flash';
+                const provider = (newKey && !newKey.startsWith('AIzaSy')) ? 'openrouter' : 'google';
                 storageService.saveAISettings({
                   ...current,
                   ...(newKey ? { openRouterApiKey: newKey } : {}),
-                  model: modelInput,
-                  provider: 'openrouter'
+                  model: targetModel,
+                  provider
                 });
+                setModelInput(targetModel);
                 setIsSettingsOpen(false);
                 setKeyInput('');
                 setTestResult(null);

@@ -227,14 +227,22 @@ class StorageService {
     // Prioritize Gemini / OpenRouter environment key
     const envKey = resolveEnvApiKey();
 
-    if (envKey && !loaded.openRouterApiKey) {
-      loaded.openRouterApiKey = envKey;
+    if (envKey) {
+      if (!loaded.openRouterApiKey || (envKey.startsWith('AIzaSy') && !loaded.openRouterApiKey.startsWith('AIzaSy'))) {
+        loaded.openRouterApiKey = envKey;
+        loaded.provider = 'google';
+        this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
+      }
+    }
+
+    // Force default model to gemini-3.8-flash (official Google AI Studio primary model)
+    if (!loaded.model || loaded.model === 'gemini-2.0-flash' || loaded.model.includes('gemini-2.5') || loaded.model === 'default') {
+      loaded.model = 'gemini-3.8-flash';
       this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
 
-    // Default model to gemini-3.8-flash (official Google AI Studio primary model)
-    if (!loaded.model || loaded.model.includes('gemini-2.5') || loaded.model === 'default') {
-      loaded.model = 'gemini-3.8-flash';
+    if (!loaded.provider || (loaded.model.includes('gemini') && loaded.provider !== 'google')) {
+      loaded.provider = 'google';
       this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
     }
 
@@ -251,8 +259,15 @@ class StorageService {
   }
 
   public getApiKey(): string {
+    const envKey = resolveEnvApiKey();
     const settings = this.getAISettings();
-    return (settings.openRouterApiKey || resolveEnvApiKey()).trim();
+    if (envKey && envKey.startsWith('AIzaSy')) {
+      return envKey;
+    }
+    if (settings.openRouterApiKey && settings.openRouterApiKey.startsWith('AIzaSy')) {
+      return settings.openRouterApiKey.trim();
+    }
+    return (settings.openRouterApiKey || envKey || '').trim();
   }
 
   public getTodayStudySeconds(): number {

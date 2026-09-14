@@ -53,7 +53,10 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
   // AI settings
   const [provider, setProvider] = useState(aiSettings.provider);
   const [apiKey, setApiKey] = useState('');
-  const [model, setModel] = useState(aiSettings.model || 'gemini-3.8-flash');
+  const [model, setModel] = useState(() => {
+    const m = aiSettings.model;
+    return (m && m !== 'gemini-2.5-flash' && m !== 'gemini-2.0-flash') ? m : 'gemini-3.8-flash';
+  });
   const [speechEnabled, setSpeechEnabled] = useState(aiSettings.speechEnabled);
   const [soundFxEnabled, setSoundFxEnabled] = useState(aiSettings.soundFxEnabled);
   const [theme, setTheme] = useState<AtmosphereTheme>(aiSettings.theme || 'dusk');
@@ -167,10 +170,12 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
     e.preventDefault();
     sound.playSuccess();
     const finalApiKey = apiKey.trim() || aiSettings.openRouterApiKey;
+    const targetModel = (model && model !== 'gemini-2.5-flash' && model !== 'gemini-2.0-flash') ? model : 'gemini-3.8-flash';
+    const isGemini = !finalApiKey || finalApiKey.startsWith('AIzaSy') || targetModel.includes('gemini');
     onUpdateAISettings({
-      provider,
+      provider: isGemini ? 'google' : (provider || 'openrouter'),
       openRouterApiKey: finalApiKey,
-      model,
+      model: targetModel,
       speechEnabled,
       soundFxEnabled,
       theme

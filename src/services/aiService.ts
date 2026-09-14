@@ -37,10 +37,18 @@ class AIService {
 
   public getApiStatus(): ApiStatus {
     const settings = storageService.getAISettings();
-    const rawKey = (settings.openRouterApiKey || resolveEnvApiKey()).trim();
-    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-3.8-flash';
+    const envKey = resolveEnvApiKey();
+    const rawKey = (envKey.startsWith('AIzaSy') ? envKey : settings.openRouterApiKey || envKey || '').trim();
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.8-flash';
+
+    let statusMsg = this.apiStatus.statusMessage;
+    if (rawKey.startsWith('AIzaSy') && (statusMsg.includes('402') || statusMsg.includes('OpenRouter') || statusMsg === 'Ready')) {
+      statusMsg = `Google AI Studio: ${activeModel}`;
+    }
+
     return {
       ...this.apiStatus,
+      statusMessage: statusMsg,
       model: activeModel,
       keyMasked: rawKey ? 'Active & Encrypted' : 'None'
     };
@@ -191,8 +199,9 @@ ${notesContext}
   ): Promise<TutorResponse> {
     const settings = storageService.getAISettings();
     const studentContext = this.getStudentContext();
-    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash') ? settings.model : 'gemini-3.8-flash';
-    const apiKey = (settings.openRouterApiKey || resolveEnvApiKey()).trim();
+    const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.8-flash';
+    const envKey = resolveEnvApiKey();
+    const apiKey = (envKey.startsWith('AIzaSy') ? envKey : settings.openRouterApiKey || envKey || '').trim();
 
     // Try OpenRouter or Google AI Studio if API key is provided
     if (apiKey) {
@@ -449,11 +458,31 @@ YOUR INSTRUCTIONS:
    */
   public async testConnection(customKey?: string, customModel?: string): Promise<{ success: boolean; message: string; latencyMs?: number }> {
     const settings = storageService.getAISettings();
-    const key = (customKey || settings.openRouterApiKey || resolveEnvApiKey()).trim();
-    const model = customModel || (settings.model && settings.model !== 'gemini-2.5-flash' ? settings.model : 'gemini-3.8-flash');
+    const envKey = resolveEnvApiKey();
+    let key = (customKey || '').trim();
+    if (!key) {
+      if (envKey && envKey.startsWith('AIzaSy')) {
+        key = envKey;
+      } else if (settings.openRouterApiKey && settings.openRouterApiKey.startsWith('AIzaSy')) {
+        key = settings.openRouterApiKey.trim();
+      } else {
+        key = (envKey || settings.openRouterApiKey || '').trim();
+      }
+    }
+    const model = customModel || (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash' ? settings.model : 'gemini-3.8-flash');
 
     if (!key) {
-      return { success: false, message: 'No API key configured.' };
+      return {
+        success: false,
+        message: 'No Google API key configured yet. Please paste your Gemini key below (starts with AIzaSy...) or configure VITE_GEMINI_API_KEY in hosting.'
+      };
+    }
+
+    if (model.includes('gemini') && !key.startsWith('AIzaSy')) {
+      return {
+        success: false,
+        message: 'Selected model is Google Gemini, but the configured key does not match Google AI Studio format (must start with "AIzaSy..."). Please paste your Gemini key below.'
+      };
     }
 
     const startTime = Date.now();

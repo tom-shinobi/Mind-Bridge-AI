@@ -247,7 +247,7 @@ export type AtmosphereTheme =
   | 'midnight_synthwave';
 
 export interface AISettings {
-  provider: 'openrouter' | 'local_intelligent';
+  provider: 'google' | 'openrouter' | 'local_intelligent';
   openRouterApiKey: string;
   model: string;
   speechEnabled: boolean;
