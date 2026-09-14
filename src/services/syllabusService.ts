@@ -1,7 +1,7 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
 import { createWorker } from 'tesseract.js';
-import { storageService } from './storageService';
+import { storageService, isGoogleApiKey } from './storageService';
 import type { ExtractedSyllabus, SyllabusTopic, LearningGap } from '../types';
 
 // Configure pdfjs worker if available
@@ -130,9 +130,9 @@ You MUST return ONLY valid JSON matching this exact structure:
       try {
         let rawContent: string | null = null;
 
-        if (apiKey.startsWith('AIzaSy')) {
+        if (isGoogleApiKey(apiKey)) {
           // Direct Google AI Studio Gemini Engine
-          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.5-flash' ? 'gemini-3.8-flash' : activeModel) : 'gemini-3.8-flash';
+          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.0-flash' || activeModel.includes('gemini-2.5') ? 'gemini-3.8-flash' : activeModel) : 'gemini-3.8-flash';
           const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
           let response = await fetch(geminiUrl, {
             method: 'POST',

@@ -1,5 +1,5 @@
 import type { Test, TutorMessage } from '../types';
-import { storageService, resolveEnvApiKey } from './storageService';
+import { storageService, resolveEnvApiKey, isGoogleApiKey } from './storageService';
 import { calendarService } from './calendarService';
 import { noteService } from './noteService';
 
@@ -46,7 +46,7 @@ class AIService {
 
     // Purge any stale OpenRouter / 402 errors from Gemini models
     if (statusMsg.includes('402') || (isGemini && statusMsg.includes('OpenRouter'))) {
-      if (apiKey && apiKey.startsWith('AIzaSy')) {
+      if (apiKey && isGoogleApiKey(apiKey)) {
         statusMsg = `Google AI Studio: ${activeModel}`;
       } else {
         statusMsg = 'Ready (Local AI Active)';
@@ -57,7 +57,7 @@ class AIService {
       ...this.apiStatus,
       statusMessage: statusMsg,
       model: activeModel,
-      keyMasked: apiKey ? (apiKey.startsWith('AIzaSy') ? 'Google AI Studio Key' : 'Configured') : 'None'
+      keyMasked: apiKey ? (isGoogleApiKey(apiKey) ? 'Google AI Studio Key' : 'Configured') : 'None'
     };
   }
 
@@ -217,7 +217,7 @@ ${notesContext}
     const studentContext = this.getStudentContext();
     const activeModel = (settings.model && settings.model !== 'gemini-2.5-flash' && settings.model !== 'gemini-2.0-flash') ? settings.model : 'gemini-3.8-flash';
     const envKey = resolveEnvApiKey();
-    const apiKey = (envKey.startsWith('AIzaSy') ? envKey : settings.openRouterApiKey || envKey || '').trim();
+    const apiKey = (isGoogleApiKey(envKey) ? envKey : settings.openRouterApiKey || envKey || '').trim();
 
     // Try OpenRouter or Google AI Studio if API key is provided
     if (apiKey) {
@@ -271,13 +271,13 @@ YOUR INSTRUCTIONS:
      "masteryDelta": 5
    }`;
 
-        const isGoogleGemini = apiKey.startsWith('AIzaSy') || activeModel.includes('gemini');
+        const isGoogleGemini = isGoogleApiKey(apiKey) || activeModel.includes('gemini');
 
         let rawText: string | null = null;
 
-        if (isGoogleGemini && apiKey.startsWith('AIzaSy')) {
+        if (isGoogleGemini && isGoogleApiKey(apiKey)) {
           // Direct Google AI Studio Gemini Engine
-          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.5-flash' ? 'gemini-3.8-flash' : activeModel) : 'gemini-3.8-flash';
+          const geminiModel = activeModel.includes('gemini') ? (activeModel === 'gemini-2.0-flash' || activeModel.includes('gemini-2.5') ? 'gemini-3.8-flash' : activeModel) : 'gemini-3.8-flash';
           const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
 
           const userParts: any[] = [];
@@ -506,9 +506,9 @@ YOUR INSTRUCTIONS:
     const envKey = resolveEnvApiKey();
     let key = (customKey || '').trim();
     if (!key) {
-      if (envKey && envKey.startsWith('AIzaSy')) {
+      if (envKey && isGoogleApiKey(envKey)) {
         key = envKey;
-      } else if (settings.openRouterApiKey && settings.openRouterApiKey.startsWith('AIzaSy')) {
+      } else if (settings.openRouterApiKey && isGoogleApiKey(settings.openRouterApiKey)) {
         key = settings.openRouterApiKey.trim();
       } else {
         key = (envKey || settings.openRouterApiKey || '').trim();
@@ -530,31 +530,31 @@ YOUR INSTRUCTIONS:
       this.notify();
       return {
         success: false,
-        message: 'No Google API key configured yet. MindBridge is operating on local Socratic AI. Paste your Gemini key below (starts with AIzaSy...) to enable cloud inference.'
+        message: 'No Google API key configured yet. MindBridge is operating on local Socratic AI. Paste your Google AI Studio key below to enable cloud inference.'
       };
     }
 
-    if (isGemini && !key.startsWith('AIzaSy')) {
+    if (isGemini && !isGoogleApiKey(key)) {
       this.apiStatus = {
         isLive: false,
         isRateLimited: false,
-        lastError: 'Selected model is Google Gemini, but key does not start with AIzaSy',
-        statusMessage: 'Requires AIzaSy Key',
+        lastError: 'Selected model is Google Gemini, but key does not match Google AI Studio format',
+        statusMessage: 'Invalid Google Key',
         model,
         keyMasked: 'Invalid Format'
       };
       this.notify();
       return {
         success: false,
-        message: 'Selected model is Google Gemini, but the configured key does not match Google AI Studio format (must start with "AIzaSy..."). Please paste your Gemini key below.'
+        message: 'Selected model is Google Gemini, but the configured key does not match Google AI Studio format (must start with "AIzaSy..." or "AQ..."). Please paste your Gemini key below.'
       };
     }
 
     const startTime = Date.now();
     try {
-      if (isGemini && key.startsWith('AIzaSy')) {
+      if (isGemini && isGoogleApiKey(key)) {
         // Direct Google AI Studio Gemini Health Check
-        let geminiModel = model === 'gemini-2.5-flash' ? 'gemini-3.8-flash' : model;
+        let geminiModel = (model === 'gemini-2.0-flash' || model.includes('gemini-2.5')) ? 'gemini-3.8-flash' : model;
         let url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${key}`;
         let res = await fetch(url, {
           method: 'POST',
@@ -565,7 +565,7 @@ YOUR INSTRUCTIONS:
         });
 
         if (!res.ok && geminiModel === 'gemini-3.8-flash') {
-          geminiModel = 'gemini-2.0-flash';
+          geminiModel = 'gemini-3.6-flash';
           url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${key}`;
           res = await fetch(url, {
             method: 'POST',

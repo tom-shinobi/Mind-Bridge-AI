@@ -52,6 +52,12 @@ export function resolveGeminiApiKey(): string {
   ).trim();
 }
 
+export function isGoogleApiKey(key?: string): boolean {
+  if (!key) return false;
+  const k = key.trim();
+  return k.startsWith('AIzaSy') || k.startsWith('AQ.') || (k.length >= 25 && !k.startsWith('sk-or-') && !k.startsWith('sk-'));
+}
+
 export function resolveOpenRouterApiKey(): string {
   const env = (import.meta as any).env || {};
   return (env.VITE_OPENROUTER_API_KEY || '').trim();
@@ -238,7 +244,7 @@ class StorageService {
     const envKey = resolveEnvApiKey();
 
     if (envKey) {
-      if (!loaded.openRouterApiKey || (envKey.startsWith('AIzaSy') && !loaded.openRouterApiKey.startsWith('AIzaSy'))) {
+      if (!loaded.openRouterApiKey || (isGoogleApiKey(envKey) && !isGoogleApiKey(loaded.openRouterApiKey))) {
         loaded.openRouterApiKey = envKey;
         loaded.provider = 'google';
         this.save(STORAGE_KEYS.AI_SETTINGS, loaded);
@@ -282,10 +288,10 @@ class StorageService {
     const isGemini = !settings.model || settings.model.includes('gemini');
 
     if (isGemini) {
-      if (geminiEnv && geminiEnv.startsWith('AIzaSy')) {
+      if (geminiEnv && isGoogleApiKey(geminiEnv)) {
         return geminiEnv;
       }
-      if (settings.openRouterApiKey && settings.openRouterApiKey.startsWith('AIzaSy')) {
+      if (settings.openRouterApiKey && isGoogleApiKey(settings.openRouterApiKey)) {
         return settings.openRouterApiKey.trim();
       }
       return geminiEnv || '';

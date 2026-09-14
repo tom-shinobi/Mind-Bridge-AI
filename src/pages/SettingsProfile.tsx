@@ -25,6 +25,7 @@ import type { StudentProfile, AISettings, MemorySummary, AtmosphereTheme } from 
 import { THEME_CONFIGS } from '../types';
 import { sound } from '../services/soundService';
 import { authService } from '../services/authService';
+import { isGoogleApiKey } from '../services/storageService';
 import { supabaseDataService } from '../services/supabaseDataService';
 import { FaceIdScannerModal } from '../components/auth/FaceIdScannerModal';
 import { PageHeaderZine } from '../components/editorial/PageHeaderZine';
@@ -171,7 +172,7 @@ export const SettingsProfile: React.FC<SettingsProfileProps> = ({
     sound.playSuccess();
     const finalApiKey = apiKey.trim() || aiSettings.openRouterApiKey;
     const targetModel = (model && model !== 'gemini-2.5-flash' && model !== 'gemini-2.0-flash') ? model : 'gemini-3.8-flash';
-    const isGemini = !finalApiKey || finalApiKey.startsWith('AIzaSy') || targetModel.includes('gemini');
+    const isGemini = !finalApiKey || isGoogleApiKey(finalApiKey) || targetModel.includes('gemini');
     onUpdateAISettings({
       provider: isGemini ? 'google' : (provider || 'openrouter'),
       openRouterApiKey: finalApiKey,

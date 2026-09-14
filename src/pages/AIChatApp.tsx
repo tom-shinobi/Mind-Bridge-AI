@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import type { TutorMessage, LearningGap, SyllabusTopic, StudentProfile } from '../types';
 import { aiService, type ApiStatus } from '../services/aiService';
-import { storageService, resolveGeminiApiKey } from '../services/storageService';
+import { storageService, resolveGeminiApiKey, isGoogleApiKey } from '../services/storageService';
 import { speechService } from '../services/speechService';
 import { sound } from '../services/soundService';
 import { FormattedContent } from '../components/FormattedContent';
@@ -1059,7 +1059,7 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
                   <span className="text-[10px] text-emerald-400 font-medium px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/25">
                     ✓ Active from Hosting
                   </span>
-                ) : storageService.getApiKey()?.startsWith('AIzaSy') ? (
+                ) : isGoogleApiKey(storageService.getApiKey()) ? (
                   <span className="text-[10px] text-cyan-400 font-medium px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/25">
                     ✓ Saved in Browser
                   </span>
@@ -1073,7 +1073,7 @@ export const AIChatApp: React.FC<AIChatAppProps> = ({
                 type="password"
                 value={keyInput}
                 onChange={(e) => setKeyInput(e.target.value)}
-                placeholder="Paste Google AI Studio key (starts with AIzaSy...)"
+                placeholder="Paste Google AI Studio key (starts with AIzaSy... or AQ...)"
                 className="w-full text-xs font-mono px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
               />
               <div className="flex items-center justify-between pt-0.5">
