@@ -27,8 +27,7 @@ import {
   Headphones,
   X,
   Mic,
-  Flame,
-  ExternalLink
+  Flame
 } from 'lucide-react';
 import { sound } from '../../services/soundService';
 
@@ -409,51 +408,239 @@ const CATEGORIES: { id: StationCategory; label: string; icon: string }[] = [
   { id: 'nature', label: 'Nature', icon: '🌲' }
 ];
 
-export interface SpotifyPreset {
+export interface SongTrack {
   id: string;
-  name: string;
+  title: string;
   artist: string;
-  description: string;
-  embedUrl: string;
-  badge: string;
+  duration: string;
+  youtubeId: string;
+  category: 'bieber' | 'pop';
   emoji: string;
-  youtubeQuery: string;
-  spotifyUrl: string;
+  badge?: string;
 }
 
-export const SPOTIFY_PRESETS: SpotifyPreset[] = [
+export const CURATED_TRACKS: SongTrack[] = [
+  // Justin Bieber Hits (Full Official Songs)
   {
-    id: 'bieber_artist',
-    name: 'Justin Bieber',
+    id: 'bieber_ghost',
+    title: 'Ghost',
     artist: 'Justin Bieber',
-    description: 'Peaches, Stay, Ghost, Sorry, Love Yourself, Baby, Intentions & more',
-    embedUrl: 'https://open.spotify.com/embed/artist/1uNFoZAHBGtllmzznpCI3s?utm_source=generator&theme=0',
-    badge: 'Pop King',
-    emoji: '🎤',
-    youtubeQuery: 'Justin Bieber Greatest Hits',
-    spotifyUrl: 'https://open.spotify.com/artist/1uNFoZAHBGtllmzznpCI3s'
+    duration: '3:25',
+    youtubeId: 'Fp8msa5ctsM',
+    category: 'bieber',
+    emoji: '👻',
+    badge: 'Hot 100'
   },
   {
-    id: 'top_hits',
-    name: "Today's Top Hits",
-    artist: 'Billboard / Global Pop 50',
-    description: 'The biggest 50 pop hits in the world — Bieber, Dua Lipa, The Weeknd, Taylor Swift',
-    embedUrl: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?utm_source=generator&theme=0',
-    badge: 'Billboard',
-    emoji: '🔥',
-    youtubeQuery: 'Top 40 Pop Hits',
-    spotifyUrl: 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M'
+    id: 'bieber_peaches',
+    title: 'Peaches',
+    artist: 'Justin Bieber ft. Daniel Caesar & Giveon',
+    duration: '3:18',
+    youtubeId: 'tQ0yjYUFKAE',
+    category: 'bieber',
+    emoji: '🍑',
+    badge: 'Billboard #1'
   },
   {
-    id: 'bieber_acoustic',
-    name: 'Bieber Acoustic',
+    id: 'bieber_stay',
+    title: 'Stay',
+    artist: 'The Kid LAROI & Justin Bieber',
+    duration: '2:21',
+    youtubeId: 'kTJczUoc26U',
+    category: 'bieber',
+    emoji: '🚀',
+    badge: 'Global #1'
+  },
+  {
+    id: 'bieber_sorry',
+    title: 'Sorry',
     artist: 'Justin Bieber',
-    description: 'Soulful stripped-back guitar, piano ballads & acoustic study vocals',
-    embedUrl: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXaImCxTP3lsY?utm_source=generator&theme=0',
-    badge: 'Acoustic',
+    duration: '3:20',
+    youtubeId: 'fRh_vgS2dFE',
+    category: 'bieber',
+    emoji: '💃',
+    badge: 'Diamond'
+  },
+  {
+    id: 'bieber_love_yourself',
+    title: 'Love Yourself',
+    artist: 'Justin Bieber',
+    duration: '3:53',
+    youtubeId: 'oyEuk8j8imI',
+    category: 'bieber',
     emoji: '🎸',
-    youtubeQuery: 'Justin Bieber Acoustic Sessions',
-    spotifyUrl: 'https://open.spotify.com/playlist/37i9dQZF1DXaImCxTP3lsY'
+    badge: 'Acoustic'
+  },
+  {
+    id: 'bieber_baby',
+    title: 'Baby',
+    artist: 'Justin Bieber ft. Ludacris',
+    duration: '3:34',
+    youtubeId: 'kffacxfA7G4',
+    category: 'bieber',
+    emoji: '👶',
+    badge: 'Classic'
+  },
+  {
+    id: 'bieber_what_do_you_mean',
+    title: 'What Do You Mean?',
+    artist: 'Justin Bieber',
+    duration: '3:26',
+    youtubeId: 'DK_0jXPuIr0',
+    category: 'bieber',
+    emoji: '⏰',
+    badge: 'Hit'
+  },
+  {
+    id: 'bieber_intentions',
+    title: 'Intentions',
+    artist: 'Justin Bieber ft. Quavo',
+    duration: '3:33',
+    youtubeId: '3AyMjyHu1bA',
+    category: 'bieber',
+    emoji: '✨',
+    badge: 'Groove'
+  },
+  {
+    id: 'bieber_hold_on',
+    title: 'Hold On',
+    artist: 'Justin Bieber',
+    duration: '2:51',
+    youtubeId: 'LWeiydKl0mU',
+    category: 'bieber',
+    emoji: '🏍️',
+    badge: 'Soul'
+  },
+  {
+    id: 'bieber_holy',
+    title: 'Holy',
+    artist: 'Justin Bieber ft. Chance The Rapper',
+    duration: '3:32',
+    youtubeId: 'pvPsJFRGleA',
+    category: 'bieber',
+    emoji: '🙏',
+    badge: 'Warm'
+  },
+  {
+    id: 'bieber_yummy',
+    title: 'Yummy',
+    artist: 'Justin Bieber',
+    duration: '3:28',
+    youtubeId: '8EJ3zbKTWQ8',
+    category: 'bieber',
+    emoji: '🍭',
+    badge: 'Trap-Pop'
+  },
+  {
+    id: 'bieber_company',
+    title: 'Company',
+    artist: 'Justin Bieber',
+    duration: '3:28',
+    youtubeId: 'gdx7gN1UyX0',
+    category: 'bieber',
+    emoji: '🌴',
+    badge: 'Chill'
+  },
+  {
+    id: 'bieber_boyfriend',
+    title: 'Boyfriend',
+    artist: 'Justin Bieber',
+    duration: '2:51',
+    youtubeId: '4GuqB1BQVr4',
+    category: 'bieber',
+    emoji: '🕶️',
+    badge: 'R&B'
+  },
+  {
+    id: 'bieber_as_long_as_you_love_me',
+    title: 'As Long As You Love Me',
+    artist: 'Justin Bieber ft. Big Sean',
+    duration: '3:49',
+    youtubeId: 'R4em3LKQCAQ',
+    category: 'bieber',
+    emoji: '⚡',
+    badge: 'Anthem'
+  },
+  {
+    id: 'bieber_lonely',
+    title: 'Lonely',
+    artist: 'Justin Bieber & benny blanco',
+    duration: '2:29',
+    youtubeId: 'xQOO2xGQ1Pc',
+    category: 'bieber',
+    emoji: '🎭',
+    badge: 'Piano'
+  },
+  {
+    id: 'bieber_despacito',
+    title: 'Despacito (Remix)',
+    artist: 'Luis Fonsi, Daddy Yankee, Justin Bieber',
+    duration: '3:48',
+    youtubeId: '72UO0v5ESUo',
+    category: 'bieber',
+    emoji: '🔥',
+    badge: 'Latin Pop'
+  },
+  // Global Pop Hits (Full Songs)
+  {
+    id: 'weeknd_blinding_lights',
+    title: 'Blinding Lights',
+    artist: 'The Weeknd',
+    duration: '3:20',
+    youtubeId: '4NRXx6U8ABQ',
+    category: 'pop',
+    emoji: '🌃',
+    badge: 'Global #1'
+  },
+  {
+    id: 'dualipa_levitating',
+    title: 'Levitating',
+    artist: 'Dua Lipa',
+    duration: '3:23',
+    youtubeId: 'TUVcZfQe-Kw',
+    category: 'pop',
+    emoji: '🌌',
+    badge: 'Dance'
+  },
+  {
+    id: 'harry_as_it_was',
+    title: 'As It Was',
+    artist: 'Harry Styles',
+    duration: '2:47',
+    youtubeId: 'H5v3kku4y6Q',
+    category: 'pop',
+    emoji: '💫',
+    badge: 'Indie Pop'
+  },
+  {
+    id: 'taylor_cruel_summer',
+    title: 'Cruel Summer',
+    artist: 'Taylor Swift',
+    duration: '2:58',
+    youtubeId: 'ic8j13piAhQ',
+    category: 'pop',
+    emoji: '☀️',
+    badge: 'Hot 100'
+  },
+  {
+    id: 'bruno_thats_what_i_like',
+    title: "That's What I Like",
+    artist: 'Bruno Mars',
+    duration: '3:26',
+    youtubeId: 'PMivT7MJ41M',
+    category: 'pop',
+    emoji: '🕺',
+    badge: 'Funk Pop'
+  },
+  {
+    id: 'post_circles',
+    title: 'Circles',
+    artist: 'Post Malone',
+    duration: '3:35',
+    youtubeId: 'wXhTHyIgQ_U',
+    category: 'pop',
+    emoji: '⭕',
+    badge: 'Acoustic'
   }
 ];
 
@@ -462,46 +649,179 @@ interface LofiPlayerProps {
 }
 
 export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+  // Mode: 'songs' (Built-in YouTube Full Song Player) vs 'radio' (Live Streams)
+  const [activeMode, setActiveMode] = useState<'songs' | 'radio'>('songs');
+
+  // Song Player State
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [isPlayingSong, setIsPlayingSong] = useState(false);
+  const [songFilter, setSongFilter] = useState<'all' | 'bieber' | 'pop'>('bieber');
+  const [activeCustomSearch, setActiveCustomSearch] = useState<string | null>(null);
+  const [customInputText, setCustomInputText] = useState('');
+
+  // Radio Player State
+  const [isPlayingRadio, setIsPlayingRadio] = useState(false);
   const [currentStationIndex, setCurrentStationIndex] = useState(0);
-  const [volume, setVolume] = useState(0.65);
+  const [selectedRadioCategory, setSelectedRadioCategory] = useState<StationCategory>('all');
+  const [radioSearchQuery, setRadioSearchQuery] = useState('');
+
+  // Common UI State
+  const [volume, setVolume] = useState(0.7);
   const [isMuted, setIsMuted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<StationCategory>('all');
-  const [searchQuery, setSearchQuery] = useState('');
 
-  // Mode: Live Radio vs On-Demand Artist / Spotify Pop Player
-  const [activeMode, setActiveMode] = useState<'radio' | 'ondemand'>('radio');
-  const [selectedPresetId, setSelectedPresetId] = useState<string>('bieber_artist');
-  const [customSearchTerm, setCustomSearchTerm] = useState('');
-
-  const currentStation = STATIONS[currentStationIndex];
-  const activePreset =
-    SPOTIFY_PRESETS.find((p) => p.id === selectedPresetId) || SPOTIFY_PRESETS[0];
+  const currentTrack = CURATED_TRACKS[currentTrackIndex] || CURATED_TRACKS[0];
+  const currentStation = STATIONS[currentStationIndex] || STATIONS[0];
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const oscillatorsRef = useRef<OscillatorNode[]>([]);
   const gainNodeRef = useRef<GainNode | null>(null);
+  const ytIframeRef = useRef<HTMLIFrameElement | null>(null);
 
-  // Filter stations by active category and search term
+  // Filter curated songs in real time by category and search text
+  const filteredTracks = useMemo(() => {
+    return CURATED_TRACKS.map((track, originalIndex) => ({ track, originalIndex })).filter(
+      ({ track }) => {
+        const matchesCategory =
+          songFilter === 'all' || track.category === songFilter;
+        const q = customInputText.trim().toLowerCase();
+        const matchesQuery =
+          !q ||
+          track.title.toLowerCase().includes(q) ||
+          track.artist.toLowerCase().includes(q);
+        return matchesCategory && matchesQuery;
+      }
+    );
+  }, [songFilter, customInputText]);
+
+  // Filter radio stations
   const filteredStations = useMemo(() => {
     return STATIONS.map((station, originalIndex) => ({ station, originalIndex })).filter(
       ({ station }) => {
         const matchesCategory =
-          selectedCategory === 'all' || station.category === selectedCategory;
-        const query = searchQuery.trim().toLowerCase();
+          selectedRadioCategory === 'all' || station.category === selectedRadioCategory;
+        const q = radioSearchQuery.trim().toLowerCase();
         const matchesQuery =
-          !query ||
-          station.name.toLowerCase().includes(query) ||
-          station.tagline.toLowerCase().includes(query) ||
-          station.category.toLowerCase().includes(query);
+          !q ||
+          station.name.toLowerCase().includes(q) ||
+          station.tagline.toLowerCase().includes(q) ||
+          station.category.toLowerCase().includes(q);
         return matchesCategory && matchesQuery;
       }
     );
-  }, [selectedCategory, searchQuery]);
+  }, [selectedRadioCategory, radioSearchQuery]);
 
-  // Initialize Web Audio Fallback Synthesizer
+  // PostMessage control to the persistent YouTube iframe
+  const postMessageToPlayer = (func: string, args: any = '') => {
+    try {
+      if (ytIframeRef.current && ytIframeRef.current.contentWindow) {
+        ytIframeRef.current.contentWindow.postMessage(
+          JSON.stringify({
+            event: 'command',
+            func: func,
+            args: args ? [args] : []
+          }),
+          '*'
+        );
+      }
+    } catch (e) {
+      console.warn('YouTube postMessage error:', e);
+    }
+  };
+
+  // Song Controls
+  const handleSelectTrack = (index: number) => {
+    sound.playClick();
+    if (isPlayingRadio) {
+      if (audioRef.current) audioRef.current.pause();
+      stopSynth();
+      setIsPlayingRadio(false);
+    }
+    setActiveCustomSearch(null);
+    setCurrentTrackIndex(index);
+    setIsPlayingSong(true);
+  };
+
+  const toggleSongPlay = () => {
+    sound.playClick();
+    if (isPlayingRadio) {
+      if (audioRef.current) audioRef.current.pause();
+      stopSynth();
+      setIsPlayingRadio(false);
+    }
+    if (isPlayingSong) {
+      postMessageToPlayer('pauseVideo');
+      setIsPlayingSong(false);
+    } else {
+      postMessageToPlayer('playVideo');
+      setIsPlayingSong(true);
+    }
+  };
+
+  const handleNextTrack = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    sound.playClick();
+    setActiveCustomSearch(null);
+    const next = (currentTrackIndex + 1) % CURATED_TRACKS.length;
+    setCurrentTrackIndex(next);
+    setIsPlayingSong(true);
+  };
+
+  const handlePrevTrack = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    sound.playClick();
+    setActiveCustomSearch(null);
+    const prev = (currentTrackIndex - 1 + CURATED_TRACKS.length) % CURATED_TRACKS.length;
+    setCurrentTrackIndex(prev);
+    setIsPlayingSong(true);
+  };
+
+  const handlePlayCustomSong = (query: string) => {
+    if (!query.trim()) return;
+    sound.playClick();
+    if (isPlayingRadio) {
+      if (audioRef.current) audioRef.current.pause();
+      stopSynth();
+      setIsPlayingRadio(false);
+    }
+    // Check if query matches a curated track
+    const matchIdx = CURATED_TRACKS.findIndex(
+      (t) =>
+        t.title.toLowerCase().includes(query.toLowerCase()) ||
+        t.artist.toLowerCase().includes(query.toLowerCase())
+    );
+    if (matchIdx !== -1) {
+      handleSelectTrack(matchIdx);
+    } else {
+      setActiveCustomSearch(query.trim());
+      setIsPlayingSong(true);
+    }
+    setCustomInputText('');
+  };
+
+  // Listen to YouTube Player state changes for auto-advance
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        if (!event.data) return;
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data && data.event === 'onStateChange') {
+          // 1 = playing, 2 = paused, 0 = ended
+          if (data.info === 1) setIsPlayingSong(true);
+          if (data.info === 2) setIsPlayingSong(false);
+          if (data.info === 0) {
+            handleNextTrack();
+          }
+        }
+      } catch {}
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [currentTrackIndex]);
+
+  // Web Audio Fallback Synthesizer for Radio
   const startSynth = () => {
     try {
       if (!audioCtxRef.current) {
@@ -510,14 +830,11 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
           audioCtxRef.current = new AudioContextClass();
         }
       }
-
       if (!audioCtxRef.current) return;
       if (audioCtxRef.current.state === 'suspended') {
         audioCtxRef.current.resume();
       }
-
       stopSynth();
-
       const ctx = audioCtxRef.current;
       const masterGain = ctx.createGain();
       masterGain.gain.setValueAtTime(isMuted ? 0 : volume * 0.12, ctx.currentTime);
@@ -530,17 +847,13 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
         const oscGain = ctx.createGain();
         osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
         osc.frequency.setValueAtTime(freq, ctx.currentTime);
-
-        // Subtle gentle detune for lush chorus feel
         osc.detune.setValueAtTime(idx * 4 - 6, ctx.currentTime);
         oscGain.gain.setValueAtTime(0.25, ctx.currentTime);
-
         osc.connect(oscGain);
         oscGain.connect(masterGain);
         osc.start();
         oscs.push(osc);
       });
-
       oscillatorsRef.current = oscs;
     } catch (e) {
       console.warn('Web Audio synthesis fallback:', e);
@@ -557,22 +870,25 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
     oscillatorsRef.current = [];
   };
 
-  // Playback Control
-  const togglePlay = () => {
+  // Radio Playback Controls
+  const toggleRadioPlay = () => {
     sound.playClick();
-    if (isPlaying) {
+    if (isPlayingSong) {
+      postMessageToPlayer('pauseVideo');
+      setIsPlayingSong(false);
+    }
+    if (isPlayingRadio) {
       if (audioRef.current) audioRef.current.pause();
       stopSynth();
-      setIsPlaying(false);
+      setIsPlayingRadio(false);
     } else {
-      setIsPlaying(true);
+      setIsPlayingRadio(true);
       if (audioRef.current) {
         audioRef.current.src = currentStation.streamUrl;
         audioRef.current.volume = isMuted ? 0 : volume;
         audioRef.current
           .play()
           .catch(() => {
-            // Stream blocked or offline -> start synthetic ambient chord pad!
             startSynth();
           });
       } else {
@@ -583,10 +899,14 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
 
   const handleStationChange = (index: number) => {
     sound.playClick();
+    if (isPlayingSong) {
+      postMessageToPlayer('pauseVideo');
+      setIsPlayingSong(false);
+    }
     setCurrentStationIndex(index);
     const station = STATIONS[index];
 
-    if (isPlaying) {
+    if (isPlayingRadio) {
       if (audioRef.current) {
         audioRef.current.src = station.streamUrl;
         audioRef.current
@@ -620,6 +940,7 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
     if (gainNodeRef.current && audioCtxRef.current) {
       gainNodeRef.current.gain.setValueAtTime(isMuted ? 0 : val * 0.12, audioCtxRef.current.currentTime);
     }
+    postMessageToPlayer('setVolume', Math.round(val * 100));
   };
 
   const toggleMute = () => {
@@ -632,20 +953,11 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
     if (gainNodeRef.current && audioCtxRef.current) {
       gainNodeRef.current.gain.setValueAtTime(next ? 0 : volume * 0.12, audioCtxRef.current.currentTime);
     }
-  };
-
-  const handleOpenYouTube = (query: string) => {
-    sound.playClick();
-    window.open(
-      `https://music.youtube.com/search?q=${encodeURIComponent(query)}`,
-      '_blank',
-      'noopener,noreferrer'
-    );
-  };
-
-  const handleOpenSpotify = (url: string) => {
-    sound.playClick();
-    window.open(url, '_blank', 'noopener,noreferrer');
+    if (next) {
+      postMessageToPlayer('mute');
+    } else {
+      postMessageToPlayer('unMute');
+    }
   };
 
   useEffect(() => {
@@ -663,7 +975,7 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
           : 'bottom-20 right-3.5 md:bottom-5 md:right-5'
       }`}
     >
-      {/* Hidden native audio tag */}
+      {/* Hidden native radio audio tag */}
       <audio
         ref={audioRef}
         preload="none"
@@ -671,12 +983,42 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
         onError={() => startSynth()}
       />
 
+      {/* PERSISTENT BUILT-IN YOUTUBE IFRAME - NEVER UNMOUNTS WHEN MINIMIZED */}
+      <div
+        className={`transition-all duration-300 ${
+          isExpanded && activeMode === 'songs'
+            ? 'w-full h-44 rounded-2xl overflow-hidden my-2 border border-white/15 bg-black shadow-2xl relative block shrink-0'
+            : 'fixed -bottom-96 -right-96 w-1 h-1 opacity-0 pointer-events-none'
+        }`}
+      >
+        <iframe
+          ref={ytIframeRef}
+          key={
+            activeCustomSearch
+              ? `custom_${activeCustomSearch}`
+              : currentTrack.youtubeId
+          }
+          src={
+            activeCustomSearch
+              ? `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(
+                  activeCustomSearch
+                )}&enablejsapi=1&autoplay=1`
+              : `https://www.youtube-nocookie.com/embed/${currentTrack.youtubeId}?enablejsapi=1&autoplay=1`
+          }
+          width="100%"
+          height="100%"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          className="w-full h-full border-0"
+          title="Built-in Song Player"
+        />
+      </div>
+
       {/* EXPANDED PLAYER DRAWER */}
       {isExpanded ? (
         <div
           className={`w-84 sm:w-92 max-w-[calc(100vw-1.5rem)] max-h-[85vh] flex flex-col rounded-3xl p-4 sm:p-5 border-2 transition-all duration-300 backdrop-blur-2xl bg-gradient-to-br ${
-            activeMode === 'ondemand'
-              ? 'from-rose-950/40 via-black/90 to-purple-950/60 border-rose-500/40 shadow-[0_0_30px_rgba(251,113,133,0.25)]'
+            activeMode === 'songs'
+              ? 'from-purple-950/50 via-black/90 to-indigo-950/60 border-purple-500/40 shadow-[0_0_35px_rgba(168,85,247,0.25)]'
               : `${currentStation.bgGradient} ${currentStation.borderClass} ${currentStation.glowClass}`
           }`}
         >
@@ -690,29 +1032,31 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
                 className="w-9 h-9 rounded-xl flex items-center justify-center border transition-all shrink-0"
                 style={{
                   backgroundColor:
-                    activeMode === 'ondemand'
-                      ? '#FB718520'
+                    activeMode === 'songs'
+                      ? '#A855F720'
                       : `${currentStation.accentColor}20`,
                   borderColor:
-                    activeMode === 'ondemand'
-                      ? '#FB718550'
+                    activeMode === 'songs'
+                      ? '#A855F750'
                       : `${currentStation.accentColor}50`,
-                  color: activeMode === 'ondemand' ? '#FB7185' : currentStation.accentColor
+                  color: activeMode === 'songs' ? '#C084FC' : currentStation.accentColor
                 }}
               >
-                {activeMode === 'ondemand' ? (
-                  <Mic className="w-4 h-4 text-rose-400" />
+                {activeMode === 'songs' ? (
+                  <Music className={`w-4 h-4 ${isPlayingSong ? 'animate-pulse' : ''}`} />
                 ) : (
-                  <Radio className={`w-4 h-4 ${isPlaying ? 'animate-pulse' : ''}`} />
+                  <Radio className={`w-4 h-4 ${isPlayingRadio ? 'animate-pulse' : ''}`} />
                 )}
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold flex items-center gap-1">
-                  <Sparkles className="w-2.5 h-2.5 text-lime-400" />
-                  {activeMode === 'ondemand' ? 'POP ON-DEMAND' : 'HORIZON MUSIC RADIO'}
+                  <Sparkles className="w-2.5 h-2.5 text-purple-400" />
+                  {activeMode === 'songs' ? 'FULL SONG PLAYER' : 'HORIZON RADIO'}
                 </span>
                 <p className="text-xs font-bold text-white leading-tight truncate">
-                  {activeMode === 'ondemand' ? activePreset.name : currentStation.name}
+                  {activeMode === 'songs'
+                    ? activeCustomSearch || currentTrack.title
+                    : currentStation.name}
                 </p>
               </div>
             </div>
@@ -726,8 +1070,23 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
             </button>
           </div>
 
-          {/* Mode Switcher: Live Radio vs Bieber & Pop On-Demand */}
+          {/* Mode Switcher: Built-in Full Songs vs Live Radio */}
           <div className="grid grid-cols-2 gap-1 bg-black/60 p-1 rounded-xl border border-white/10 my-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                sound.playClick();
+                setActiveMode('songs');
+              }}
+              className={`py-1.5 px-2 rounded-lg font-bold text-[10px] flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                activeMode === 'songs'
+                  ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-md font-extrabold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Music className="w-3 h-3" />
+              <span>Full Songs (Bieber)</span>
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -743,142 +1102,208 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
               <Radio className="w-3 h-3" />
               <span>Live Radio ({STATIONS.length})</span>
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                sound.playClick();
-                if (isPlaying) {
-                  if (audioRef.current) audioRef.current.pause();
-                  stopSynth();
-                  setIsPlaying(false);
-                }
-                setActiveMode('ondemand');
-              }}
-              className={`py-1.5 px-2 rounded-lg font-bold text-[10px] flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                activeMode === 'ondemand'
-                  ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-sm font-extrabold'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Mic className="w-3 h-3" />
-              <span>Bieber & Pop ✨</span>
-            </button>
           </div>
 
-          {/* MODE CONTENT: ON-DEMAND BIEBER & POP PLAYER */}
-          {activeMode === 'ondemand' ? (
+          {/* MODE 1: FULL SONGS (JUSTIN BIEBER & POP HITS) */}
+          {activeMode === 'songs' ? (
             <div className="flex-1 flex flex-col min-h-0 space-y-2 pt-0.5">
-              {/* Presets Chips */}
+              {/* Category Filter Chips */}
               <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none shrink-0">
-                {SPOTIFY_PRESETS.map((preset) => {
-                  const isSel = preset.id === selectedPresetId;
+                {[
+                  { id: 'bieber', label: 'Justin Bieber', icon: '👑' },
+                  { id: 'pop', label: 'Global Hits', icon: '🔥' },
+                  { id: 'all', label: 'All Songs', icon: '🎵' }
+                ].map((tab) => {
+                  const isActive = songFilter === tab.id;
                   return (
                     <button
-                      key={preset.id}
+                      key={tab.id}
                       type="button"
                       onClick={() => {
                         sound.playClick();
-                        setSelectedPresetId(preset.id);
+                        setSongFilter(tab.id as any);
                       }}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
-                        isSel
-                          ? 'bg-rose-500 text-white shadow-md font-extrabold'
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold shrink-0 transition-all cursor-pointer flex items-center gap-1 ${
+                        isActive
+                          ? 'bg-purple-500 text-white shadow-sm font-extrabold'
                           : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/5'
                       }`}
                     >
-                      <span>{preset.emoji}</span>
-                      <span>{preset.name}</span>
+                      <span>{tab.icon}</span>
+                      <span>{tab.label}</span>
                     </button>
                   );
                 })}
               </div>
 
-              {/* Tagline & Description */}
-              <div className="px-2.5 py-1.5 rounded-xl bg-black/50 border border-white/10 text-[11px] text-slate-300 font-sans leading-snug shrink-0">
-                <div className="flex items-center justify-between font-semibold text-rose-300">
-                  <span className="flex items-center gap-1">
-                    <Flame className="w-3 h-3 text-rose-400" /> {activePreset.artist}
+              {/* Custom Play Any Song Search Bar */}
+              <div className="flex items-center gap-1 bg-black/50 border border-white/10 rounded-xl p-1 shrink-0">
+                <Search className="w-3.5 h-3.5 text-purple-400 ml-1.5 shrink-0" />
+                <input
+                  type="text"
+                  value={customInputText}
+                  onChange={(e) => setCustomInputText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handlePlayCustomSong(customInputText);
+                  }}
+                  placeholder="Play any song (e.g. Bieber - Never Say Never)..."
+                  className="w-full bg-transparent px-1.5 py-0.5 text-[10px] text-white placeholder-slate-500 focus:outline-none font-sans"
+                />
+                <button
+                  type="button"
+                  onClick={() => handlePlayCustomSong(customInputText)}
+                  disabled={!customInputText.trim()}
+                  className="px-2 py-1 bg-purple-600 hover:bg-purple-500 disabled:opacity-30 rounded-lg text-[9px] font-bold text-white transition-all cursor-pointer shrink-0"
+                >
+                  Play
+                </button>
+              </div>
+
+              {/* Now Playing Mini Card (when custom search or song is active) */}
+              <div className="px-2.5 py-1.5 rounded-xl bg-purple-950/30 border border-purple-500/20 text-[11px] text-slate-300 font-sans leading-snug shrink-0">
+                <div className="flex items-center justify-between font-semibold text-purple-300">
+                  <span className="flex items-center gap-1.5 truncate">
+                    <span className="text-sm">
+                      {activeCustomSearch ? '🔍' : currentTrack.emoji}
+                    </span>
+                    <span className="truncate">
+                      {activeCustomSearch
+                        ? `Custom: ${activeCustomSearch}`
+                        : `${currentTrack.title} — ${currentTrack.artist}`}
+                    </span>
                   </span>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 bg-rose-500/20 text-rose-300 rounded">
-                    {activePreset.badge}
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 bg-purple-500/20 text-purple-300 rounded shrink-0 ml-1">
+                    {activeCustomSearch ? 'Full Audio' : currentTrack.duration}
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1">{activePreset.description}</p>
               </div>
 
-              {/* Embedded Spotify Player (152px compact widget with native controls) */}
-              <div className="relative rounded-2xl overflow-hidden border border-white/15 bg-black/70 shadow-2xl shrink-0">
-                <iframe
-                  key={activePreset.id}
-                  src={activePreset.embedUrl}
-                  width="100%"
-                  height="152"
-                  frameBorder="0"
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                  loading="lazy"
-                  className="w-full rounded-2xl"
-                  title="Spotify Music Player"
-                />
+              {/* Curated Tracklist Directory */}
+              <div className="flex-1 min-h-0 overflow-hidden flex flex-col pt-0.5">
+                <div className="flex items-center justify-between pb-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  <span>Full Tracks ({filteredTracks.length})</span>
+                  <span className="text-purple-400 font-sans normal-case text-[10px]">
+                    Plays in background
+                  </span>
+                </div>
+
+                <div className="overflow-y-auto max-h-40 pr-1 space-y-1 custom-scrollbar">
+                  {filteredTracks.map(({ track, originalIndex }) => {
+                    const isSelected =
+                      !activeCustomSearch && originalIndex === currentTrackIndex;
+                    return (
+                      <button
+                        key={track.id}
+                        type="button"
+                        onClick={() => handleSelectTrack(originalIndex)}
+                        className={`w-full p-2 rounded-xl text-left border transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                          isSelected
+                            ? 'border-purple-400 bg-purple-600/30 text-white font-bold shadow-md'
+                            : 'border-white/5 bg-black/40 text-slate-300 hover:text-white hover:bg-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-base shrink-0">{track.emoji}</span>
+                          <div className="min-w-0 text-left">
+                            <p className="text-[11px] font-semibold truncate leading-tight">
+                              {track.title}
+                            </p>
+                            <p className="text-[9px] text-slate-400 truncate">
+                              {track.artist}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {isSelected ? (
+                            <div className="flex items-center gap-1">
+                              {isPlayingSong ? (
+                                <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping" />
+                              ) : (
+                                <span className="text-[9px] uppercase tracking-wider font-mono text-purple-300">
+                                  Paused
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-[9px] text-slate-500 font-mono">
+                              {track.duration}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Quick Launch Actions (YouTube Music & Spotify) */}
-              <div className="space-y-1.5 pt-0.5 shrink-0">
+              {/* Bottom Transport Controls: Volume & Play/Pause */}
+              <div className="pt-2.5 flex items-center justify-between gap-2 border-t border-white/10 mt-1 shrink-0">
+                {/* Volume */}
+                <div className="flex items-center gap-1.5 w-24">
+                  <button
+                    onClick={toggleMute}
+                    className="text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                  >
+                    {isMuted || volume === 0 ? (
+                      <VolumeX className="w-3.5 h-3.5 text-rose-400" />
+                    ) : (
+                      <Volume2 className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={isMuted ? 0 : volume}
+                    onChange={handleVolumeChange}
+                    className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-white"
+                  />
+                </div>
+
+                {/* Song Transport Buttons */}
                 <div className="flex items-center gap-1.5">
                   <button
-                    type="button"
-                    onClick={() => handleOpenYouTube(activePreset.youtubeQuery)}
-                    className="flex-1 py-1.5 px-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 rounded-xl text-[10px] font-bold text-red-300 hover:text-red-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    title="Play on YouTube Music"
+                    onClick={handlePrevTrack}
+                    className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 border border-white/10 transition-all cursor-pointer"
+                    title="Previous song"
                   >
-                    <Play className="w-3 h-3 fill-red-400 text-red-400" />
-                    <span>YouTube Music</span>
-                    <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+                    <SkipBack className="w-3.5 h-3.5" />
                   </button>
 
                   <button
-                    type="button"
-                    onClick={() => handleOpenSpotify(activePreset.spotifyUrl)}
-                    className="flex-1 py-1.5 px-2 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 rounded-xl text-[10px] font-bold text-emerald-300 hover:text-emerald-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    title="Open on Spotify"
+                    onClick={toggleSongPlay}
+                    className="py-2 px-3.5 rounded-xl font-bold uppercase text-xs flex items-center gap-1.5 transition-all shadow-lg cursor-pointer bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
+                    style={{
+                      boxShadow: '0 0 15px rgba(168,85,247,0.5)'
+                    }}
                   >
-                    <Music className="w-3 h-3 text-emerald-400" />
-                    <span>Open in Spotify</span>
-                    <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+                    {isPlayingSong ? (
+                      <>
+                        <Pause className="w-3.5 h-3.5 fill-white" />
+                        <span>Pause</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-3.5 h-3.5 fill-white" />
+                        <span>Play</span>
+                      </>
+                    )}
                   </button>
-                </div>
 
-                {/* Custom song search prompt */}
-                <div className="flex items-center gap-1 bg-black/40 border border-white/10 rounded-xl p-1">
-                  <Search className="w-3.5 h-3.5 text-slate-400 ml-1.5 shrink-0" />
-                  <input
-                    type="text"
-                    value={customSearchTerm}
-                    onChange={(e) => setCustomSearchTerm(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && customSearchTerm.trim()) {
-                        handleOpenYouTube(customSearchTerm.trim());
-                      }
-                    }}
-                    placeholder="Search any song (e.g. Bieber - Ghost)..."
-                    className="w-full bg-transparent px-1.5 py-0.5 text-[10px] text-white placeholder-slate-500 focus:outline-none font-sans"
-                  />
                   <button
-                    type="button"
-                    onClick={() => {
-                      if (customSearchTerm.trim()) {
-                        handleOpenYouTube(customSearchTerm.trim());
-                      }
-                    }}
-                    disabled={!customSearchTerm.trim()}
-                    className="px-2 py-1 bg-white/10 hover:bg-white/20 disabled:opacity-30 rounded-lg text-[9px] font-bold text-white transition-all cursor-pointer shrink-0"
+                    onClick={handleNextTrack}
+                    className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 border border-white/10 transition-all cursor-pointer"
+                    title="Next song"
                   >
-                    Play
+                    <SkipForward className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
             </div>
           ) : (
-            /* LIVE RADIO VIEW */
+            /* MODE 2: LIVE RADIO STATIONS */
             <>
               {/* Vibe description & Animated visualizer */}
               <div className="py-2 space-y-1.5 shrink-0">
@@ -894,9 +1319,9 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
                       className="flex-1 rounded-full transition-all duration-300"
                       style={{
                         backgroundColor: currentStation.accentColor,
-                        height: isPlaying ? `${scale * 100}%` : '20%',
-                        opacity: isPlaying ? 0.85 : 0.3,
-                        animation: isPlaying
+                        height: isPlayingRadio ? `${scale * 100}%` : '20%',
+                        opacity: isPlayingRadio ? 0.85 : 0.3,
+                        animation: isPlayingRadio
                           ? `pulse ${0.7 + (i % 4) * 0.25}s ease-in-out infinite alternate`
                           : 'none'
                       }}
@@ -905,19 +1330,19 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
                 </div>
               </div>
 
-              {/* Search Bar */}
+              {/* Radio Search Bar */}
               <div className="relative mb-2 shrink-0">
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search 23 stations, genres, or Bieber..."
+                  value={radioSearchQuery}
+                  onChange={(e) => setRadioSearchQuery(e.target.value)}
+                  placeholder="Search 23 radio stations..."
                   className="w-full pl-8 pr-7 py-1.5 bg-black/40 border border-white/10 rounded-xl text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-white/30 transition-all font-sans"
                 />
-                {searchQuery && (
+                {radioSearchQuery && (
                   <button
-                    onClick={() => setSearchQuery('')}
+                    onClick={() => setRadioSearchQuery('')}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                   >
                     <X className="w-3 h-3" />
@@ -928,13 +1353,13 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
               {/* Category Filter Chips */}
               <div className="flex items-center gap-1 overflow-x-auto pb-2 scrollbar-none shrink-0">
                 {CATEGORIES.map((cat) => {
-                  const isActive = selectedCategory === cat.id;
+                  const isActive = selectedRadioCategory === cat.id;
                   return (
                     <button
                       key={cat.id}
                       onClick={() => {
                         sound.playClick();
-                        setSelectedCategory(cat.id);
+                        setSelectedRadioCategory(cat.id);
                       }}
                       className={`px-2 py-1 rounded-lg text-[10px] font-bold shrink-0 transition-all cursor-pointer flex items-center gap-1 ${
                         isActive
@@ -959,7 +1384,7 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
                 <div className="overflow-y-auto max-h-40 pr-1 space-y-1 custom-scrollbar">
                   {filteredStations.length === 0 ? (
                     <div className="py-6 text-center text-slate-400 text-xs font-sans">
-                      No stations found matching "{searchQuery}"
+                      No stations found matching "{radioSearchQuery}"
                     </div>
                   ) : (
                     filteredStations.map(({ station, originalIndex }) => {
@@ -989,7 +1414,7 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
 
                           {isSelected && (
                             <div className="flex items-center gap-1 shrink-0">
-                              {isPlaying ? (
+                              {isPlayingRadio ? (
                                 <span
                                   className="w-2 h-2 rounded-full animate-ping"
                                   style={{ backgroundColor: currentStation.accentColor }}
@@ -1008,9 +1433,8 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
                 </div>
               </div>
 
-              {/* Controls: Volume Slider, Skips & Play/Pause */}
+              {/* Radio Controls */}
               <div className="pt-3 flex items-center justify-between gap-2 border-t border-white/10 mt-2 shrink-0">
-                {/* Volume control */}
                 <div className="flex items-center gap-1.5 w-24">
                   <button
                     onClick={toggleMute}
@@ -1033,7 +1457,6 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
                   />
                 </div>
 
-                {/* Playback Transport Buttons */}
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={handlePrevStation}
@@ -1044,7 +1467,7 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
                   </button>
 
                   <button
-                    onClick={togglePlay}
+                    onClick={toggleRadioPlay}
                     className="py-2 px-3.5 rounded-xl font-bold uppercase text-xs flex items-center gap-1.5 transition-all shadow-lg cursor-pointer"
                     style={{
                       backgroundColor: currentStation.accentColor,
@@ -1052,7 +1475,7 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
                       boxShadow: `0 0 15px ${currentStation.accentColor}50`
                     }}
                   >
-                    {isPlaying ? (
+                    {isPlayingRadio ? (
                       <>
                         <Pause className="w-3.5 h-3.5 fill-black" />
                         <span>Pause</span>
@@ -1078,41 +1501,53 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
           )}
         </div>
       ) : (
-        /* MINIMIZED FLOATING PILL */
+        /* MINIMIZED FLOATING PILL - KEEPS PLAYING AUDIO CONTINUOUSLY */
         <div
           className={`rounded-full p-1.5 pl-3 border-2 transition-all duration-300 backdrop-blur-2xl bg-black/90 flex items-center gap-2 sm:gap-2.5 shadow-2xl ${
-            activeMode === 'ondemand'
-              ? 'border-rose-500/50 shadow-[0_0_20px_rgba(251,113,133,0.3)]'
+            activeMode === 'songs'
+              ? 'border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.35)]'
               : `${currentStation.borderClass} ${currentStation.glowClass}`
           }`}
         >
-          {/* Station Indicator */}
+          {/* Track / Station Indicator */}
           <div
             onClick={() => setIsExpanded(true)}
             className="flex items-center gap-2 cursor-pointer group pr-1"
           >
             <span className="text-base">
-              {activeMode === 'ondemand' ? activePreset.emoji : currentStation.emoji}
+              {activeMode === 'songs'
+                ? activeCustomSearch
+                  ? '🔍'
+                  : currentTrack.emoji
+                : currentStation.emoji}
             </span>
             <div className="hidden sm:block text-left">
-              <p className="text-[9px] text-slate-400 uppercase tracking-wider leading-none">
-                {activeMode === 'ondemand' ? 'POP ON-DEMAND' : currentStation.category}
+              <p className="text-[9px] text-slate-400 uppercase tracking-wider leading-none truncate max-w-[120px]">
+                {activeMode === 'songs'
+                  ? activeCustomSearch
+                    ? 'CUSTOM SONG'
+                    : currentTrack.artist
+                  : currentStation.category}
               </p>
-              <p className="text-xs font-bold text-white leading-tight max-w-[110px] truncate">
-                {activeMode === 'ondemand' ? activePreset.name : currentStation.name}
+              <p className="text-xs font-bold text-white leading-tight max-w-[120px] truncate">
+                {activeMode === 'songs'
+                  ? activeCustomSearch || currentTrack.title
+                  : currentStation.name}
               </p>
             </div>
           </div>
 
-          {/* Mini Waveform (when radio stream is playing) */}
-          {activeMode === 'radio' && isPlaying && (
+          {/* Mini Waveform (when song or radio is playing) */}
+          {((activeMode === 'songs' && isPlayingSong) ||
+            (activeMode === 'radio' && isPlayingRadio)) && (
             <div className="flex items-center gap-0.5 h-3 px-0.5">
               {[0.4, 1, 0.6, 0.9].map((s, i) => (
                 <div
                   key={i}
                   className="w-0.5 rounded-full animate-pulse"
                   style={{
-                    backgroundColor: currentStation.accentColor,
+                    backgroundColor:
+                      activeMode === 'songs' ? '#C084FC' : currentStation.accentColor,
                     height: `${s * 100}%`
                   }}
                 />
@@ -1120,53 +1555,45 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ activeTab }) => {
             </div>
           )}
 
-          {activeMode === 'radio' ? (
-            <>
-              {/* Quick Skip Back */}
-              <button
-                onClick={handlePrevStation}
-                className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                title="Previous station"
-              >
-                <SkipBack className="w-3.5 h-3.5" />
-              </button>
+          {/* Quick Skip Back */}
+          <button
+            onClick={activeMode === 'songs' ? handlePrevTrack : handlePrevStation}
+            className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            title="Previous track"
+          >
+            <SkipBack className="w-3.5 h-3.5" />
+          </button>
 
-              {/* Quick Play/Pause button */}
-              <button
-                onClick={togglePlay}
-                className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-105 shadow-md"
-                style={{
-                  backgroundColor: currentStation.accentColor,
-                  color: '#000000'
-                }}
-                title={isPlaying ? 'Pause radio' : 'Play radio stream'}
-              >
-                {isPlaying ? (
-                  <Pause className="w-3.5 h-3.5 fill-black" />
-                ) : (
-                  <Play className="w-3.5 h-3.5 fill-black ml-0.5" />
-                )}
-              </button>
+          {/* Quick Play/Pause button */}
+          <button
+            onClick={activeMode === 'songs' ? toggleSongPlay : toggleRadioPlay}
+            className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-105 shadow-md"
+            style={{
+              backgroundColor:
+                activeMode === 'songs' ? '#C084FC' : currentStation.accentColor,
+              color: '#000000'
+            }}
+            title={
+              (activeMode === 'songs' ? isPlayingSong : isPlayingRadio)
+                ? 'Pause'
+                : 'Play'
+            }
+          >
+            {(activeMode === 'songs' ? isPlayingSong : isPlayingRadio) ? (
+              <Pause className="w-3.5 h-3.5 fill-black" />
+            ) : (
+              <Play className="w-3.5 h-3.5 fill-black ml-0.5" />
+            )}
+          </button>
 
-              {/* Quick Skip Forward */}
-              <button
-                onClick={handleNextStation}
-                className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                title="Next station"
-              >
-                <SkipForward className="w-3.5 h-3.5" />
-              </button>
-            </>
-          ) : (
-            /* In on-demand mode: quick open full player button */
-            <button
-              onClick={() => setIsExpanded(true)}
-              className="px-2.5 py-1 rounded-full bg-rose-500 text-white font-bold text-[10px] flex items-center gap-1 hover:bg-rose-400 transition-all cursor-pointer shadow-md"
-            >
-              <Music className="w-3 h-3" />
-              <span>Bieber Hits</span>
-            </button>
-          )}
+          {/* Quick Skip Forward */}
+          <button
+            onClick={activeMode === 'songs' ? handleNextTrack : handleNextStation}
+            className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            title="Next track"
+          >
+            <SkipForward className="w-3.5 h-3.5" />
+          </button>
 
           {/* Expand toggle */}
           <button
